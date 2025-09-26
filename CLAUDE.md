@@ -35,6 +35,11 @@ This repository implements the advanced context engineering workflow for AI-driv
 - `/plan [research-file or description]` - Create detailed implementation plan
 - `/implement [plan-file]` - Execute the implementation plan
 
+### Additional Commands
+- `/epic-oneshot [task]` - Execute complete RPI workflow in one session
+- `/standup` - Generate progress report from RPI artifacts
+- `/blocked` - Identify and analyze implementation blockers
+
 ### Usage Examples
 ```bash
 # Research how authentication works
@@ -74,7 +79,10 @@ project-root/
 │       ├── codebase-locator.md
 │       ├── codebase-analyzer.md
 │       ├── codebase-pattern-finder.md
-│       └── web-search-researcher.md
+│       ├── web-search-researcher.md
+│       ├── file-analyzer.md
+│       ├── bug-hunter.md
+│       └── test-runner.md
 ├── research/           # Research documents (OUTPUT from phase 1)
 │   └── YYYY-MM-DD-topic.md
 ├── plans/             # Implementation plans (OUTPUT from phase 2)
@@ -116,6 +124,22 @@ This intentional context reset prevents overflow and ensures each phase starts w
 - Named: `YYYY-MM-DD-description.md`
 - Include phases, specific changes, and success criteria
 - Separate automated and manual verification
+
+## Enhanced Capabilities
+
+### File Analysis
+The file-analyzer agent can reduce large log files and outputs by 80-90% while preserving critical information, making it invaluable for debugging production issues or analyzing verbose test outputs.
+
+### Bug Detection
+The bug-hunter agent provides elite-level bug detection, identifying security vulnerabilities, performance bottlenecks, and logic errors with specific remediation suggestions.
+
+### Test Execution
+The test-runner agent executes tests in an isolated context, preventing test output from polluting your main conversation while still providing actionable results.
+
+### Project Management
+- **Epic Oneshot**: Chain all three phases for quick feature implementation
+- **Standup**: Generate daily progress reports automatically
+- **Blocked**: Identify and resolve implementation impediments
 
 ## Best Practices
 

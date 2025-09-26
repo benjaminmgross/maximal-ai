@@ -93,13 +93,34 @@ your-project/
 │       ├── codebase-locator.md        # Finds WHERE things are
 │       ├── codebase-analyzer.md       # Understands HOW code works
 │       ├── codebase-pattern-finder.md # Discovers patterns to follow
-│       └── web-search-researcher.md   # External documentation research
+│       ├── web-search-researcher.md   # External documentation research
+│       ├── file-analyzer.md           # Reduces large files by 80-90%
+│       ├── bug-hunter.md             # Elite bug detection specialist
+│       └── test-runner.md            # Executes tests without context pollution
 ├── research/                 # Generated research documents
 │   └── YYYY-MM-DD-topic.md
 ├── plans/                    # Generated implementation plans
 │   └── YYYY-MM-DD-feature.md
 └── CLAUDE.md                 # Project configuration for Claude
 ```
+
+### Enhanced Agents
+
+- **file-analyzer**: Reduces large files by 80-90% while preserving critical information
+- **bug-hunter**: Elite bug detection with security and performance analysis
+- **test-runner**: Execute tests without polluting context
+
+### Project Management Commands
+
+- **epic-oneshot**: Complete RPI workflow in a single session
+- **standup**: Generate progress reports from git and RPI artifacts
+- **blocked**: Identify and resolve implementation blockers
+
+### Git Integration
+
+- Selective staging patterns for clean commits
+- Phase-based commit strategies
+- Automatic commit message templates
 
 ## 🔄 Workflow Details
 
