@@ -2,16 +2,27 @@
 
 You are tasked with conducting comprehensive research across the codebase to answer user questions by spawning parallel sub-agents and synthesizing their findings.
 
+<research_query>
+$ARGUMENTS
+</research_query>
+
 ## Initial Setup
 
-When this command is invoked, respond with:
+When this command is invoked:
+
+1. **Check if a research query was provided**:
+   - If a query was provided as a parameter, skip the default message
+   - Immediately proceed to Step 1 with the provided query
+   - Begin the research process
+
+2. **If no query provided**, respond with:
 ```
 I'm ready to research the codebase. Please provide your research question or area of interest, and I'll analyze it thoroughly by exploring relevant components and connections.
 ```
 
 Then wait for the user's research query.
 
-## Steps to follow after receiving the research query
+## Process Steps
 
 ### Step 1: Read Directly Mentioned Files
 - If the user mentions specific files (tickets, docs, JSON), read them FULLY first
@@ -147,8 +158,3 @@ Good research documents:
 - Identify patterns and connections
 - Are immediately actionable
 - Include enough context for future reference
-
-## Example Usage
-
-```
-User: /research How does the authentication system work in this codebase?

@@ -2,6 +2,10 @@
 
 You are tasked with implementing an approved technical plan. These plans contain phases with specific changes and success criteria.
 
+<plan_path>
+$ARGUMENTS
+</plan_path>
+
 ## Getting Started
 
 When given a plan path:
