@@ -36,6 +36,9 @@ echo "Installing commands..."
 cp "$SCRIPT_DIR/.claude/commands/research.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$SCRIPT_DIR/.claude/commands/plan.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$SCRIPT_DIR/.claude/commands/implement.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$SCRIPT_DIR/.claude/commands/epic-oneshot.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$SCRIPT_DIR/.claude/commands/standup.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$SCRIPT_DIR/.claude/commands/blocked.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."
@@ -43,6 +46,9 @@ cp "$SCRIPT_DIR/.claude/agents/codebase-locator.md" "$PROJECT_ROOT/.claude/agent
 cp "$SCRIPT_DIR/.claude/agents/codebase-analyzer.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/codebase-pattern-finder.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/web-search-researcher.md" "$PROJECT_ROOT/.claude/agents/"
+cp "$SCRIPT_DIR/.claude/agents/file-analyzer.md" "$PROJECT_ROOT/.claude/agents/"
+cp "$SCRIPT_DIR/.claude/agents/bug-hunter.md" "$PROJECT_ROOT/.claude/agents/"
+cp "$SCRIPT_DIR/.claude/agents/test-runner.md" "$PROJECT_ROOT/.claude/agents/"
 
 # Copy or merge CLAUDE.md
 if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then

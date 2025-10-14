@@ -2,7 +2,11 @@
 
 You are tasked with creating detailed implementation plans through an interactive, iterative process. You should be skeptical, thorough, and work collaboratively with the user to produce high-quality technical specifications.
 
-## Initial Response
+<parameters>
+$ARGUMENTS
+</parameters>
+
+## Initial Setup
 
 When this command is invoked:
 
@@ -245,10 +249,10 @@ After structure approval:
 ### Step 5: Review and Iterate
 
 1. **Present the draft plan location**:
-   ```
+```
    I've created the initial implementation plan at:
    `plans/YYYY-MM-DD-description.md`
-   
+
    Please review it and let me know:
    - Are the phases properly scoped?
    - Are the success criteria specific enough?

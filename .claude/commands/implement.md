@@ -2,6 +2,10 @@
 
 You are tasked with implementing an approved technical plan. These plans contain phases with specific changes and success criteria.
 
+<plan_path>
+$ARGUMENTS
+</plan_path>
+
 ## Getting Started
 
 When given a plan path:
@@ -89,6 +93,168 @@ Before moving to the next phase:
 2. Update the plan with checkmarks for completed items
 3. Document any significant deviations
 4. Commit your changes if appropriate
+
+## Git Commit Best Practices
+
+During implementation, maintain clean git history with atomic commits:
+
+### Setup Before Implementation
+```bash
+# Save initial state
+git status --porcelain > /tmp/rpi_baseline
+export IMPL_START=$(git rev-parse HEAD)
+echo "Implementation starting from commit: $IMPL_START"
+
+# Detect project type for later verification
+if [ -f "package.json" ]; then
+    export PROJECT_TYPE="javascript"
+    echo "Detected JavaScript/TypeScript project"
+elif [ -f "pyproject.toml" ] || [ -f "setup.py" ] || [ -f "requirements.txt" ]; then
+    export PROJECT_TYPE="python"
+    echo "Detected Python project"
+else
+    export PROJECT_TYPE="unknown"
+    echo "Project type not detected, will try both verification methods"
+fi
+```
+
+### During Each Phase
+
+Track and commit phase-specific changes:
+
+```bash
+# After completing a phase, stage only phase files
+git diff --name-only $IMPL_START > /tmp/phase_changes
+
+# Review what will be staged
+echo "Files modified in this phase:"
+cat /tmp/phase_changes
+
+# Stage phase files selectively
+for file in $(cat /tmp/phase_changes); do
+    if [ -f "$file" ]; then
+        git add "$file"
+    fi
+done
+
+# Commit with descriptive message
+git commit -m "Phase [N]: [Phase Title]
+
+- [Brief description of changes]
+- [Key files modified]
+
+Implementation from: plans/[plan-file].md
+Phase [N] of [Total]: [Percentage]% complete"
+```
+
+### Selective Staging Patterns
+
+For different types of changes:
+
+```bash
+# Python projects:
+if [ "$PROJECT_TYPE" = "python" ]; then
+    # Stage only source code changes
+    git add **/*.py --ignore-errors
+    git add src/**/*.py tests/**/*.py --ignore-errors
+
+    # Stage only test changes
+    git add test_*.py *_test.py tests/**/*.py --ignore-errors
+
+    # Stage configuration changes
+    git add pyproject.toml setup.py setup.cfg requirements*.txt .flake8 .ruff.toml --ignore-errors
+fi
+
+# JavaScript/TypeScript projects:
+if [ "$PROJECT_TYPE" = "javascript" ]; then
+    # Stage only source code changes
+    git add src/**/*.{ts,js,tsx,jsx} --ignore-errors
+
+    # Stage only test changes
+    git add **/*.test.{ts,js} **/*.spec.{ts,js} --ignore-errors
+
+    # Stage configuration changes
+    git add package.json tsconfig.json .eslintrc --ignore-errors
+fi
+
+# Stage only documentation (both types)
+git add **/*.md docs/** README.* --ignore-errors
+```
+
+### After Implementation
+
+Verify clean state and run final checks:
+
+```bash
+# Run project-appropriate verification
+if [ "$PROJECT_TYPE" = "python" ]; then
+    echo "Running Python verification..."
+    pytest --tb=short || echo "⚠️ Some tests failed"
+    ruff check . || flake8 . || echo "⚠️ Linting issues found"
+    mypy . --ignore-missing-imports || echo "⚠️ Type issues found"
+elif [ "$PROJECT_TYPE" = "javascript" ]; then
+    echo "Running JavaScript/TypeScript verification..."
+    npm test || echo "⚠️ Some tests failed"
+    npm run lint || echo "⚠️ Linting issues found"
+    npm run typecheck || echo "⚠️ Type issues found"
+fi
+
+# Check final git status
+if [ -z "$(git status --porcelain)" ]; then
+    echo "✅ Working directory clean - all changes committed"
+    echo "Commits created during implementation:"
+    git log --oneline $IMPL_START..HEAD
+else
+    echo "⚠️ Uncommitted changes remain:"
+    git status --short
+    echo "Consider:"
+    echo "  - git add -p  # Interactive staging"
+    echo "  - git stash   # Save for later"
+fi
+```
+
+### Commit Message Templates
+
+Use structured messages for clarity:
+
+```bash
+# Feature implementation
+git commit -m "feat: Add [feature name]
+
+- Implement [component/function]
+- Add tests for [functionality]
+- Update documentation
+
+Closes: #[issue]
+Plan: plans/YYYY-MM-DD-feature.md"
+
+# Bug fix
+git commit -m "fix: Resolve [issue description]
+
+- Root cause: [explanation]
+- Solution: [what was changed]
+- Tests added to prevent regression
+
+Fixes: #[issue]"
+
+# Refactoring
+git commit -m "refactor: Improve [component/area]
+
+- Extract [functionality] to [location]
+- Reduce complexity from X to Y
+- No functional changes
+
+Part of: plans/YYYY-MM-DD-refactor.md"
+```
+
+### Important Git Guidelines
+
+- **Commit early and often** - Each phase should have its own commit
+- **Keep commits atomic** - One logical change per commit
+- **Write clear messages** - Future you will thank present you
+- **Reference plans** - Link commits to implementation plans
+- **Don't commit broken code** - Each commit should pass tests
+- **Use conventional commits** - feat:, fix:, refactor:, docs:, test:
 
 ## Handling Issues
 
