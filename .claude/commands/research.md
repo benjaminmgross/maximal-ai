@@ -30,6 +30,38 @@ Then wait for the user's research query.
 - **CRITICAL**: Read these files yourself in the main context before spawning any sub-tasks
 - This ensures you have full context before decomposing the research
 
+### Step 1.5: Load Coding Standards (If Present)
+
+Before decomposing the research query, check for repository coding standards:
+
+1. **Check for coding standards directory**:
+   - Use Bash to check if `docs/coding-standards/` exists
+   - If the directory doesn't exist, continue normally (graceful degradation)
+
+2. **If standards directory exists**:
+   - Spawn a **codebase-analyzer** sub-agent with this prompt:
+     ```
+     Read and synthesize all markdown files in docs/coding-standards/ directory.
+
+     Extract and return:
+     1. Key architectural patterns (e.g., package structure, file organization)
+     2. Critical anti-patterns to avoid
+     3. Technology-specific guidelines (e.g., async usage, dependency management)
+     4. Code quality standards (formatting, testing, imports)
+
+     Format as a concise summary with specific file:line references for each guideline.
+     Limit response to essential patterns only - focus on what would impact development decisions.
+     ```
+
+   - Wait for the sub-agent to complete before proceeding
+   - Store the synthesized standards in context for reference during analysis
+
+3. **If standards directory does not exist**:
+   - Continue normally without standards (graceful degradation)
+   - No need to mention absence to the user
+
+**IMPORTANT**: Standards loading should happen BEFORE decomposing the research query, so architectural patterns can inform which components to investigate.
+
 ### Step 2: Analyze and Decompose
 - Break down the user's query into composable research areas
 - Take time to think deeply about the underlying patterns, connections, and architectural implications
@@ -60,6 +92,10 @@ The key is to use these agents intelligently:
 - **IMPORTANT**: Wait for ALL sub-agent tasks to complete before proceeding
 - Compile all sub-agent results
 - Connect findings across different components
+- **If coding standards were loaded**: Cross-reference findings with established patterns
+  - Note where current implementation follows standards
+  - Highlight any deviations from documented patterns
+  - Reference specific standards when applicable (e.g., "Uses async pattern contrary to docs/coding-standards/repo-standards.md:240")
 - Include specific file paths and line numbers for reference
 - Highlight patterns, connections, and architectural decisions
 - Answer the user's specific questions with concrete evidence
@@ -112,6 +148,24 @@ last_updated_by: [Your name]
 
 ## Architecture Insights
 [Patterns, conventions, and design decisions discovered]
+
+## Coding Standards Adherence
+[**Only include this section if coding standards were loaded**]
+
+**Standards Location**: `docs/coding-standards/*.md`
+
+### Patterns Followed:
+- [Pattern from standards that current code follows] - Reference: repo-standards.md:123
+- [Another pattern that's being used correctly]
+
+### Deviations Found:
+- [Deviation from documented standards] - Reference: repo-standards.md:240
+  - Current implementation: [what exists]
+  - Expected per standards: [what standards recommend]
+  - Impact: [Low/Medium/High]
+
+### Recommendations:
+- [Suggestion for aligning with standards, if relevant to research query]
 
 ## Related Research
 [Links to other research documents if available]
