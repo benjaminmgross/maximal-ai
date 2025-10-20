@@ -58,6 +58,40 @@ Tip: You can also invoke this command with a research file directly: `/plan rese
    - Read them FULLY into the main context
    - This ensures you have complete understanding before proceeding
 
+3.5. **Load Coding Standards (If Present)**:
+
+After reading files identified by research tasks and before analyzing understanding:
+
+1. **Check for coding standards directory**:
+   - Use Bash to check if `docs/coding-standards/` exists
+   - If the directory doesn't exist, continue normally (graceful degradation)
+
+2. **If standards directory exists**:
+   - Spawn a **codebase-analyzer** sub-agent with this prompt:
+     ```
+     Read and synthesize all markdown files in docs/coding-standards/ directory.
+
+     Extract and return:
+     1. Architectural patterns that must be followed
+     2. Critical anti-patterns to avoid (with examples from standards)
+     3. Technology-specific requirements (e.g., which libraries to use, async patterns)
+     4. Code organization rules (where files should live, import patterns)
+     5. Testing and verification requirements
+     6. Dependency management guidelines
+
+     Format as a concise summary with specific file:line references.
+     Prioritize patterns that would affect design decisions and implementation approach.
+     ```
+
+   - Wait for the sub-agent to complete before proceeding
+   - Store the synthesized standards in context for reference during planning
+
+3. **If standards directory does not exist**:
+   - Continue normally without standards (graceful degradation)
+   - No need to mention absence to the user
+
+**IMPORTANT**: Load standards BEFORE presenting initial understanding to the user, so your analysis already incorporates standards compliance.
+
 4. **Analyze and verify understanding**:
    - Cross-reference requirements with actual code
    - Identify any discrepancies or misunderstandings
@@ -67,18 +101,24 @@ Tip: You can also invoke this command with a research file directly: `/plan rese
 5. **Present informed understanding and focused questions**:
    ```
    Based on my research of the codebase, I understand we need to [accurate summary].
-   
+
    I've found that:
    - [Current implementation detail with file:line reference]
    - [Relevant pattern or constraint discovered]
    - [Potential complexity or edge case identified]
-   
+
+   **Coding Standards Considerations** [only if standards were loaded]:
+   According to `docs/coding-standards/`:
+   - [Relevant architectural pattern we should follow] (repo-standards.md:123)
+   - [Anti-pattern we must avoid] (repo-standards.md:240)
+   - [Technology guideline that affects our approach] (repo-standards.md:305)
+
    Questions that my research couldn't answer:
    - [Specific technical question that requires human judgment]
    - [Business logic clarification]
    - [Design preference that affects implementation]
    ```
-   
+
    Only ask questions that you genuinely cannot answer through code investigation.
 
 ### Step 2: Research & Discovery
@@ -132,15 +172,20 @@ Once aligned on approach:
 1. **Create initial plan outline**:
    ```
    Here's my proposed plan structure:
-   
+
    ## Overview
    [1-2 sentence summary]
-   
+
+   **Standards Alignment** [only if standards were loaded]:
+   This approach follows:
+   - [Pattern from standards] - Reference: repo-standards.md:123
+   - [Another relevant guideline] - Reference: visual-formatting.md:45
+
    ## Implementation Phases:
    1. [Phase name] - [what it accomplishes]
    2. [Phase name] - [what it accomplishes]
    3. [Phase name] - [what it accomplishes]
-   
+
    Does this phasing make sense? Should I adjust the order or granularity?
    ```
 
@@ -180,6 +225,25 @@ After structure approval:
 ## Implementation Approach
 
 [High-level strategy and reasoning]
+
+## Coding Standards Compliance
+[**Only include this section if coding standards were loaded**]
+
+**Standards Location**: `docs/coding-standards/*.md`
+
+### Patterns Applied:
+- **[Pattern Name]** (repo-standards.md:123): [How we're following this pattern in our implementation]
+- **[Another Pattern]** (repo-standards.md:240): [Application in this plan]
+
+### Anti-Patterns Avoided:
+- **[Anti-pattern Name]** (repo-standards.md:305): [How we're avoiding this]
+- We explicitly DO NOT do [thing] because standards prohibit it
+
+### Guidelines Followed:
+- **[Guideline Category]** (visual-formatting.md:45): [Specific application]
+- **[Tool Usage]** (repo-standards.md:608): [How we're using tools per standards]
+
+---
 
 ## Phase 1: [Descriptive Name]
 
@@ -305,6 +369,13 @@ After structure approval:
    - Do NOT write the plan with unresolved questions
    - The implementation plan must be complete and actionable
    - Every decision must be made before finalizing the plan
+
+7. **Follow Coding Standards** [when present]:
+   - Reference loaded coding standards throughout planning
+   - Validate design decisions against documented patterns
+   - Explicitly note which standards apply to each phase
+   - Call out any necessary deviations with justification
+   - Ensure anti-patterns are avoided
 
 ## Success Criteria Guidelines
 

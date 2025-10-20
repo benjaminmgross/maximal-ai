@@ -26,14 +26,19 @@ After receiving the task:
    ```
 
 2. **Execute research**:
+   - **Check for coding standards** and load if present:
+     - Use Bash to check if `docs/coding-standards/` exists
+     - If standards exist, spawn **codebase-analyzer** to synthesize standards
    - Use codebase-locator to find relevant files
    - Use codebase-analyzer to understand implementation
    - Use codebase-pattern-finder for similar patterns
    - Use web-search-researcher if external info needed
+   - Cross-reference findings with standards (if loaded)
 
 3. **Save research document**:
    - Create `research/YYYY-MM-DD-[topic].md`
    - Include comprehensive findings
+   - **Include "Coding Standards Adherence" section** if standards were loaded
    - Document all discoveries
 
 4. **Present summary**:
@@ -43,6 +48,7 @@ After receiving the task:
    Key findings:
    - [Major discovery 1]
    - [Major discovery 2]
+   **Standards**: [Brief note if standards were considered]
 
    Moving to planning phase...
    ```
@@ -58,16 +64,23 @@ After receiving the task:
 2. **Read research document**:
    - Load the just-created research file
    - Extract key implementation points
+   - **Load coding standards** (same process as /plan command):
+     - Check for docs/coding-standards/ directory
+     - Spawn codebase-analyzer to synthesize if present
+     - Wait for synthesis before proceeding
 
 3. **Create implementation plan**:
    - Define phases with specific changes
    - Include exact code modifications
+   - **Validate all decisions against coding standards** (if loaded)
+   - **Include "Coding Standards Compliance" section** in plan (if standards exist)
    - Add verification criteria
    - Document what we're NOT doing
 
 4. **Save plan document**:
    - Create `plans/YYYY-MM-DD-[feature].md`
    - Include all phases and verification
+   - Include standards references (if applicable)
 
 5. **Get user approval**:
    ```
@@ -77,6 +90,7 @@ After receiving the task:
    - Phase 1: [Description]
    - Phase 2: [Description]
    - Phase 3: [Description]
+   **Standards compliance**: [Brief note if standards were applied]
 
    Ready to proceed with implementation? (yes/no)
    ```
@@ -92,10 +106,15 @@ If user approves:
    ```
 
 2. **Execute plan phases**:
+   - **Load coding standards** (same process as /implement command):
+     - Check for docs/coding-standards/ directory
+     - Spawn codebase-analyzer to synthesize if present
+     - Keep standards in context during implementation
    - Use TodoWrite to track progress
    - Implement each phase sequentially
+   - **Follow coding standards** for all code changes (if loaded)
    - Run verification after each phase
-   - Document any deviations
+   - Document any deviations (including from standards)
 
 3. **Run final verification**:
    ```bash
@@ -127,6 +146,7 @@ If user approves:
    - Files modified: X
    - Tests passing: ✅
    - Verification complete: ✅
+   **Coding standards**: [✅ Followed | ⚠️ N/A - no standards present]
 
    **Next Steps:**
    1. Review the changes
@@ -138,9 +158,10 @@ If user approves:
 
 1. **Maintain phase separation** - Each phase builds on the previous
 2. **Document everything** - Create proper research and plan documents
-3. **Verify continuously** - Don't proceed if verification fails
-4. **Track progress** - Use TodoWrite throughout
-5. **Handle errors gracefully** - Stop and ask for guidance if blocked
+3. **Apply coding standards** - Load and follow standards at each phase when present
+4. **Verify continuously** - Don't proceed if verification fails
+5. **Track progress** - Use TodoWrite throughout
+6. **Handle errors gracefully** - Stop and ask for guidance if blocked
 
 ## When to Use
 

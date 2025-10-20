@@ -12,6 +12,26 @@ When given a plan path:
 - Read the plan completely and check for any existing checkmarks (- [x])
 - Read any original research documents mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
+- **Load coding standards if present**:
+  - Use Bash to check if `docs/coding-standards/` exists
+  - If standards exist, spawn a **codebase-analyzer** sub-agent:
+    ```
+    Read and synthesize all markdown files in docs/coding-standards/ directory.
+
+    Extract and return:
+    1. Code organization patterns (file placement, package structure)
+    2. Anti-patterns to avoid during implementation
+    3. Code style and formatting requirements
+    4. Import patterns and dependency usage rules
+    5. Testing requirements and patterns
+    6. Common implementation gotchas from standards
+
+    Format as actionable implementation checklist with specific file:line references.
+    Focus on patterns that affect how code should be written and organized.
+    ```
+  - Wait for synthesis to complete before starting implementation
+  - Keep standards in context for reference during implementation
+  - If standards don't exist, continue normally (graceful degradation)
 - Think deeply about how the pieces fit together
 - Create a todo list to track your progress
 - Start implementing if you understand what needs to be done
@@ -22,11 +42,20 @@ If no plan path provided, ask for one.
 
 Plans are carefully designed, but reality can be messy. Your job is to:
 - Follow the plan's intent while adapting to what you find
+- **Adhere to coding standards** (if present) for all new/modified code
 - Implement each phase fully before moving to the next
 - Verify your work makes sense in the broader codebase context
 - Update checkboxes in the plan as you complete sections
+- **Reference standards when making decisions** about code organization, patterns, and style
 
 When things don't match the plan exactly, think about why and communicate clearly. The plan is your guide, but your judgment matters too.
+
+**When standards exist and affect implementation**:
+- Follow documented patterns for code organization
+- Avoid documented anti-patterns
+- Apply required code style and formatting rules
+- Use specified tools and dependencies as documented
+- Reference specific standards in commit messages when applicable
 
 If you encounter a mismatch:
 - STOP and think deeply about why the plan can't be followed
@@ -62,6 +91,12 @@ For each phase:
 2. **Make the Changes**
    - Implement changes in the order specified
    - Follow the code examples closely
+   - **Apply coding standards** (if loaded) to all new/modified code:
+     - Place files in correct locations per standards
+     - Use documented import patterns
+     - Follow established architectural patterns
+     - Avoid documented anti-patterns
+     - Apply required code style/formatting
    - Adapt to actual code structure as needed
    - Commit frequently (if user requests)
 
@@ -308,10 +343,13 @@ If the plan has existing checkmarks:
    - Don't jump ahead even if you see the solution
 
 2. **Maintain Code Quality**
-   - Follow existing code patterns
+   - **Follow coding standards** (if present) for all code changes
+     - Reference specific standards in commit messages: "Follows pattern from repo-standards.md:123"
+     - Avoid anti-patterns documented in standards
+   - Follow existing code patterns (and documented standards patterns take precedence)
    - Keep consistent style
    - Add appropriate error handling
-   - Don't introduce new dependencies without approval
+   - Don't introduce new dependencies without approval (check dependency management standards)
 
 3. **Test Continuously**
    - Run tests after each significant change
@@ -347,6 +385,7 @@ You know you're doing well when:
 Before declaring implementation complete:
 - [ ] All phases implemented
 - [ ] All automated verification passing
+- [ ] **Coding standards followed** (if present - spot check 2-3 changes against standards)
 - [ ] Plan updated with completion checkmarks
 - [ ] Any deviations documented
 - [ ] Code follows project conventions
