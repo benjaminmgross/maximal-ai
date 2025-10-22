@@ -27,21 +27,61 @@ graph LR
 
 ## 🚀 Quick Start
 
-### Installation
+### One-Time Setup
 
-1. **Copy the `.claude` directory to your project root:**
+1. **Clone this repository:**
 ```bash
-cp -r /path/to/maximal-ai/.claude /path/to/your/project/
+git clone https://github.com/YOUR_USERNAME/maximal-ai.git /path/to/maximal-ai
 ```
 
-2. **Create document directories:**
+2. **Add to your shell configuration** (`~/.zshrc` or `~/.bashrc`):
 ```bash
-mkdir -p research plans
+export MAXIMAL_AI_HOME="$HOME/dev/maximal-ai"
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-3. **Copy the CLAUDE.md configuration:**
+3. **Run the installer:**
 ```bash
-cp /path/to/maximal-ai/CLAUDE.md /path/to/your/project/
+cd /path/to/maximal-ai
+./install.sh
+```
+
+4. **Reload your shell:**
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+### Install to Any Project
+
+Once set up, you can install the workflow into any project:
+
+```bash
+cd /path/to/your/project
+maximal-ai
+```
+
+This will:
+- ✅ Install 6 commands (research, plan, implement, epic-oneshot, standup, blocked)
+- ✅ Install 7 specialized agents
+- ✅ Create research/ and plans/ directories
+- ✅ Set up CLAUDE.md configuration
+- ✅ Update .gitignore if needed
+- ✅ Auto-detect and apply coding standards from `docs/coding-standards/` (if present)
+
+### Updating
+
+To update all projects after pulling new changes:
+
+```bash
+cd /path/to/maximal-ai
+git pull
+./install.sh  # Updates the maximal-ai command
+```
+
+Then re-run in each project to get latest commands/agents:
+```bash
+cd /path/to/your/project
+maximal-ai
 ```
 
 ### Basic Usage
@@ -88,7 +128,10 @@ your-project/
 │   ├── commands/
 │   │   ├── research.md      # Research phase command
 │   │   ├── plan.md          # Planning phase command
-│   │   └── implement.md     # Implementation phase command
+│   │   ├── implement.md     # Implementation phase command
+│   │   ├── epic-oneshot.md  # Complete RPI workflow
+│   │   ├── standup.md       # Progress reports
+│   │   └── blocked.md       # Blocker analysis
 │   └── agents/
 │       ├── codebase-locator.md        # Finds WHERE things are
 │       ├── codebase-analyzer.md       # Understands HOW code works
@@ -97,6 +140,11 @@ your-project/
 │       ├── file-analyzer.md           # Reduces large files by 80-90%
 │       ├── bug-hunter.md             # Elite bug detection specialist
 │       └── test-runner.md            # Executes tests without context pollution
+├── docs/
+│   └── coding-standards/     # Your team's coding standards (optional)
+│       ├── architecture.md   # Package structure, patterns
+│       ├── best-practices.md # Coding guidelines
+│       └── testing.md        # Test requirements
 ├── research/                 # Generated research documents
 │   └── YYYY-MM-DD-topic.md
 ├── plans/                    # Generated implementation plans
@@ -192,7 +240,7 @@ your-project/
    **Changes**: Add OAuth provider settings
    ```typescript
    // Code to add
-   ```
+```
 
 ### Success Criteria:
 #### Automated Verification:
@@ -249,6 +297,85 @@ your-project/
 
 ## 🛠 Advanced Features
 
+### Automatic Coding Standards Integration
+
+The workflow automatically loads and enforces your coding standards if they exist in your repository.
+
+#### Setup
+
+1. **Create a coding standards directory**:
+   ```bash
+   mkdir -p docs/coding-standards
+   ```
+
+2. **Add your standards as markdown files**:
+   ```
+   docs/coding-standards/
+   ├── architecture.md       # Package structure, file organization
+   ├── best-practices.md     # Coding patterns, anti-patterns
+   ├── style-guide.md        # Formatting, naming conventions
+   └── testing.md            # Testing requirements and patterns
+   ```
+
+#### How It Works
+
+When you run `/research`, `/plan`, or `/implement`, the commands will:
+
+1. **Automatically detect** the `docs/coding-standards/` directory
+2. **Load and synthesize** all markdown files using a specialized agent
+3. **Apply standards** throughout the workflow:
+   - Research phase includes "Coding Standards Adherence" section
+   - Planning phase validates decisions against standards
+   - Implementation phase follows standards for all code changes
+4. **Gracefully degrade** if no standards exist (no errors or warnings)
+
+#### Example Standards File
+
+```markdown
+# Architecture Standards
+
+## Package Structure
+- Use domain-driven design with `/domain`, `/application`, `/infrastructure`
+- Reference: `src/domain/user/user.ts:1-50`
+
+## Anti-Patterns to Avoid
+- ❌ No circular dependencies between packages
+- ❌ No direct database access from controllers
+- ✅ Always use repository pattern for data access
+
+## Technology Guidelines
+- Use async/await instead of .then() for promises
+- All API responses must use standard error format
+```
+
+#### Benefits
+
+- ✅ **Consistent code quality** - AI follows your team's patterns
+- ✅ **Automatic enforcement** - No need to remind AI about standards
+- ✅ **Contextual guidance** - Standards applied when most relevant
+- ✅ **Zero configuration** - Just add files to `docs/coding-standards/`
+- ✅ **Version controlled** - Standards evolve with your codebase
+
+#### What to Include in Coding Standards
+
+**Essential:**
+- Package/module organization patterns
+- Critical anti-patterns to avoid
+- Technology-specific guidelines (async patterns, dependency management)
+- Code quality standards (testing, error handling)
+
+**Optional:**
+- Formatting rules (if not handled by linters)
+- Naming conventions
+- Documentation requirements
+- Performance guidelines
+
+**Keep It Concise:**
+- Focus on what impacts architectural decisions
+- Include specific file:line references to examples
+- Avoid duplicating what linters catch
+- Update as patterns evolve
+
 ### Custom Agents
 
 You can add specialized agents for your domain:
@@ -267,9 +394,9 @@ tools: Read, Bash, Edit
 
 Extend commands for your specific needs:
 - Add domain-specific research patterns
-- Include company coding standards
 - Integrate with your CI/CD pipeline
 - Add custom verification steps
+- Create project-specific templates
 
 ## 📊 Success Metrics
 
