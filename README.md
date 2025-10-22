@@ -27,21 +27,60 @@ graph LR
 
 ## 🚀 Quick Start
 
-### Installation
+### One-Time Setup
 
-1. **Copy the `.claude` directory to your project root:**
+1. **Clone this repository:**
 ```bash
-cp -r /path/to/maximal-ai/.claude /path/to/your/project/
+git clone https://github.com/YOUR_USERNAME/maximal-ai.git ~/dev/maximal-ai
 ```
 
-2. **Create document directories:**
+2. **Add to your shell configuration** (`~/.zshrc` or `~/.bashrc`):
 ```bash
-mkdir -p research plans
+export MAXIMAL_AI_HOME="$HOME/dev/maximal-ai"
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-3. **Copy the CLAUDE.md configuration:**
+3. **Run the installer:**
 ```bash
-cp /path/to/maximal-ai/CLAUDE.md /path/to/your/project/
+cd ~/dev/maximal-ai
+./install.sh
+```
+
+4. **Reload your shell:**
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+### Install to Any Project
+
+Once set up, you can install the workflow into any project:
+
+```bash
+cd /path/to/your/project
+maximal-ai
+```
+
+This will:
+- ✅ Install 6 commands (research, plan, implement, epic-oneshot, standup, blocked)
+- ✅ Install 7 specialized agents
+- ✅ Create research/ and plans/ directories
+- ✅ Set up CLAUDE.md configuration
+- ✅ Update .gitignore if needed
+
+### Updating
+
+To update all projects after pulling new changes:
+
+```bash
+cd ~/dev/maximal-ai
+git pull
+./install.sh  # Updates the maximal-ai command
+```
+
+Then re-run in each project to get latest commands/agents:
+```bash
+cd /path/to/your/project
+maximal-ai
 ```
 
 ### Basic Usage
