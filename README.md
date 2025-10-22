@@ -1,6 +1,6 @@
 # Advanced Context Engineering for AI-Driven Development
 
-A complete implementation of the three-phase workflow (Research → Plan → Implement) for maximizing AI coding agent effectiveness, based on the methodology presented in "Advanced Context Engineering for Coding Agents".
+A complete implementation of the three-phase workflow (Research → Plan → Implement) for maximizing AI coding agent effectiveness, based on the methodology presented in ["Advanced Context Engineering for Coding Agents"]([Original Talk: Advanced Context Engineering for Coding Agents](https://share.google/EzLe2HO7rplnHBvGd)).
 
 ## 🎯 Overview
 
