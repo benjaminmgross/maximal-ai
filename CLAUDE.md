@@ -39,6 +39,8 @@ This repository implements the advanced context engineering workflow for AI-driv
 - `/epic-oneshot [task]` - Execute complete RPI workflow in one session
 - `/standup` - Generate progress report from RPI artifacts
 - `/blocked` - Identify and analyze implementation blockers
+- `/create_handoff` - Create handoff documentation for session transfer
+- `/resume_handoff [handoff-file]` - Resume work from handoff document
 
 ### Usage Examples
 ```bash
@@ -50,6 +52,12 @@ This repository implements the advanced context engineering workflow for AI-driv
 
 # Implement the plan
 /implement plans/2025-01-08-add-oauth-support.md
+
+# Create a handoff to transfer work to another session
+/create_handoff
+
+# Resume from a handoff
+/resume_handoff handoffs/2025-11-08-oauth-implementation.md
 ```
 
 ## Key Principles
@@ -74,7 +82,12 @@ project-root/
 │   ├── commands/       # Workflow commands
 │   │   ├── research.md
 │   │   ├── plan.md
-│   │   └── implement.md
+│   │   ├── implement.md
+│   │   ├── epic-oneshot.md
+│   │   ├── standup.md
+│   │   ├── blocked.md
+│   │   ├── create_handoff.md
+│   │   └── resume_handoff.md
 │   └── agents/         # Specialized sub-agents
 │       ├── codebase-locator.md
 │       ├── codebase-analyzer.md
@@ -85,9 +98,11 @@ project-root/
 │       └── test-runner.md
 ├── research/           # Research documents (OUTPUT from phase 1)
 │   └── YYYY-MM-DD-topic.md
-├── plans/             # Implementation plans (OUTPUT from phase 2)
+├── plans/              # Implementation plans (OUTPUT from phase 2)
 │   └── YYYY-MM-DD-feature.md
-└── CLAUDE.md          # This file
+├── handoffs/           # Session handoff documents (OUTPUT from /create_handoff)
+│   └── YYYY-MM-DD_description.md
+└── CLAUDE.md           # This file
 ```
 
 ## Critical Workflow: Context Resets Between Phases
@@ -124,6 +139,12 @@ This intentional context reset prevents overflow and ensures each phase starts w
 - Named: `YYYY-MM-DD-description.md`
 - Include phases, specific changes, and success criteria
 - Separate automated and manual verification
+
+### Handoff Documents
+- Located in `handoffs/` directory
+- Named: `YYYY-MM-DD_description.md`
+- Include task status, learnings, recent changes, and action items
+- Enable context transfer between sessions
 
 ## Enhanced Capabilities
 

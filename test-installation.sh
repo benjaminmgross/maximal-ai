@@ -42,7 +42,7 @@ bash "$SCRIPT_DIR/setup.sh"
 echo "✓ Checking installation..."
 
 # Check commands
-for cmd in research plan implement epic-oneshot standup blocked; do
+for cmd in research plan implement epic-oneshot standup blocked create_handoff resume_handoff; do
     if [ -f ".claude/commands/$cmd.md" ]; then
         echo "  ✅ Command: $cmd"
     else
@@ -62,7 +62,7 @@ for agent in codebase-locator codebase-analyzer codebase-pattern-finder web-sear
 done
 
 # Check directories
-for dir in research plans; do
+for dir in research plans handoffs; do
     if [ -d "$dir" ]; then
         echo "  ✅ Directory: $dir"
     else

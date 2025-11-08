@@ -41,12 +41,14 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  maximal-ai install   # Same as above"
     echo ""
     echo "After installation, use these commands in Claude:"
-    echo "  /research      - Conduct comprehensive research"
-    echo "  /plan          - Create implementation plan"
-    echo "  /implement     - Execute the plan"
-    echo "  /epic-oneshot  - Run all three phases in one session"
-    echo "  /standup       - Generate progress report"
-    echo "  /blocked       - Analyze blockers"
+    echo "  /research        - Conduct comprehensive research"
+    echo "  /plan            - Create implementation plan"
+    echo "  /implement       - Execute the plan"
+    echo "  /epic-oneshot    - Run all three phases in one session"
+    echo "  /standup         - Generate progress report"
+    echo "  /blocked         - Analyze blockers"
+    echo "  /create_handoff  - Create handoff documentation for session transfer"
+    echo "  /resume_handoff  - Resume work from handoff document"
     exit 0
 fi
 
@@ -80,6 +82,7 @@ mkdir -p "$PROJECT_ROOT/.claude/commands"
 mkdir -p "$PROJECT_ROOT/.claude/agents"
 mkdir -p "$PROJECT_ROOT/research"
 mkdir -p "$PROJECT_ROOT/plans"
+mkdir -p "$PROJECT_ROOT/handoffs"
 
 # Copy command files
 echo "Installing commands..."
@@ -89,6 +92,8 @@ cp "$INSTALL_DIR/.claude/commands/implement.md" "$PROJECT_ROOT/.claude/commands/
 cp "$INSTALL_DIR/.claude/commands/epic-oneshot.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/standup.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/blocked.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/create_handoff.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/resume_handoff.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."
@@ -120,7 +125,8 @@ if [ -f "$PROJECT_ROOT/.gitignore" ]; then
         echo "# AI Context Engineering artifacts" >> "$PROJECT_ROOT/.gitignore"
         echo "research/" >> "$PROJECT_ROOT/.gitignore"
         echo "plans/" >> "$PROJECT_ROOT/.gitignore"
-        echo "Added research/ and plans/ to .gitignore"
+        echo "handoffs/" >> "$PROJECT_ROOT/.gitignore"
+        echo "Added research/, plans/, and handoffs/ to .gitignore"
     fi
 fi
 
@@ -128,7 +134,7 @@ echo ""
 echo "✅ Installation Complete!"
 echo ""
 echo "📦 Installed:"
-echo "   • 6 commands: research, plan, implement, epic-oneshot, standup, blocked"
+echo "   • 8 commands: research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff"
 echo "   • 7 agents: locator, analyzer, pattern-finder, researcher, file-analyzer, bug-hunter, test-runner"
 echo ""
 echo "📚 Next Steps:"

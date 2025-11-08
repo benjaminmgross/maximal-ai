@@ -61,9 +61,9 @@ maximal-ai
 ```
 
 This will:
-- ✅ Install 6 commands (research, plan, implement, epic-oneshot, standup, blocked)
+- ✅ Install 8 commands (research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff)
 - ✅ Install 7 specialized agents
-- ✅ Create research/ and plans/ directories
+- ✅ Create research/, plans/, and handoffs/ directories
 - ✅ Set up CLAUDE.md configuration
 - ✅ Update .gitignore if needed
 - ✅ Auto-detect and apply coding standards from `docs/coding-standards/` (if present)
@@ -120,18 +120,49 @@ This will:
 - Update progress tracking
 - Adapt to reality while maintaining plan intent
 
+#### 4. Session Handoffs
+
+When you need to transfer context to a new Claude session, create a handoff document:
+
+```
+/create_handoff
+```
+
+This will create a comprehensive handoff document in `handoffs/` with:
+- Task status and progress
+- Key learnings and patterns discovered
+- Recent changes made (with file:line references)
+- Unsolved issues and blockers
+- Artifacts created
+- Action items for continuation
+
+To resume work from a handoff:
+
+```
+/resume_handoff handoffs/2025-11-08_feature-implementation.md
+```
+
+This will:
+- Read and analyze the handoff document
+- Verify current state matches handoff expectations
+- Load all referenced artifacts (research, plans, etc.)
+- Create a task list for continuation
+- Propose next steps interactively
+
 ## 📁 Project Structure
 
 ```
 your-project/
 ├── .claude/
 │   ├── commands/
-│   │   ├── research.md      # Research phase command
-│   │   ├── plan.md          # Planning phase command
-│   │   ├── implement.md     # Implementation phase command
-│   │   ├── epic-oneshot.md  # Complete RPI workflow
-│   │   ├── standup.md       # Progress reports
-│   │   └── blocked.md       # Blocker analysis
+│   │   ├── research.md        # Research phase command
+│   │   ├── plan.md            # Planning phase command
+│   │   ├── implement.md       # Implementation phase command
+│   │   ├── epic-oneshot.md    # Complete RPI workflow
+│   │   ├── standup.md         # Progress reports
+│   │   ├── blocked.md         # Blocker analysis
+│   │   ├── create_handoff.md  # Session handoff creation
+│   │   └── resume_handoff.md  # Resume from handoff
 │   └── agents/
 │       ├── codebase-locator.md        # Finds WHERE things are
 │       ├── codebase-analyzer.md       # Understands HOW code works
@@ -149,6 +180,8 @@ your-project/
 │   └── YYYY-MM-DD-topic.md
 ├── plans/                    # Generated implementation plans
 │   └── YYYY-MM-DD-feature.md
+├── handoffs/                 # Session handoff documents
+│   └── YYYY-MM-DD_description.md
 └── CLAUDE.md                 # Project configuration for Claude
 ```
 

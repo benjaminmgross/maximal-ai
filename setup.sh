@@ -30,6 +30,7 @@ mkdir -p "$PROJECT_ROOT/.claude/commands"
 mkdir -p "$PROJECT_ROOT/.claude/agents"
 mkdir -p "$PROJECT_ROOT/research"
 mkdir -p "$PROJECT_ROOT/plans"
+mkdir -p "$PROJECT_ROOT/handoffs"
 
 # Copy command files
 echo "Installing commands..."
@@ -39,6 +40,8 @@ cp "$SCRIPT_DIR/.claude/commands/implement.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$SCRIPT_DIR/.claude/commands/epic-oneshot.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$SCRIPT_DIR/.claude/commands/standup.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$SCRIPT_DIR/.claude/commands/blocked.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$SCRIPT_DIR/.claude/commands/create_handoff.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$SCRIPT_DIR/.claude/commands/resume_handoff.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."
@@ -70,7 +73,8 @@ if [ -f "$PROJECT_ROOT/.gitignore" ]; then
         echo "# AI Context Engineering artifacts" >> "$PROJECT_ROOT/.gitignore"
         echo "research/" >> "$PROJECT_ROOT/.gitignore"
         echo "plans/" >> "$PROJECT_ROOT/.gitignore"
-        echo "Added research/ and plans/ to .gitignore"
+        echo "handoffs/" >> "$PROJECT_ROOT/.gitignore"
+        echo "Added research/, plans/, and handoffs/ to .gitignore"
     fi
 fi
 
