@@ -143,6 +143,8 @@ The key is to use these agents intelligently:
 
 ### Step 5: Generate Research Document
 
+**IMPORTANT**: After generating the research document, complete the "Research Validation Checks" section at the end to ensure no hallucinations or placeholders remain.
+
 Create the document at `research/YYYY-MM-DD-description.md` with this structure:
 
 ```markdown
@@ -283,6 +285,17 @@ last_updated_by: [Your name]
 
 **Unanswered Questions**:
 [List any questions above that research could not answer and require CTO input or further investigation]
+
+## Research Validation Checks
+
+**Before finalizing this research document, verify:**
+
+- [ ] **File Verification**: All mentioned file paths have been confirmed to exist using Read tool
+- [ ] **Code Reference Verification**: All `file:line` references have been verified against actual code
+- [ ] **Test Execution**: If claiming functionality works, tests were run and output verified
+- [ ] **No Placeholders**: No sections contain placeholder text like "[TODO]" or "[TBD]"
+
+**If any checks fail, update the research document before marking as complete.**
 
 ## Next Steps
 [Recommended actions based on the research]
