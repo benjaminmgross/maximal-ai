@@ -250,6 +250,31 @@ After structure approval:
 ### Overview
 [What this phase accomplishes]
 
+### Acceptance Test for This Phase
+
+**Test file:** `tests/path/to/test_phase_1.py`
+
+**Test code:**
+```python
+def test_phase_1_acceptance():
+    """
+    Given: [initial state]
+    When: [action taken in this phase]
+    Then: [expected outcome]
+    """
+    # Arrange
+    [setup code]
+
+    # Act
+    result = [action]
+
+    # Assert
+    assert result == [expected]
+```
+
+**Why this test proves the phase works:**
+[Explanation of what this test validates]
+
 ### Changes Required:
 
 #### 1. [Component/File Group]
@@ -278,7 +303,45 @@ After structure approval:
 
 ## Phase 2: [Descriptive Name]
 
-[Similar structure with both automated and manual success criteria...]
+### Overview
+[What this phase accomplishes]
+
+### Acceptance Test for This Phase
+
+**Test file:** `tests/path/to/test_phase_2.py`
+
+**Test code:**
+```python
+def test_phase_2_acceptance():
+    """
+    Given: [initial state]
+    When: [action taken in this phase]
+    Then: [expected outcome]
+    """
+    # Arrange
+    [setup code]
+
+    # Act
+    result = [action]
+
+    # Assert
+    assert result == [expected]
+```
+
+**Why this test proves the phase works:**
+[Explanation of what this test validates]
+
+### Changes Required:
+
+[Specific changes for this phase]
+
+### Success Criteria:
+
+#### Automated Verification:
+[Automated checks for this phase]
+
+#### Manual Verification:
+[Manual checks for this phase]
 
 ---
 
