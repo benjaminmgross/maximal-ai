@@ -14,7 +14,7 @@ I'll analyze your current work to identify blockers and suggest resolutions. Let
 ### Step 1: Identify Potential Blockers
 
 1. **Scan active plans**:
-   - Read plans in `plans/` directory
+   - Read plans in `thoughts/plans/` directory
    - Look for incomplete phases
    - Check success criteria not met
    - Identify dependencies

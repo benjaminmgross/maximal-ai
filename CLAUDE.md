@@ -6,6 +6,31 @@ This file configures Claude to use the advanced three-phase development workflow
 
 This repository implements the advanced context engineering workflow for AI-driven development, based on the principles from the "Advanced Context Engineering for Coding Agents" methodology.
 
+## Username Configuration
+
+RPI commands automatically detect your username for file naming. Priority order:
+
+1. **`.claude/config.yaml`** (recommended - per repository)
+2. **`RPI_USERNAME`** environment variable (global default)
+3. **`git config user.name`** (automatic fallback)
+4. **"user"** (last resort default)
+
+**Quick Setup:**
+```bash
+# Option 1: Create local config (recommended)
+cat > .claude/config.yaml << EOF
+username: benjamin
+EOF
+
+# Option 2: Set environment variable
+export RPI_USERNAME="benjamin"
+
+# Option 3: Use git username automatically (no setup needed)
+git config user.name  # This will be auto-converted
+```
+
+Files will be named: `YYYY.MM.DD-{username}-description.md`
+
 ## Core Workflow
 
 ### The Three Phases
@@ -48,16 +73,16 @@ This repository implements the advanced context engineering workflow for AI-driv
 /research How does the authentication system work?
 
 # Create a plan based on research
-/plan research/2025-01-08-authentication-flow.md
+/plan thoughts/research/2025.01.08-username-authentication-flow.md
 
 # Implement the plan
-/implement plans/2025-01-08-add-oauth-support.md
+/implement thoughts/plans/2025.01.08-username-add-oauth-support.md
 
 # Create a handoff to transfer work to another session
 /create_handoff
 
 # Resume from a handoff
-/resume_handoff handoffs/2025-11-08-oauth-implementation.md
+/resume_handoff thoughts/handoffs/2025.11.08-username-oauth-implementation.md
 ```
 
 ## Key Principles
@@ -96,12 +121,13 @@ project-root/
 │       ├── file-analyzer.md
 │       ├── bug-hunter.md
 │       └── test-runner.md
-├── research/           # Research documents (OUTPUT from phase 1)
-│   └── YYYY-MM-DD-topic.md
-├── plans/              # Implementation plans (OUTPUT from phase 2)
-│   └── YYYY-MM-DD-feature.md
-├── handoffs/           # Session handoff documents (OUTPUT from /create_handoff)
-│   └── YYYY-MM-DD_description.md
+├── thoughts/           # RPI artifacts (symlinked to minty-thoughts)
+│   ├── research/       # Research documents (OUTPUT from phase 1)
+│   │   └── YYYY.MM.DD-username-description.md
+│   ├── plans/          # Implementation plans (OUTPUT from phase 2)
+│   │   └── YYYY.MM.DD-username-description.md
+│   └── handoffs/       # Session handoff documents
+│       └── YYYY.MM.DD-username-description.md
 └── CLAUDE.md           # This file
 ```
 
@@ -111,16 +137,16 @@ project-root/
 
 1. **Phase 1 (Research)**: Start fresh Claude session
    - Run: `/research How does authentication work?`
-   - Output: `research/2025-01-12-authentication.md`
+   - Output: `thoughts/research/2025.01.12-username-authentication.md`
    - Close/clear context
 
 2. **Phase 2 (Planning)**: Start fresh Claude session
-   - Run: `/plan research/2025-01-12-authentication.md`
-   - Output: `plans/2025-01-12-oauth-support.md`
+   - Run: `/plan thoughts/research/2025.01.12-username-authentication.md`
+   - Output: `thoughts/plans/2025.01.12-username-oauth-support.md`
    - Close/clear context
 
 3. **Phase 3 (Implementation)**: Start fresh Claude session
-   - Run: `/implement plans/2025-01-12-oauth-support.md`
+   - Run: `/implement thoughts/plans/2025.01.12-username-oauth-support.md`
    - Execute the plan with verification
    - Complete implementation
 
@@ -129,20 +155,23 @@ This intentional context reset prevents overflow and ensures each phase starts w
 ## Document Formats
 
 ### Research Documents
-- Located in `research/` directory
-- Named: `YYYY-MM-DD-description.md`
+- Located in `thoughts/research/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/research/`
+- Named: `YYYY.MM.DD-username-description.md`
 - Include findings, code references, and insights
 - Self-contained with all necessary context
 
 ### Implementation Plans
-- Located in `plans/` directory
-- Named: `YYYY-MM-DD-description.md`
+- Located in `thoughts/plans/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/plans/`
+- Named: `YYYY.MM.DD-username-description.md`
 - Include phases, specific changes, and success criteria
 - Separate automated and manual verification
 
 ### Handoff Documents
-- Located in `handoffs/` directory
-- Named: `YYYY-MM-DD_description.md`
+- Located in `thoughts/handoffs/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/handoffs/`
+- Named: `YYYY.MM.DD-username-description.md`
 - Include task status, learnings, recent changes, and action items
 - Enable context transfer between sessions
 

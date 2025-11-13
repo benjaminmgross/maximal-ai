@@ -26,7 +26,7 @@ Please provide:
 
 I'll analyze this information and work with you to create a comprehensive plan.
 
-Tip: You can also invoke this command with a research file directly: `/plan research/2025-01-08-authentication-flow.md`
+Tip: You can also invoke this command with a research file directly: `/plan thoughts/research/2025.01.08-username-authentication-flow.md`
 ```
 
 ## Process Steps
@@ -195,7 +195,36 @@ Once aligned on approach:
 
 After structure approval:
 
-1. **Write the plan** to `plans/YYYY-MM-DD-description.md`
+### Username Detection for File Naming
+
+Before creating the plan document, detect the username to use in the filename:
+
+1. **Detect username with priority order**:
+   ```bash
+   # Priority 1: Check .claude/config.yaml for username
+   if [ -f ".claude/config.yaml" ]; then
+       CONFIG_USERNAME=$(grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+   fi
+
+   # Priority 2: Check RPI_USERNAME environment variable
+   # Priority 3: Fallback to git config user.name
+   # Priority 4: Default to "user"
+   RPI_USERNAME="${CONFIG_USERNAME:-${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}}"
+   RPI_USERNAME="${RPI_USERNAME:-user}"
+
+   echo "Using username: $RPI_USERNAME"
+```
+
+2. **Format the date with dots**: Use `YYYY.MM.DD` format instead of `YYYY-MM-DD`
+   ```bash
+   CURRENT_DATE=$(date +%Y.%m.%d)
+   ```
+
+3. **Construct filename**: `{CURRENT_DATE}-{RPI_USERNAME}-{description}.md`
+   - Example: `2025.11.13-benjamin-oauth-support.md`
+   - Example: `2025.11.13-shared-refactor-plan.md`
+
+1. **Write the plan** to `thoughts/plans/YYYY.MM.DD-{username}-description.md`
 2. **Use this template structure**:
 
 ```markdown
@@ -369,7 +398,7 @@ def test_phase_2_acceptance():
 
 ## References
 
-- Original research: `research/[relevant].md`
+- Original research: `thoughts/research/[relevant].md`
 - Similar implementation: `[file:line]`
 ```
 
@@ -378,7 +407,7 @@ def test_phase_2_acceptance():
 1. **Present the draft plan location**:
 ```
    I've created the initial implementation plan at:
-   `plans/YYYY-MM-DD-description.md`
+   `thoughts/plans/YYYY.MM.DD-{username}-description.md`
 
    Please review it and let me know:
    - Are the phases properly scoped?

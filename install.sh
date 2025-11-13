@@ -84,6 +84,54 @@ mkdir -p "$PROJECT_ROOT/research"
 mkdir -p "$PROJECT_ROOT/plans"
 mkdir -p "$PROJECT_ROOT/handoffs"
 
+# Username detection and configuration
+echo ""
+echo "Configuring username for RPI file naming..."
+
+# Check if config.yaml exists and has username
+CONFIG_FILE="$PROJECT_ROOT/.claude/config.yaml"
+CONFIG_USERNAME=""
+
+if [ -f "$CONFIG_FILE" ]; then
+    CONFIG_USERNAME=$(grep "^username:" "$CONFIG_FILE" 2>/dev/null | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+fi
+
+if [ -n "$CONFIG_USERNAME" ]; then
+    echo "Using existing username from config: $CONFIG_USERNAME"
+    FINAL_USERNAME="$CONFIG_USERNAME"
+else
+    # Detect username from environment or git
+    DETECTED_USERNAME="${RPI_USERNAME:-$(git config user.name 2>/dev/null | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}"
+    DETECTED_USERNAME="${DETECTED_USERNAME:-user}"
+
+    # Prompt user for username
+    echo ""
+    echo "Detected username: $DETECTED_USERNAME"
+    echo -n "Press Enter to use this username, or type a different one: "
+    read USER_INPUT
+
+    # Use input if provided, otherwise use detected
+    if [ -n "$USER_INPUT" ]; then
+        FINAL_USERNAME=$(echo "$USER_INPUT" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+        echo "Using username: $FINAL_USERNAME"
+    else
+        FINAL_USERNAME="$DETECTED_USERNAME"
+        echo "Using username: $FINAL_USERNAME"
+    fi
+
+    # Create config.yaml with username
+    cat > "$CONFIG_FILE" << EOC
+# Maximal-AI Configuration
+# Username for RPI file naming (YYYY.MM.DD-{username}-description.md)
+username: $FINAL_USERNAME
+
+# Additional settings can be added here
+EOC
+    echo "Created .claude/config.yaml with username: $FINAL_USERNAME"
+fi
+
+echo ""
+
 # Copy command files
 echo "Installing commands..."
 cp "$INSTALL_DIR/.claude/commands/research.md" "$PROJECT_ROOT/.claude/commands/"
@@ -127,6 +175,17 @@ if [ -f "$PROJECT_ROOT/.gitignore" ]; then
         echo "plans/" >> "$PROJECT_ROOT/.gitignore"
         echo "handoffs/" >> "$PROJECT_ROOT/.gitignore"
         echo "Added research/, plans/, and handoffs/ to .gitignore"
+    fi
+
+    # Add .claude/config.yaml to gitignore (each developer has their own username)
+    if ! grep -q "^\.claude/config\.yaml$" "$PROJECT_ROOT/.gitignore"; then
+        # Check if AI Context section already exists
+        if ! grep -q "# AI Context Engineering" "$PROJECT_ROOT/.gitignore"; then
+            echo "" >> "$PROJECT_ROOT/.gitignore"
+            echo "# AI Context Engineering" >> "$PROJECT_ROOT/.gitignore"
+        fi
+        echo ".claude/config.yaml" >> "$PROJECT_ROOT/.gitignore"
+        echo "Added .claude/config.yaml to .gitignore"
     fi
 fi
 

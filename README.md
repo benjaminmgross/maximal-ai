@@ -63,10 +63,35 @@ maximal-ai
 This will:
 - ✅ Install 8 commands (research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff)
 - ✅ Install 7 specialized agents
-- ✅ Create research/, plans/, and handoffs/ directories
+- ✅ Configure username for RPI file naming (interactive prompt)
+- ✅ Create `.claude/config.yaml` with your username
+- ✅ Set up thoughts/ directory structure (research/, plans/, handoffs/)
 - ✅ Set up CLAUDE.md configuration
 - ✅ Update .gitignore if needed
 - ✅ Auto-detect and apply coding standards from `docs/coding-standards/` (if present)
+
+### Username Configuration
+
+During installation, you'll be prompted to set your username for RPI file naming. The installer will:
+1. Auto-detect from `RPI_USERNAME` environment variable or `git config user.name`
+2. Show detected username and prompt: _"Press Enter to use this username, or type a different one"_
+3. Save your choice to `.claude/config.yaml`
+
+**Username Priority Order:**
+1. `.claude/config.yaml` (per-repository, created during install)
+2. `RPI_USERNAME` environment variable (global default)
+3. `git config user.name` (automatic fallback)
+4. `"user"` (last resort)
+
+**Example filenames created:**
+- `thoughts/research/2025.11.13-benjamin-authentication-flow.md`
+- `thoughts/plans/2025.11.13-benjamin-oauth-support.md`
+- `thoughts/handoffs/2025.11.13-benjamin-session-handoff.md`
+
+**To override username later**, edit `.claude/config.yaml`:
+```yaml
+username: yourname
+```
 
 ### Updating
 
@@ -98,7 +123,7 @@ This will:
 
 #### 2. Planning Phase
 ```
-/plan research/2025-01-08-authentication-flow.md
+/plan thoughts/research/2025.01.08-username-authentication-flow.md
 ```
 Or start fresh:
 ```
@@ -112,7 +137,7 @@ This will:
 
 #### 3. Implementation Phase
 ```
-/implement plans/2025-01-08-add-oauth-support.md
+/implement thoughts/plans/2025.01.08-username-add-oauth-support.md
 ```
 This will:
 - Execute the plan phase by phase
@@ -128,7 +153,7 @@ When you need to transfer context to a new Claude session, create a handoff docu
 /create_handoff
 ```
 
-This will create a comprehensive handoff document in `handoffs/` with:
+This will create a comprehensive handoff document in `thoughts/handoffs/` with:
 - Task status and progress
 - Key learnings and patterns discovered
 - Recent changes made (with file:line references)
@@ -139,7 +164,7 @@ This will create a comprehensive handoff document in `handoffs/` with:
 To resume work from a handoff:
 
 ```
-/resume_handoff handoffs/2025-11-08_feature-implementation.md
+/resume_handoff thoughts/handoffs/2025.11.08-username-feature-implementation.md
 ```
 
 This will:
@@ -154,6 +179,7 @@ This will:
 ```
 your-project/
 ├── .claude/
+│   ├── config.yaml           # Username configuration (gitignored)
 │   ├── commands/
 │   │   ├── research.md        # Research phase command
 │   │   ├── plan.md            # Planning phase command
@@ -169,19 +195,20 @@ your-project/
 │       ├── codebase-pattern-finder.md # Discovers patterns to follow
 │       ├── web-search-researcher.md   # External documentation research
 │       ├── file-analyzer.md           # Reduces large files by 80-90%
-│       ├── bug-hunter.md             # Elite bug detection specialist
-│       └── test-runner.md            # Executes tests without context pollution
+│       ├── bug-hunter.md              # Elite bug detection specialist
+│       └── test-runner.md             # Executes tests without context pollution
 ├── docs/
 │   └── coding-standards/     # Your team's coding standards (optional)
 │       ├── architecture.md   # Package structure, patterns
 │       ├── best-practices.md # Coding guidelines
 │       └── testing.md        # Test requirements
-├── research/                 # Generated research documents
-│   └── YYYY-MM-DD-topic.md
-├── plans/                    # Generated implementation plans
-│   └── YYYY-MM-DD-feature.md
-├── handoffs/                 # Session handoff documents
-│   └── YYYY-MM-DD_description.md
+├── thoughts/                 # RPI artifacts (can be symlinked to minty-thoughts)
+│   ├── research/             # Generated research documents
+│   │   └── YYYY.MM.DD-username-topic.md
+│   ├── plans/                # Generated implementation plans
+│   │   └── YYYY.MM.DD-username-feature.md
+│   └── handoffs/             # Session handoff documents
+│       └── YYYY.MM.DD-username-description.md
 └── CLAUDE.md                 # Project configuration for Claude
 ```
 

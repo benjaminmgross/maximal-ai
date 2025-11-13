@@ -36,14 +36,14 @@ After receiving the task:
    - Cross-reference findings with standards (if loaded)
 
 3. **Save research document**:
-   - Create `research/YYYY-MM-DD-[topic].md`
+   - Create `thoughts/research/YYYY.MM.DD-{username}-[topic].md`
    - Include comprehensive findings
    - **Include "Coding Standards Adherence" section** if standards were loaded
    - Document all discoveries
 
 4. **Present summary**:
    ```
-   Research complete! Document saved to: research/YYYY-MM-DD-[topic].md
+   Research complete! Document saved to: thoughts/research/YYYY.MM.DD-{username}-[topic].md
 
    Key findings:
    - [Major discovery 1]
@@ -78,13 +78,13 @@ After receiving the task:
    - Document what we're NOT doing
 
 4. **Save plan document**:
-   - Create `plans/YYYY-MM-DD-[feature].md`
+   - Create `thoughts/plans/YYYY.MM.DD-{username}-[feature].md`
    - Include all phases and verification
    - Include standards references (if applicable)
 
 5. **Get user approval**:
    ```
-   Plan complete! Document saved to: plans/YYYY-MM-DD-[feature].md
+   Plan complete! Document saved to: thoughts/plans/YYYY.MM.DD-{username}-[feature].md
 
    Plan overview:
    - Phase 1: [Description]
@@ -139,8 +139,8 @@ If user approves:
    ## Epic Oneshot Complete! ✅
 
    **Artifacts Created:**
-   - Research: research/YYYY-MM-DD-[topic].md
-   - Plan: plans/YYYY-MM-DD-[feature].md
+   - Research: thoughts/research/YYYY.MM.DD-{username}-[topic].md
+   - Plan: thoughts/plans/YYYY.MM.DD-{username}-[feature].md
 
    **Implementation Summary:**
    - Files modified: X
