@@ -11,7 +11,37 @@ You are tasked with writing a handoff document to hand off your work to another 
 ### 1. Filepath & Metadata
 Use the following information to understand how to create your document:
 
->  **File Naming:** create your file under `handoffs/YYYY-MM-DD_description.md`, where:
+### Username Detection for File Naming
+
+Before creating the handoff document, detect the username to use in the filename:
+
+1. **Detect username with priority order**:
+   ```bash
+   # Priority 1: Check .claude/config.yaml for username
+   if [ -f ".claude/config.yaml" ]; then
+       CONFIG_USERNAME=$(grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+   fi
+
+   # Priority 2: Check RPI_USERNAME environment variable
+   # Priority 3: Fallback to git config user.name
+   # Priority 4: Default to "user"
+   RPI_USERNAME="${CONFIG_USERNAME:-${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}}"
+   RPI_USERNAME="${RPI_USERNAME:-user}"
+
+   echo "Using username: $RPI_USERNAME"
+```
+
+2. **Format the date with dots**: Use `YYYY.MM.DD` format instead of `YYYY-MM-DD`
+   ```bash
+   CURRENT_DATE=$(date +%Y.%m.%d)
+   ```
+
+3. **Construct filename**: `{CURRENT_DATE}-{RPI_USERNAME}-{description}.md` (note underscores)
+
+   - Example: `2025.11.13-benjamin-oauth-implementation.md`
+   - Example: `2025.11.13-shared-deployment-handoff.md`
+
+>  **File Naming:** create your file under `thoughts/handoffs/YYYY.MM.DD-{username}-description.md`, where:
 >
 > * YYYY-MM-DD is today's date
 > * Description is a brief kebab-case description

@@ -178,7 +178,7 @@ git commit -m "Phase [N]: [Phase Title]
 - [Brief description of changes]
 - [Key files modified]
 
-Implementation from: plans/[plan-file].md
+Implementation from: thoughts/plans/[plan-file].md
 Phase [N] of [Total]: [Percentage]% complete"
 ```
 
@@ -261,7 +261,7 @@ git commit -m "feat: Add [feature name]
 - Update documentation
 
 Closes: #[issue]
-Plan: plans/YYYY-MM-DD-feature.md"
+Plan: thoughts/plans/YYYY.MM.DD-username-feature.md"
 
 # Bug fix
 git commit -m "fix: Resolve [issue description]
@@ -279,7 +279,7 @@ git commit -m "refactor: Improve [component/area]
 - Reduce complexity from X to Y
 - No functional changes
 
-Part of: plans/YYYY-MM-DD-refactor.md"
+Part of: thoughts/plans/YYYY.MM.DD-username-refactor.md"
 ```
 
 ### Important Git Guidelines

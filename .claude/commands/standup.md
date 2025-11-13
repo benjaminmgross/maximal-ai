@@ -26,8 +26,8 @@ I'll generate a standup report from your recent work. Let me analyze your RPI ar
    ```
 
 2. **Scan RPI artifacts**:
-   - List recent files in `research/` directory
-   - List recent files in `plans/` directory
+   - List recent files in `thoughts/research/` directory
+   - List recent files in `thoughts/plans/` directory
    - Check for in-progress implementations
 
 3. **Analyze todos**:
@@ -56,7 +56,7 @@ Create a structured standup report:
 ## 🚧 In Progress
 [Based on uncommitted changes and active plans]
 - [Current task] ([X]% complete)
-  - Plan: plans/[filename].md
+  - Plan: thoughts/plans/[filename].md
   - Next step: [Description]
 
 ## 📋 Upcoming
@@ -66,8 +66,8 @@ Create a structured standup report:
 3. [Future consideration]
 
 ## 🔬 Recent Research
-[From research/ directory]
-- [Topic] - research/[filename].md
+[From thoughts/research/ directory]
+- [Topic] - thoughts/research/[filename].md
   - Key finding: [Brief summary]
 
 ## ⚠️ Blockers/Issues
