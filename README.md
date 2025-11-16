@@ -109,6 +109,22 @@ cd /path/to/your/project
 maximal-ai
 ```
 
+### Testing
+
+To verify the installation system works correctly:
+
+```bash
+cd /path/to/maximal-ai
+./test-installation.sh
+```
+
+This integration test:
+- Creates a temporary test directory
+- Runs the installation process
+- Verifies all commands and agents are installed
+- Tests Python and JavaScript project type detection
+- Cleans up after itself
+
 ### Basic Usage
 
 #### 1. Research Phase
@@ -517,6 +533,12 @@ This workflow is continuously evolving. Contributions welcome:
 - Industry-specific patterns
 - Integration examples
 - Success stories
+
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes to this project.
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 📖 References
 
