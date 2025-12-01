@@ -62,14 +62,25 @@ Tip: You can also invoke this command with a research file directly: `/plan thou
 
 After reading files identified by research tasks and before analyzing understanding:
 
-1. **Check for coding standards directory**:
-   - Use Bash to check if `docs/coding-standards/` exists
-   - If the directory doesn't exist, continue normally (graceful degradation)
+1. **Check for coding standards using priority order**:
+   ```bash
+   # Priority 1: External standards via MINTY_DOCS_PATH environment variable
+   if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
+       echo "Found external coding standards (via MINTY_DOCS_PATH)"
+   # Priority 2: Local repository standards
+   elif [ -d "docs/coding-standards/" ]; then
+       STANDARDS_PATH="docs/coding-standards/"
+       echo "Found local coding standards"
+   else
+       STANDARDS_PATH=""
+   fi
+   ```
 
-2. **If standards directory exists**:
+2. **If standards found** (`STANDARDS_PATH` is not empty):
    - Spawn a **codebase-analyzer** sub-agent with this prompt:
      ```
-     Read and synthesize all markdown files in docs/coding-standards/ directory.
+     Read and synthesize all markdown files in [STANDARDS_PATH] directory.
 
      Extract and return:
      1. Architectural patterns that must be followed
@@ -86,7 +97,7 @@ After reading files identified by research tasks and before analyzing understand
    - Wait for the sub-agent to complete before proceeding
    - Store the synthesized standards in context for reference during planning
 
-3. **If standards directory does not exist**:
+3. **If no standards found**:
    - Continue normally without standards (graceful degradation)
    - No need to mention absence to the user
 
@@ -272,6 +283,24 @@ Before creating the plan document, detect the username to use in the filename:
 - **[Guideline Category]** (visual-formatting.md:45): [Specific application]
 - **[Tool Usage]** (repo-standards.md:608): [How we're using tools per standards]
 
+## TDD Commit Strategy
+
+For each implementation phase, follow this commit pattern:
+
+1. **test: [phase] Add/update tests (RED)**
+   - Write tests that define expected behavior
+   - Tests MUST fail at this point
+   - Commit message: `test: Phase N - add tests for [feature]`
+
+2. **feat: [phase] Implement feature (GREEN)**
+   - Write minimal code to pass tests
+   - Commit message: `feat: Phase N - implement [feature]`
+
+3. **refactor: [phase] Clean up (REFACTOR)**
+   - Improve code quality, apply standards
+   - Tests must stay green
+   - Commit message: `refactor: Phase N - clean up [feature]`
+
 ---
 
 ## Phase 1: [Descriptive Name]
@@ -316,11 +345,17 @@ def test_phase_1_acceptance():
 
 ### Success Criteria:
 
+#### TDD Verification:
+- [ ] Tests written BEFORE implementation
+- [ ] Tests failed initially (RED phase verified)
+- [ ] Tests pass after implementation (GREEN phase verified)
+- [ ] Code cleaned up with tests still passing (REFACTOR phase verified)
+
 #### Automated Verification:
-- [ ] Tests pass: `npm test` or `make test`
-- [ ] Type checking passes: `npm run typecheck`
-- [ ] Linting passes: `npm run lint`
-- [ ] Build succeeds: `npm run build`
+- [ ] Tests pass: `npm test` or `pytest`
+- [ ] Type checking passes: `npm run typecheck` or `mypy .`
+- [ ] Linting passes: `npm run lint` or `ruff check .`
+- [ ] Build succeeds: `npm run build` or `python -m build`
 
 #### Manual Verification:
 - [ ] Feature works as expected when tested via UI

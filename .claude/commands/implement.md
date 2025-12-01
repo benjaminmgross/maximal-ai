@@ -13,10 +13,24 @@ When given a plan path:
 - Read any original research documents mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
 - **Load coding standards if present**:
-  - Use Bash to check if `docs/coding-standards/` exists
-  - If standards exist, spawn a **codebase-analyzer** sub-agent:
+  - Check for standards using this priority order:
+    ```bash
+    # Priority 1: External standards via MINTY_DOCS_PATH environment variable
+    if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+        STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
+        echo "Found external coding standards (via MINTY_DOCS_PATH)"
+    # Priority 2: Local repository standards
+    elif [ -d "docs/coding-standards/" ]; then
+        STANDARDS_PATH="docs/coding-standards/"
+        echo "Found local coding standards"
+    else
+        STANDARDS_PATH=""
+        echo "No coding standards found - continuing without standards"
+    fi
     ```
-    Read and synthesize all markdown files in docs/coding-standards/ directory.
+  - If standards found (`STANDARDS_PATH` is not empty), spawn a **codebase-analyzer** sub-agent:
+    ```
+    Read and synthesize all markdown files in [STANDARDS_PATH] directory.
 
     Extract and return:
     1. Code organization patterns (file placement, package structure)
@@ -31,7 +45,16 @@ When given a plan path:
     ```
   - Wait for synthesis to complete before starting implementation
   - Keep standards in context for reference during implementation
-  - If standards don't exist, continue normally (graceful degradation)
+  - If no standards found, continue normally (graceful degradation - NO error, NO user notification)
+- **Invoke TDD Skill (if available)**:
+  - Check if `superpowers:test-driven-development` skill is available
+  - If available, use the Skill tool to invoke it
+  - This skill enforces the RED-GREEN-REFACTOR cycle:
+    1. **RED**: Write/update tests FIRST - they MUST fail initially
+    2. **GREEN**: Write minimal code to make tests pass
+    3. **REFACTOR**: Clean up while keeping tests green
+  - If TDD skill is not available, follow the TDD workflow manually as described in "Make the Changes" section
+  - TDD is strongly recommended for all implementation work
 - Think deeply about how the pieces fit together
 - Create a todo list to track your progress
 - Start implementing if you understand what needs to be done
@@ -88,9 +111,21 @@ For each phase:
    - Understand what this phase accomplishes
    - Review the success criteria
 
-2. **Make the Changes**
-   - Implement changes in the order specified
-   - Follow the code examples closely
+2. **Make the Changes (TDD Workflow)**
+   - **For each feature/change in the phase**:
+     1. **RED Phase**: Write or update tests FIRST
+        - Run tests to confirm they FAIL
+        - If tests pass before implementation, the tests are not testing the new behavior
+        - Commit: `test: Phase N - add tests for [feature]`
+     2. **GREEN Phase**: Write minimal implementation
+        - Only write code needed to make tests pass
+        - Resist adding features not covered by tests
+        - Commit: `feat: Phase N - implement [feature]`
+     3. **REFACTOR Phase**: Clean up
+        - Improve code quality while keeping tests green
+        - Apply coding standards (if loaded)
+        - Commit: `refactor: Phase N - clean up [feature]`
+   - Follow the code examples from the plan closely
    - **Apply coding standards** (if loaded) to all new/modified code:
      - Place files in correct locations per standards
      - Use documented import patterns
@@ -98,7 +133,6 @@ For each phase:
      - Avoid documented anti-patterns
      - Apply required code style/formatting
    - Adapt to actual code structure as needed
-   - Commit frequently (if user requests)
 
 3. **Verify as You Go**
    - Run automated verification commands after each major change
