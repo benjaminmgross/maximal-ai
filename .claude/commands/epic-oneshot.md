@@ -28,13 +28,10 @@ After receiving the task:
 2. **Execute research**:
    - **Check for coding standards** using priority order and load if present:
      ```bash
-     # Priority 1: External minty-docs via environment variable
+     # Priority 1: External standards via MINTY_DOCS_PATH environment variable
      if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
          STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
-     # Priority 2: Default minty-docs location
-     elif [ -d "$HOME/dev/minty-docs/cross-cutting/coding-standards/" ]; then
-         STANDARDS_PATH="$HOME/dev/minty-docs/cross-cutting/coding-standards/"
-     # Priority 3: Local repository standards
+     # Priority 2: Local repository standards
      elif [ -d "docs/coding-standards/" ]; then
          STANDARDS_PATH="docs/coding-standards/"
      else
@@ -78,7 +75,7 @@ After receiving the task:
    - Load the just-created research file
    - Extract key implementation points
    - **Load coding standards** (same process as /plan command):
-     - Check for standards using priority order (MINTY_DOCS_PATH → ~/dev/minty-docs → docs/coding-standards/)
+     - Check for standards using priority order (MINTY_DOCS_PATH → docs/coding-standards/)
      - Spawn codebase-analyzer to synthesize if standards found
      - Wait for synthesis before proceeding
 
@@ -120,7 +117,7 @@ If user approves:
 
 2. **Execute plan phases**:
    - **Load coding standards** (same process as /implement command):
-     - Check for standards using priority order (MINTY_DOCS_PATH → ~/dev/minty-docs → docs/coding-standards/)
+     - Check for standards using priority order (MINTY_DOCS_PATH → docs/coding-standards/)
      - Spawn codebase-analyzer to synthesize if standards found
      - Keep standards in context during implementation
    - **Invoke TDD skill** (if available): Use `superpowers:test-driven-development` before implementation

@@ -64,15 +64,11 @@ After reading files identified by research tasks and before analyzing understand
 
 1. **Check for coding standards using priority order**:
    ```bash
-   # Priority 1: External minty-docs via environment variable
+   # Priority 1: External standards via MINTY_DOCS_PATH environment variable
    if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
        STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
        echo "Found external coding standards (via MINTY_DOCS_PATH)"
-   # Priority 2: Default minty-docs location
-   elif [ -d "$HOME/dev/minty-docs/cross-cutting/coding-standards/" ]; then
-       STANDARDS_PATH="$HOME/dev/minty-docs/cross-cutting/coding-standards/"
-       echo "Found external coding standards (default location)"
-   # Priority 3: Local repository standards
+   # Priority 2: Local repository standards
    elif [ -d "docs/coding-standards/" ]; then
        STANDARDS_PATH="docs/coding-standards/"
        echo "Found local coding standards"

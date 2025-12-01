@@ -15,15 +15,11 @@ When given a plan path:
 - **Load coding standards if present**:
   - Check for standards using this priority order:
     ```bash
-    # Priority 1: External minty-docs via environment variable
+    # Priority 1: External standards via MINTY_DOCS_PATH environment variable
     if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
         STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
         echo "Found external coding standards (via MINTY_DOCS_PATH)"
-    # Priority 2: Default minty-docs location
-    elif [ -d "$HOME/dev/minty-docs/cross-cutting/coding-standards/" ]; then
-        STANDARDS_PATH="$HOME/dev/minty-docs/cross-cutting/coding-standards/"
-        echo "Found external coding standards (default location)"
-    # Priority 3: Local repository standards
+    # Priority 2: Local repository standards
     elif [ -d "docs/coding-standards/" ]; then
         STANDARDS_PATH="docs/coding-standards/"
         echo "Found local coding standards"

@@ -37,28 +37,23 @@ The RPI workflow automatically loads coding standards from multiple sources:
 
 ### Priority Order:
 1. **Environment**: `$MINTY_DOCS_PATH/cross-cutting/coding-standards/`
-2. **Default External**: `~/dev/minty-docs/cross-cutting/coding-standards/`
-3. **Local**: `docs/coding-standards/` in the current repository
+2. **Local**: `docs/coding-standards/` in the current repository
 
 ### Configuration:
 
-**Option 1: Use minty-docs with environment variable**
+**Option 1: Use external standards via environment variable**
 ```bash
-# Set environment variable to custom minty-docs location
-export MINTY_DOCS_PATH="$HOME/dev/minty-docs"
+# Set MINTY_DOCS_PATH to your external standards repository
+export MINTY_DOCS_PATH="/path/to/your/standards-repo"
 ```
 
-**Option 2: Use default minty-docs location**
-- If `~/dev/minty-docs` exists, standards are loaded automatically
-- No configuration needed
-
-**Option 3: Use local standards (project-specific rules)**
+**Option 2: Use local standards (project-specific rules)**
 ```bash
 mkdir -p docs/coding-standards
 # Add your .md files with coding standards
 ```
 
-**Option 4: No configuration needed**
+**Option 3: No configuration needed**
 - If no standards exist anywhere, commands continue gracefully
 - No error messages or warnings
 
