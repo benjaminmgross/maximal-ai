@@ -75,14 +75,29 @@ Only proceed to Step 1.5 (Load Coding Standards) after getting answers or determ
 
 Before decomposing the research query, check for repository coding standards:
 
-1. **Check for coding standards directory**:
-   - Use Bash to check if `docs/coding-standards/` exists
-   - If the directory doesn't exist, continue normally (graceful degradation)
+1. **Check for coding standards using priority order**:
+   ```bash
+   # Priority 1: External minty-docs via environment variable
+   if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
+       echo "Found external coding standards (via MINTY_DOCS_PATH)"
+   # Priority 2: Default minty-docs location
+   elif [ -d "$HOME/dev/minty-docs/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$HOME/dev/minty-docs/cross-cutting/coding-standards/"
+       echo "Found external coding standards (default location)"
+   # Priority 3: Local repository standards
+   elif [ -d "docs/coding-standards/" ]; then
+       STANDARDS_PATH="docs/coding-standards/"
+       echo "Found local coding standards"
+   else
+       STANDARDS_PATH=""
+   fi
+   ```
 
-2. **If standards directory exists**:
+2. **If standards found** (`STANDARDS_PATH` is not empty):
    - Spawn a **codebase-analyzer** sub-agent with this prompt:
      ```
-     Read and synthesize all markdown files in docs/coding-standards/ directory.
+     Read and synthesize all markdown files in [STANDARDS_PATH] directory.
 
      Extract and return:
      1. Key architectural patterns (e.g., package structure, file organization)
@@ -97,7 +112,7 @@ Before decomposing the research query, check for repository coding standards:
    - Wait for the sub-agent to complete before proceeding
    - Store the synthesized standards in context for reference during analysis
 
-3. **If standards directory does not exist**:
+3. **If no standards found**:
    - Continue normally without standards (graceful degradation)
    - No need to mention absence to the user
 

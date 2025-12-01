@@ -31,6 +31,66 @@ git config user.name  # This will be auto-converted
 
 Files will be named: `YYYY.MM.DD-{username}-description.md`
 
+## Coding Standards Integration
+
+The RPI workflow automatically loads coding standards from multiple sources:
+
+### Priority Order:
+1. **Environment**: `$MINTY_DOCS_PATH/cross-cutting/coding-standards/`
+2. **Default External**: `~/dev/minty-docs/cross-cutting/coding-standards/`
+3. **Local**: `docs/coding-standards/` in the current repository
+
+### Configuration:
+
+**Option 1: Use minty-docs with environment variable**
+```bash
+# Set environment variable to custom minty-docs location
+export MINTY_DOCS_PATH="$HOME/dev/minty-docs"
+```
+
+**Option 2: Use default minty-docs location**
+- If `~/dev/minty-docs` exists, standards are loaded automatically
+- No configuration needed
+
+**Option 3: Use local standards (project-specific rules)**
+```bash
+mkdir -p docs/coding-standards
+# Add your .md files with coding standards
+```
+
+**Option 4: No configuration needed**
+- If no standards exist anywhere, commands continue gracefully
+- No error messages or warnings
+
+### Standards Format:
+Standards should be markdown files containing:
+- Code style guidelines
+- Architectural patterns
+- Anti-patterns to avoid
+- Testing requirements
+
+## Test-Driven Development (TDD)
+
+The RPI workflow encourages TDD practices during implementation:
+
+### Workflow:
+1. **RED**: Write/update tests FIRST - tests must fail initially
+2. **GREEN**: Write minimal code to make tests pass
+3. **REFACTOR**: Clean up while keeping tests green
+
+### Commit Strategy:
+```
+test: Phase N - add tests for [feature]     # RED
+feat: Phase N - implement [feature]          # GREEN
+refactor: Phase N - clean up [feature]       # REFACTOR
+```
+
+### Skill Integration:
+The `/implement` command will invoke `superpowers:test-driven-development` skill (if available) to guide proper test-first development.
+
+### Opting Out:
+TDD is **strongly recommended** but can be bypassed if explicitly stated in the task. However, this should be rare and justified.
+
 ## Core Workflow
 
 ### The Three Phases
