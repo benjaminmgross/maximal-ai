@@ -129,6 +129,10 @@ If user approves:
    - **Follow coding standards** for all code changes (if loaded)
    - Run verification after each phase
    - Document any deviations (including from standards)
+   - **Consider documentation updates** (after all code changes complete):
+     - Check if docs/ or $MINTY_DOCS_PATH exist
+     - If new feature/pattern added, suggest documentation update
+     - If neither destination exists, continue silently
 
 3. **Run final verification**:
    ```bash
@@ -150,7 +154,7 @@ If user approves:
 
 4. **Present completion summary**:
    ```
-   ## Epic Oneshot Complete! ✅
+   ## Epic Oneshot Complete!
 
    **Artifacts Created:**
    - Research: thoughts/research/YYYY.MM.DD-{username}-[topic].md
@@ -158,9 +162,12 @@ If user approves:
 
    **Implementation Summary:**
    - Files modified: X
-   - Tests passing: ✅
-   - Verification complete: ✅
-   **Coding standards**: [✅ Followed | ⚠️ N/A - no standards present]
+   - Tests passing: [status]
+   - Verification complete: [status]
+
+   **Standards & Documentation:**
+   - Coding standards: [Followed | N/A - no standards present]
+   - Documentation updated: [Yes - location | No - not needed | Skipped - no docs destination]
 
    **Next Steps:**
    1. Review the changes

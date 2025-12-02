@@ -64,6 +64,51 @@ Standards should be markdown files containing:
 - Anti-patterns to avoid
 - Testing requirements
 
+## Documentation Updates
+
+The RPI workflow supports automatic documentation updates after implementation. Documentation can flow to two destinations:
+
+### Destinations
+
+| Type | Path | When to Use |
+|------|------|-------------|
+| Cross-cutting | `$MINTY_DOCS_PATH/cross-cutting/` | Patterns, standards, or behaviors affecting multiple repos |
+| Repo-specific | `docs/` | Features, APIs, or behaviors specific to this repository |
+
+### Workflow
+
+After implementation completes, the `/implement` command will:
+
+1. **Check** if documentation updates are warranted (new feature, changed behavior, new pattern)
+2. **Determine** the appropriate destination based on scope:
+   - Cross-cutting → `$MINTY_DOCS_PATH`
+   - Repo-specific → `docs/`
+3. **Prompt** for documentation if a destination exists
+4. **Skip silently** if no documentation destination is configured
+
+### Configuration
+
+**For cross-cutting documentation:**
+```bash
+# Set in ~/.zshrc or ~/.bashrc
+export MINTY_DOCS_PATH="/path/to/minty-docs"
+```
+
+**For repo-specific documentation:**
+```bash
+# Create docs directory in your repository
+mkdir -p docs/
+```
+
+### Graceful Degradation
+
+If neither `$MINTY_DOCS_PATH` is configured nor the `docs/` folder is populated:
+- No errors or warnings are shown
+- The workflow continues normally
+- Users can add documentation manually later
+
+This ensures the RPI workflow works for all users regardless of their documentation setup.
+
 ## Test-Driven Development (TDD)
 
 The RPI workflow encourages TDD practices during implementation:

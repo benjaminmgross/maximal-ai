@@ -163,6 +163,60 @@ Before moving to the next phase:
 3. Document any significant deviations
 4. Commit your changes if appropriate
 
+### Step 5: Documentation Update
+
+After all implementation phases complete and verification passes, consider whether documentation updates are needed.
+
+1. **Determine if documentation is warranted**:
+   - Was a new feature or capability added?
+   - Were existing behaviors significantly changed?
+   - Were new patterns introduced that others should follow?
+   - Were anti-patterns discovered and resolved?
+
+   If no documentation is needed, skip to Git Commit Best Practices.
+
+2. **Classify documentation type**:
+   ```bash
+   # Check what documentation destinations are available
+   DOCS_DESTINATION=""
+   DOCS_TYPE=""
+
+   # Priority 1: Cross-cutting documentation (affects multiple repos)
+   if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH" ]; then
+       echo "Cross-cutting docs available at: $MINTY_DOCS_PATH"
+       CROSS_CUTTING_AVAILABLE="true"
+   else
+       CROSS_CUTTING_AVAILABLE="false"
+   fi
+
+   # Priority 2: Repo-specific documentation
+   if [ -d "docs/" ]; then
+       echo "Repo-specific docs available at: docs/"
+       REPO_DOCS_AVAILABLE="true"
+   else
+       REPO_DOCS_AVAILABLE="false"
+   fi
+
+   # If neither exists, skip documentation silently
+   if [ "$CROSS_CUTTING_AVAILABLE" = "false" ] && [ "$REPO_DOCS_AVAILABLE" = "false" ]; then
+       echo "No documentation destinations configured - skipping documentation update"
+   fi
+   ```
+
+3. **Determine appropriate destination**:
+   - **Cross-cutting** (`$MINTY_DOCS_PATH/cross-cutting/`): Use for patterns, standards, or behaviors that affect multiple repositories
+   - **Repo-specific** (`docs/`): Use for features, APIs, or behaviors specific to this repository
+
+4. **Create or update documentation**:
+   - Follow existing documentation structure in the destination
+   - Include relevant code references from this implementation
+   - Link back to the implementation plan if applicable
+
+5. **Graceful degradation**:
+   - If the appropriate destination doesn't exist, log what would have been documented
+   - Continue with git commit - missing docs destination is NOT a blocker
+   - User can manually create documentation later if needed
+
 ## Git Commit Best Practices
 
 During implementation, maintain clean git history with atomic commits:
@@ -425,5 +479,6 @@ Before declaring implementation complete:
 - [ ] Code follows project conventions
 - [ ] No commented-out code or TODOs left
 - [ ] All tests passing
+- [ ] **Documentation considered** (new feature? → update docs/ or $MINTY_DOCS_PATH)
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.

@@ -84,6 +84,21 @@ mkdir -p "$PROJECT_ROOT/research"
 mkdir -p "$PROJECT_ROOT/plans"
 mkdir -p "$PROJECT_ROOT/handoffs"
 
+# Optional: Create docs directory for repo-specific documentation
+if [ ! -d "$PROJECT_ROOT/docs" ]; then
+    echo ""
+    echo "Would you like to create a docs/ directory for repo-specific documentation?"
+    echo "This enables the RPI workflow to suggest documentation updates after implementation."
+    echo -n "(y/N): "
+    read CREATE_DOCS
+    if [ "$CREATE_DOCS" = "y" ] || [ "$CREATE_DOCS" = "Y" ]; then
+        mkdir -p "$PROJECT_ROOT/docs"
+        echo "Created docs/ directory"
+    else
+        echo "Skipping docs/ directory (can be created later)"
+    fi
+fi
+
 # Username detection and configuration
 echo ""
 echo "Configuring username for RPI file naming..."
@@ -195,6 +210,18 @@ echo ""
 echo "📦 Installed:"
 echo "   • 8 commands: research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff"
 echo "   • 7 agents: locator, analyzer, pattern-finder, researcher, file-analyzer, bug-hunter, test-runner"
+echo ""
+echo "📄 Documentation destinations:"
+if [ -n "$MINTY_DOCS_PATH" ]; then
+    echo "   • Cross-cutting: $MINTY_DOCS_PATH"
+else
+    echo "   • Cross-cutting: Not configured (set MINTY_DOCS_PATH for cross-cutting docs)"
+fi
+if [ -d "$PROJECT_ROOT/docs" ]; then
+    echo "   • Repo-specific: docs/"
+else
+    echo "   • Repo-specific: Not configured (create docs/ for repo-specific docs)"
+fi
 echo ""
 echo "📚 Next Steps:"
 echo "1. Open this project in Claude"
