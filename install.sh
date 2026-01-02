@@ -80,9 +80,9 @@ fi
 echo "Creating directory structure..."
 mkdir -p "$PROJECT_ROOT/.claude/commands"
 mkdir -p "$PROJECT_ROOT/.claude/agents"
-mkdir -p "$PROJECT_ROOT/research"
-mkdir -p "$PROJECT_ROOT/plans"
-mkdir -p "$PROJECT_ROOT/handoffs"
+mkdir -p "$PROJECT_ROOT/thoughts/research"
+mkdir -p "$PROJECT_ROOT/thoughts/plans"
+mkdir -p "$PROJECT_ROOT/thoughts/handoffs"
 
 # Optional: Create docs directory for repo-specific documentation
 if [ ! -d "$PROJECT_ROOT/docs" ]; then
@@ -182,14 +182,12 @@ fi
 
 # Create .gitignore entries if needed
 if [ -f "$PROJECT_ROOT/.gitignore" ]; then
-    # Check if research/ and plans/ are already in gitignore
-    if ! grep -q "^research/$" "$PROJECT_ROOT/.gitignore"; then
+    # Check if thoughts/ is already in gitignore
+    if ! grep -q "^thoughts/$" "$PROJECT_ROOT/.gitignore"; then
         echo "" >> "$PROJECT_ROOT/.gitignore"
         echo "# AI Context Engineering artifacts" >> "$PROJECT_ROOT/.gitignore"
-        echo "research/" >> "$PROJECT_ROOT/.gitignore"
-        echo "plans/" >> "$PROJECT_ROOT/.gitignore"
-        echo "handoffs/" >> "$PROJECT_ROOT/.gitignore"
-        echo "Added research/, plans/, and handoffs/ to .gitignore"
+        echo "thoughts/" >> "$PROJECT_ROOT/.gitignore"
+        echo "Added thoughts/ to .gitignore"
     fi
 
     # Add .claude/config.yaml to gitignore (each developer has their own username)
