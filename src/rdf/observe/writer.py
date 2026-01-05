@@ -51,15 +51,34 @@ def _apply_to_file(path: Path, docstrings: list[GeneratedDocstring]) -> None:
         console.print(f"[yellow]Skipping {path} - file not found[/yellow]")
         return
 
+    # Read source first to check for modifications
+    source = path.read_text()
+    lines = source.splitlines(keepends=True)
+
+    # Verify line numbers are still valid before making any changes
+    stale_docstrings = []
+    for doc in docstrings:
+        if not _verify_function_line(lines, doc):
+            stale_docstrings.append(doc)
+
+    if stale_docstrings:
+        for doc in stale_docstrings:
+            func_name = doc.qualname.split(".")[-1]
+            console.print(
+                f"[yellow]Warning: {func_name} expected at line {doc.line_number} "
+                f"but source has changed. Re-run observation to update.[/yellow]"
+            )
+        # Remove stale docstrings from processing
+        docstrings = [d for d in docstrings if d not in stale_docstrings]
+        if not docstrings:
+            console.print(f"[yellow]Skipping {path} - all line numbers are stale[/yellow]")
+            return
+
     # Create backup
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_path = path.with_suffix(f".py.bak.{timestamp}")
     shutil.copy(path, backup_path)
     console.print(f"[dim]Backup created: {backup_path}[/dim]")
-
-    # Read source
-    source = path.read_text()
-    lines = source.splitlines(keepends=True)
 
     # Ensure file ends with newline for consistent handling
     if lines and not lines[-1].endswith("\n"):
@@ -143,3 +162,34 @@ def _find_function_node(
             if node.lineno == line_number:
                 return node
     return None
+
+
+def _verify_function_line(lines: list[str], doc: GeneratedDocstring) -> bool:
+    """
+    Verify that the expected function definition is at the recorded line number.
+
+    Returns True if the line contains a function definition with the expected name.
+    """
+    # Line numbers are 1-indexed, list is 0-indexed
+    line_idx = doc.line_number - 1
+
+    if line_idx < 0 or line_idx >= len(lines):
+        return False
+
+    line = lines[line_idx].strip()
+
+    # Extract function name from qualname (e.g., "module.Class.method" -> "method")
+    func_name = doc.qualname.split(".")[-1]
+
+    # Check if this line is a function definition with the expected name
+    if line.startswith("def ") or line.startswith("async def "):
+        # Extract the defined function name
+        # "def foo(...):" or "async def foo(...):"
+        if line.startswith("async "):
+            line = line[6:]  # Remove "async "
+        # Now line starts with "def foo(..."
+        line = line[4:]  # Remove "def "
+        defined_name = line.split("(")[0].strip()
+        return defined_name == func_name
+
+    return False

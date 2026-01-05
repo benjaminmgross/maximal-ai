@@ -371,3 +371,290 @@ class TestGeneratedDocstring:
 
         assert "Position" in rendered
         assert "TODO: Add position description" in rendered
+
+
+class TestSerialization:
+    """Tests for serialization/deserialization."""
+
+    def test_value_analysis_round_trip(self):
+        """ValueAnalysis should survive serialization round-trip."""
+        original = ValueAnalysis(
+            type_name="list",
+            is_none=False,
+            collection_length=5,
+            collection_is_empty=False,
+            dict_keys=("a", "b"),
+            string_patterns=("looks_like_path",),
+        )
+
+        data = original.to_dict()
+        restored = ValueAnalysis.from_dict(data)
+
+        assert restored.type_name == original.type_name
+        assert restored.is_none == original.is_none
+        assert restored.collection_length == original.collection_length
+        assert restored.collection_is_empty == original.collection_is_empty
+        assert restored.dict_keys == original.dict_keys
+        assert restored.string_patterns == original.string_patterns
+
+    def test_call_observation_round_trip(self):
+        """CallObservation should survive serialization round-trip."""
+        original = CallObservation(
+            function_name="test_func",
+            module_name="mymodule",
+            qualname="mymodule.test_func",
+            file_path="/path/to/file.py",
+            line_number=42,
+            timestamp=datetime.now(timezone.utc),
+            arguments=(
+                ("x", ValueAnalysis(type_name="int", is_none=False, numeric_value=10.0)),
+                ("y", ValueAnalysis(type_name="str", is_none=False, string_length=5)),
+            ),
+            return_value=ValueAnalysis(type_name="bool", is_none=False),
+            raised_exception=None,
+            caller="mymodule.main",
+            call_depth=2,
+        )
+
+        data = original.to_dict()
+        restored = CallObservation.from_dict(data)
+
+        assert restored.function_name == original.function_name
+        assert restored.qualname == original.qualname
+        assert restored.caller == original.caller
+        assert restored.call_depth == original.call_depth
+        assert len(restored.arguments) == 2
+        assert restored.arguments[0][0] == "x"
+        assert restored.arguments[0][1].numeric_value == 10.0
+
+    def test_function_profile_round_trip(self):
+        """FunctionProfile should survive serialization round-trip with observations."""
+        observation = CallObservation(
+            function_name="process",
+            module_name="test",
+            qualname="test.process",
+            file_path="test.py",
+            line_number=10,
+            timestamp=datetime.now(timezone.utc),
+            arguments=(("x", ValueAnalysis(type_name="int", is_none=False)),),
+            return_value=ValueAnalysis(type_name="int", is_none=False),
+        )
+
+        original = FunctionProfile(
+            qualname="test.process",
+            module_name="test",
+            file_path="test.py",
+            line_number=10,
+            callers={"test.main"},
+            callees={"test.helper"},
+            call_count=1,
+            observations=[observation],
+        )
+
+        data = original.to_dict()
+        restored = FunctionProfile.from_dict(data)
+
+        assert restored.qualname == original.qualname
+        assert restored.callers == original.callers
+        assert restored.callees == original.callees
+        assert len(restored.observations) == 1
+        assert restored.observations[0].function_name == "process"
+
+
+class TestInvariantInference:
+    """Tests for invariant inference edge cases."""
+
+    def _make_observation(
+        self,
+        qualname: str,
+        args: dict[str, ValueAnalysis],
+        return_val: ValueAnalysis,
+    ) -> CallObservation:
+        """Helper to create observations."""
+        return CallObservation(
+            function_name=qualname.split(".")[-1],
+            module_name="test",
+            qualname=qualname,
+            file_path="test.py",
+            line_number=1,
+            timestamp=datetime.now(timezone.utc),
+            arguments=tuple(args.items()),
+            return_value=return_val,
+        )
+
+    def _make_profile(self, qualname: str, observations: list[CallObservation]) -> FunctionProfile:
+        """Helper to create profiles."""
+        return FunctionProfile(
+            qualname=qualname,
+            module_name="test",
+            file_path="test.py",
+            line_number=1,
+            observations=observations,
+            call_count=len(observations),
+        )
+
+    def test_no_redundant_range_invariants(self):
+        """Should not emit both >= 0 and > 0 for same parameter."""
+        # All values > 0, so we should get "> 0" but NOT ">= 0"
+        observations = [
+            self._make_observation(
+                "test.calc",
+                {
+                    "value": ValueAnalysis(
+                        type_name="float", is_none=False, numeric_value=float(i + 1)
+                    )
+                },
+                ValueAnalysis(type_name="float", is_none=False),
+            )
+            for i in range(10)
+        ]
+
+        profile = self._make_profile("test.calc", observations)
+        engine = InferenceEngine({"test.calc": profile})
+        results = engine.infer_all()
+
+        _, invariants = results["test.calc"]
+        range_inv = [c for c in invariants if c.invariant_type == "range"]
+
+        # Should have exactly one range invariant for this parameter
+        value_range_inv = [c for c in range_inv if c.parameter == "value"]
+        assert len(value_range_inv) == 1
+        assert "> 0" in value_range_inv[0].description
+
+    def test_gte_zero_when_zero_included(self):
+        """Should emit >= 0 when values include zero."""
+        # Values include 0, so we should get ">= 0" but NOT "> 0"
+        observations = [
+            self._make_observation(
+                "test.calc",
+                {"value": ValueAnalysis(type_name="float", is_none=False, numeric_value=float(i))},
+                ValueAnalysis(type_name="float", is_none=False),
+            )
+            for i in range(10)  # 0, 1, 2, ... 9
+        ]
+
+        profile = self._make_profile("test.calc", observations)
+        engine = InferenceEngine({"test.calc": profile})
+        results = engine.infer_all()
+
+        _, invariants = results["test.calc"]
+        range_inv = [c for c in invariants if c.invariant_type == "range"]
+
+        value_range_inv = [c for c in range_inv if c.parameter == "value"]
+        assert len(value_range_inv) == 1
+        assert ">= 0" in value_range_inv[0].description
+        assert "> 0" not in value_range_inv[0].description
+
+
+class TestWriterVerification:
+    """Tests for writer verification logic."""
+
+    def test_verify_function_line_valid(self):
+        """Should verify valid function line."""
+        from rdf.observe.writer import _verify_function_line
+
+        lines = [
+            "# comment\n",
+            "def my_function(x, y):\n",
+            "    return x + y\n",
+        ]
+
+        doc = GeneratedDocstring(
+            qualname="module.my_function",
+            file_path="test.py",
+            line_number=2,  # 1-indexed
+            inferred_position=InferredPosition(
+                structural_role=StructuralRole.LEAF,
+                call_graph_description="",
+                io_description=None,
+                depth_description=None,
+            ),
+            inferred_invariants=[],
+            inferred_params={},
+            inferred_return=None,
+            human_input=HumanInput(),
+        )
+
+        assert _verify_function_line(lines, doc) is True
+
+    def test_verify_function_line_stale(self):
+        """Should detect stale line number."""
+        from rdf.observe.writer import _verify_function_line
+
+        lines = [
+            "# comment\n",
+            "# another comment\n",  # No longer a function def
+            "def my_function(x, y):\n",
+        ]
+
+        doc = GeneratedDocstring(
+            qualname="module.my_function",
+            file_path="test.py",
+            line_number=2,  # Now points to a comment
+            inferred_position=InferredPosition(
+                structural_role=StructuralRole.LEAF,
+                call_graph_description="",
+                io_description=None,
+                depth_description=None,
+            ),
+            inferred_invariants=[],
+            inferred_params={},
+            inferred_return=None,
+            human_input=HumanInput(),
+        )
+
+        assert _verify_function_line(lines, doc) is False
+
+    def test_verify_async_function(self):
+        """Should verify async function definitions."""
+        from rdf.observe.writer import _verify_function_line
+
+        lines = [
+            "async def fetch_data(url):\n",
+            "    pass\n",
+        ]
+
+        doc = GeneratedDocstring(
+            qualname="module.fetch_data",
+            file_path="test.py",
+            line_number=1,
+            inferred_position=InferredPosition(
+                structural_role=StructuralRole.LEAF,
+                call_graph_description="",
+                io_description=None,
+                depth_description=None,
+            ),
+            inferred_invariants=[],
+            inferred_params={},
+            inferred_return=None,
+            human_input=HumanInput(),
+        )
+
+        assert _verify_function_line(lines, doc) is True
+
+    def test_verify_wrong_function_name(self):
+        """Should detect wrong function name at line."""
+        from rdf.observe.writer import _verify_function_line
+
+        lines = [
+            "def other_function(x):\n",
+            "    pass\n",
+        ]
+
+        doc = GeneratedDocstring(
+            qualname="module.expected_function",
+            file_path="test.py",
+            line_number=1,
+            inferred_position=InferredPosition(
+                structural_role=StructuralRole.LEAF,
+                call_graph_description="",
+                io_description=None,
+                depth_description=None,
+            ),
+            inferred_invariants=[],
+            inferred_params={},
+            inferred_return=None,
+            human_input=HumanInput(),
+        )
+
+        assert _verify_function_line(lines, doc) is False

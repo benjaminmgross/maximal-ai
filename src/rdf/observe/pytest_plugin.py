@@ -80,24 +80,14 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
 
     output_file = session.config.getoption("--rdf-observe-output")
 
-    # Serialize profiles
+    # Serialize profiles with full observation data (including ValueAnalysis)
     data = {
         "meta": {
             "total_functions": len(profiles),
             "total_observations": sum(p.call_count for p in profiles.values()),
         },
-        "functions": {
-            qualname: {
-                "file_path": p.file_path,
-                "line_number": p.line_number,
-                "call_count": p.call_count,
-                "callers": list(p.callers),
-                "callees": list(p.callees),
-                "max_depth": p.max_call_depth,
-                "min_depth": p.min_call_depth,
-            }
-            for qualname, p in profiles.items()
-        },
+        # Use to_dict() to serialize full observation data for inference
+        "profiles": {qualname: p.to_dict() for qualname, p in profiles.items()},
     }
 
     Path(output_file).write_text(json.dumps(data, indent=2))

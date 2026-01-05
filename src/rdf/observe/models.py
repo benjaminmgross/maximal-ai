@@ -63,6 +63,33 @@ class ValueAnalysis:
     collection_is_empty: bool | None = None
     dict_keys: tuple[str, ...] = ()
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "type_name": self.type_name,
+            "is_none": self.is_none,
+            "numeric_value": self.numeric_value,
+            "string_length": self.string_length,
+            "string_patterns": list(self.string_patterns),
+            "collection_length": self.collection_length,
+            "collection_is_empty": self.collection_is_empty,
+            "dict_keys": list(self.dict_keys),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ValueAnalysis:
+        """Deserialize from dictionary."""
+        return cls(
+            type_name=data["type_name"],
+            is_none=data["is_none"],
+            numeric_value=data.get("numeric_value"),
+            string_length=data.get("string_length"),
+            string_patterns=tuple(data.get("string_patterns", [])),
+            collection_length=data.get("collection_length"),
+            collection_is_empty=data.get("collection_is_empty"),
+            dict_keys=tuple(data.get("dict_keys", [])),
+        )
+
 
 @dataclass(frozen=True)
 class CallObservation:
@@ -85,6 +112,41 @@ class CallObservation:
     def arguments_dict(self) -> dict[str, ValueAnalysis]:
         """Get arguments as a dictionary."""
         return dict(self.arguments)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            "function_name": self.function_name,
+            "module_name": self.module_name,
+            "qualname": self.qualname,
+            "file_path": self.file_path,
+            "line_number": self.line_number,
+            "timestamp": self.timestamp.isoformat(),
+            "arguments": [(name, val.to_dict()) for name, val in self.arguments],
+            "return_value": self.return_value.to_dict(),
+            "raised_exception": self.raised_exception,
+            "caller": self.caller,
+            "call_depth": self.call_depth,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> CallObservation:
+        """Deserialize from dictionary."""
+        return cls(
+            function_name=data["function_name"],
+            module_name=data["module_name"],
+            qualname=data["qualname"],
+            file_path=data["file_path"],
+            line_number=data["line_number"],
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            arguments=tuple(
+                (name, ValueAnalysis.from_dict(val)) for name, val in data["arguments"]
+            ),
+            return_value=ValueAnalysis.from_dict(data["return_value"]),
+            raised_exception=data.get("raised_exception"),
+            caller=data.get("caller"),
+            call_depth=data.get("call_depth", 0),
+        )
 
 
 @dataclass
@@ -118,6 +180,42 @@ class FunctionProfile:
     def is_leaf(self) -> bool:
         """True if doesn't call other tracked functions."""
         return len(self.callees) == 0
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary with full observation data."""
+        return {
+            "qualname": self.qualname,
+            "module_name": self.module_name,
+            "file_path": self.file_path,
+            "line_number": self.line_number,
+            "callers": list(self.callers),
+            "callees": list(self.callees),
+            "call_count": self.call_count,
+            "max_call_depth": self.max_call_depth,
+            "min_call_depth": self.min_call_depth,
+            "io_patterns": [p.value for p in self.io_patterns],
+            "observations": [o.to_dict() for o in self.observations],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> FunctionProfile:
+        """Deserialize from dictionary with full observation data."""
+        profile = cls(
+            qualname=data["qualname"],
+            module_name=data["module_name"],
+            file_path=data["file_path"],
+            line_number=data["line_number"],
+            callers=set(data.get("callers", [])),
+            callees=set(data.get("callees", [])),
+            call_count=data.get("call_count", 0),
+            max_call_depth=data.get("max_call_depth", 0),
+            min_call_depth=data.get("min_call_depth", 999),
+            io_patterns={IOPattern(p) for p in data.get("io_patterns", [])},
+        )
+        # Deserialize observations
+        for obs_data in data.get("observations", []):
+            profile.observations.append(CallObservation.from_dict(obs_data))
+        return profile
 
 
 @dataclass

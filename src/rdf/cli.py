@@ -278,18 +278,24 @@ def validate(*, strict: bool, path: str) -> None:
 
 
 @main.command()
-@click.argument("script", type=click.Path(exists=True))
+@click.argument("script", type=click.Path(exists=True), required=False)
 @click.option("--entrypoint", "-e", default="main", help="Function to call")
 @click.option("--non-interactive", is_flag=True, help="Skip human prompts")
 @click.option("--dry-run", is_flag=True, help="Preview without applying")
 @click.option("--filter", "func_filter", help="Only process functions matching pattern")
+@click.option(
+    "--resume",
+    type=click.Path(exists=True),
+    help="Resume from saved observation JSON file",
+)
 def observe(
-    script: str,
+    script: str | None,
     entrypoint: str,
     *,
     non_interactive: bool,
     dry_run: bool,
     func_filter: str | None,
+    resume: str | None,
 ) -> None:
     """
     Run a script and interactively generate docstrings.
@@ -303,21 +309,36 @@ def observe(
         rdf observe myapp.py --entrypoint main
         rdf observe myapp.py --non-interactive --dry-run
         rdf observe myapp.py --filter "calculate_*"
+        rdf observe --resume observations.json
     """
     import fnmatch
+    import json
 
     from rdf.observe.analyzer import InferenceEngine
     from rdf.observe.interactive import InteractiveSession
+    from rdf.observe.models import FunctionProfile
     from rdf.observe.runner import run_with_observation
     from rdf.observe.writer import apply_docstrings
 
-    # Run observation
-    console.print(f"[bold]Running {script}...[/bold]")
-    profiles = run_with_observation(Path(script), entrypoint)
-    total_calls = sum(p.call_count for p in profiles.values())
-    console.print(
-        f"[green]✓ Collected {total_calls} observations from {len(profiles)} functions[/green]"
-    )
+    # Load from resume file or run observation
+    if resume:
+        console.print(f"[bold]Resuming from {resume}...[/bold]")
+        with open(resume) as f:
+            data = json.load(f)
+        profiles = {k: FunctionProfile.from_dict(v) for k, v in data.get("profiles", {}).items()}
+        console.print(f"[green]✓ Loaded {len(profiles)} function profiles[/green]")
+    elif script:
+        console.print(f"[bold]Running {script}...[/bold]")
+        profiles = run_with_observation(Path(script), entrypoint)
+        total_calls = sum(p.call_count for p in profiles.values())
+        console.print(
+            f"[green]✓ Collected {total_calls} observations from {len(profiles)} functions[/green]"
+        )
+    else:
+        console.print(
+            "[red]Error: Either provide a script to run or --resume with a JSON file[/red]"
+        )
+        sys.exit(2)
 
     if not profiles:
         console.print(

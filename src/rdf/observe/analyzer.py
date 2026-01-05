@@ -228,24 +228,24 @@ class InferenceEngine:
         if len(values) >= self.MIN_OBSERVATIONS:
             min_val = min(values)
 
-            if min_val >= 0:
-                invariants.append(
-                    InferredInvariant(
-                        parameter=param,
-                        invariant_type="range",
-                        description=f"{param_desc} is always >= 0",
-                        confidence=1.0,
-                        observations_count=len(values),
-                        supporting_count=len(values),
-                    )
-                )
-
+            # Prefer stronger invariant (> 0) over weaker (>= 0)
             if min_val > 0:
                 invariants.append(
                     InferredInvariant(
                         parameter=param,
                         invariant_type="range",
                         description=f"{param_desc} is always > 0",
+                        confidence=1.0,
+                        observations_count=len(values),
+                        supporting_count=len(values),
+                    )
+                )
+            elif min_val >= 0:
+                invariants.append(
+                    InferredInvariant(
+                        parameter=param,
+                        invariant_type="range",
+                        description=f"{param_desc} is always >= 0",
                         confidence=1.0,
                         observations_count=len(values),
                         supporting_count=len(values),
