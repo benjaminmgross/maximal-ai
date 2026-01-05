@@ -1,0 +1,78 @@
+# Source File Headers Guide
+
+> **Purpose:** Standardize file-level documentation for AI agents.
+> **Update Trigger:** Modify when header format or required fields change.
+
+## The [IN]/[OUT]/[POS] Pattern
+
+Add these headers to source files to help AI agents understand dependencies at a glance:
+
+```python
+# [IN] from app.services import UserService / Depends on UserService
+# [OUT] get_user(), create_user() / Exports user endpoints
+# [POS] API layer - HTTP request handling / Position in architecture
+```
+
+## Header Definitions
+
+| Header | Purpose | Example |
+|--------|---------|---------|
+| `[IN]` | Dependencies this file imports | `from app.models import User` |
+| `[OUT]` | Functions/classes this file exports | `UserService, get_by_id()` |
+| `[POS]` | Position in the architecture | `Service layer - business logic` |
+
+## Examples by Layer
+
+### Routes (API Layer)
+```python
+# [IN] from app.services import UserService, AuthService
+# [OUT] router with /users endpoints
+# [POS] API layer - HTTP request handling, validation, auth
+
+from fastapi import APIRouter, Depends
+...
+```
+
+### Services (Business Logic)
+```python
+# [IN] from app.models import User / from app.core.exceptions import NotFoundError
+# [OUT] UserService class with CRUD methods
+# [POS] Service layer - business rules, orchestration
+
+from sqlalchemy.ext.asyncio import AsyncSession
+...
+```
+
+### Models (Data Layer)
+```python
+# [IN] from app.models.base import Base
+# [OUT] User model with relationships
+# [POS] Data layer - ORM definitions only
+
+from sqlalchemy import String, ForeignKey
+...
+```
+
+### Schemas (Validation)
+```python
+# [IN] from pydantic import BaseModel, EmailStr
+# [OUT] UserCreate, UserUpdate, UserResponse
+# [POS] Schema layer - request/response validation
+
+from pydantic import BaseModel
+...
+```
+
+## When to Use
+
+- Add headers to new files
+- Update headers when dependencies change
+- Useful for files with complex dependencies
+- Optional for simple utility files
+
+## Benefits
+
+1. **Quick context** - AI agents understand file purpose instantly
+2. **Dependency tracking** - Clear import/export relationships
+3. **Architecture enforcement** - Visible layer boundaries
+4. **Onboarding** - New developers understand structure faster

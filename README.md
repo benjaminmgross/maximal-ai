@@ -1,48 +1,187 @@
-# Advanced Context Engineering for AI-Driven Development
+# Maximal AI - Modular AI Development Toolkit
 
-A complete implementation of the three-phase workflow (Research → Plan → Implement) for maximizing AI coding agent effectiveness, based on the methodology presented in "Advanced Context Engineering for Coding Agents".
+A comprehensive toolkit for maximizing AI coding agent effectiveness, featuring two complementary frameworks:
+
+- **RPI Workflow** (Research → Plan → Implement) - Three-phase development workflow
+- **RDF Framework** (Repo Documentation Framework) - Layer-based AI-friendly documentation
+
+Based on the methodology from ["Advanced Context Engineering for Coding Agents"](https://youtu.be/IS_y40zY-hc).
 
 ## 🎯 Overview
 
-This system transforms how you work with AI coding assistants by introducing a structured, context-efficient workflow that produces production-ready code without the typical back-and-forth "shouting matches" with AI.
+This toolkit transforms how you work with AI coding assistants through structured workflows and comprehensive documentation that helps AI understand your codebase.
 
-### The Problem This Solves
+### The Problems This Solves
 - **Context overflow** - Running out of context before completing tasks
 - **Code slop** - AI generating code that doesn't match existing patterns
 - **Misunderstandings** - AI not understanding the codebase structure
 - **Inefficiency** - Repeated corrections and regenerations
 - **Review difficulty** - Hard to review massive AI-generated PRs
+- **Documentation gaps** - AI can't find relevant context in undocumented code
 
-### The Solution: Three-Phase Workflow
+### Two Complementary Solutions
 
 ```mermaid
-graph LR
-    A[Research] --> B[Plan]
-    B --> C[Implement]
-    
-    A -.->|Understand| D[How system works]
-    B -.->|Define| E[What to change]
-    C -.->|Execute| F[Make changes]
+graph TB
+    subgraph "RPI Workflow"
+        A[Research] --> B[Plan]
+        B --> C[Implement]
+    end
+
+    subgraph "RDF Framework"
+        D[Layer 1: Entry Points]
+        E[Layer 2: Folder Docs]
+        F[Layer 3: AI Guidance]
+        G[Layer 4: Python Tools]
+        H[Layer 5: CI/CD]
+        D --> E --> F --> G --> H
+    end
+
+    A -.->|Uses| D
+    B -.->|Uses| E
+    C -.->|Uses| F
 ```
+
+## 📋 Prerequisites
+
+Before installing, ensure you have the following:
+
+| Requirement | Version | Check Command |
+|-------------|---------|---------------|
+| **Git** | 2.0+ | `git --version` |
+| **Bash** | 4.0+ | `bash --version` |
+| **Python** | 3.10+ | `python --version` |
+| **jq** | 1.5+ | `jq --version` |
+
+**Optional tools** (for enhanced functionality):
+- **Node.js/npm** - For JavaScript/TypeScript formatting (prettier)
+- **Ruff** - For Python formatting and linting (`pip install ruff`)
+- **pytest** - For Python test running (`pip install pytest`)
+
+**Note:** If optional tools are not installed, the hooks will gracefully skip those features without errors.
 
 ## 🚀 Quick Start
 
-### Installation
+### One-Time Setup
 
-1. **Copy the `.claude` directory to your project root:**
+1. **Clone this repository:**
 ```bash
-cp -r /path/to/maximal-ai/.claude /path/to/your/project/
+git clone https://github.com/YOUR_USERNAME/maximal-ai.git /path/to/maximal-ai
 ```
 
-2. **Create document directories:**
+2. **Add to your shell configuration** (`~/.zshrc` or `~/.bashrc`):
 ```bash
-mkdir -p research plans
+export MAXIMAL_AI_HOME="$HOME/dev/maximal-ai"
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-3. **Copy the CLAUDE.md configuration:**
+3. **Run the installer:**
 ```bash
-cp /path/to/maximal-ai/CLAUDE.md /path/to/your/project/
+cd /path/to/maximal-ai
+./install.sh
 ```
+
+4. **Reload your shell:**
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+### Install to Any Project
+
+Once set up, you can install frameworks into any project using subcommands:
+
+```bash
+cd /path/to/your/project
+
+# Interactive mode - choose what to install
+maximal-ai
+
+# Install RPI workflow only (Research → Plan → Implement)
+maximal-ai rpi-workflow
+
+# Install RDF framework only (documentation layers)
+maximal-ai rdf-framework -l 1,2,3
+
+# Install both frameworks
+maximal-ai complete
+```
+
+#### RPI Workflow Installation
+
+`maximal-ai rpi-workflow` installs:
+- ✅ 8 commands (research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff)
+- ✅ 7 specialized agents
+- ✅ Username configuration for RPI file naming
+- ✅ `.claude/config.yaml` with your username
+- ✅ `thoughts/` directory structure (research/, plans/, handoffs/)
+- ✅ CLAUDE.md configuration
+- ✅ Auto-detect coding standards from `docs/coding-standards/`
+
+#### RDF Framework Installation
+
+`maximal-ai rdf-framework` installs documentation layers:
+- **Layer 1**: Entry points (AGENTS.md, CLAUDE.md, .repomap.yaml)
+- **Layer 2**: Folder documentation (.folder.md files)
+- **Layer 3**: AI guidance (protocols/, checklists/, guides/)
+- **Layer 4**: Python tooling (`rdf` CLI)
+- **Layer 5**: CI/CD integration (linting enforcement)
+
+Use `-l` flag to select specific layers: `maximal-ai rdf-framework -l 1,2,3`
+
+### Username Configuration
+
+During installation, you'll be prompted to set your username for RPI file naming. The installer will:
+1. Auto-detect from `RPI_USERNAME` environment variable or `git config user.name`
+2. Show detected username and prompt: _"Press Enter to use this username, or type a different one"_
+3. Save your choice to `.claude/config.yaml`
+
+**Username Priority Order:**
+1. `.claude/config.yaml` (per-repository, created during install)
+2. `RPI_USERNAME` environment variable (global default)
+3. `git config user.name` (automatic fallback)
+4. `"user"` (last resort)
+
+**Example filenames created:**
+- `thoughts/research/2025.11.13-benjamin-authentication-flow.md`
+- `thoughts/plans/2025.11.13-benjamin-oauth-support.md`
+- `thoughts/handoffs/2025.11.13-benjamin-session-handoff.md`
+
+**To override username later**, edit `.claude/config.yaml`:
+```yaml
+username: yourname
+```
+
+### Updating
+
+To update all projects after pulling new changes:
+
+```bash
+cd /path/to/maximal-ai
+git pull
+./install.sh  # Updates the maximal-ai command
+```
+
+Then re-run in each project to get latest commands/agents:
+```bash
+cd /path/to/your/project
+maximal-ai
+```
+
+### Testing
+
+To verify the installation system works correctly:
+
+```bash
+cd /path/to/maximal-ai
+./test-installation.sh
+```
+
+This integration test:
+- Creates a temporary test directory
+- Runs the installation process
+- Verifies all commands and agents are installed
+- Tests Python and JavaScript project type detection
+- Cleans up after itself
 
 ### Basic Usage
 
@@ -58,7 +197,7 @@ This will:
 
 #### 2. Planning Phase
 ```
-/plan research/2025-01-08-authentication-flow.md
+/plan thoughts/research/2025.01.08-username-authentication-flow.md
 ```
 Or start fresh:
 ```
@@ -72,7 +211,7 @@ This will:
 
 #### 3. Implementation Phase
 ```
-/implement plans/2025-01-08-add-oauth-support.md
+/implement thoughts/plans/2025.01.08-username-add-oauth-support.md
 ```
 This will:
 - Execute the plan phase by phase
@@ -80,28 +219,76 @@ This will:
 - Update progress tracking
 - Adapt to reality while maintaining plan intent
 
+#### 4. Session Handoffs
+
+When you need to transfer context to a new Claude session, create a handoff document:
+
+```
+/create_handoff
+```
+
+This will create a comprehensive handoff document in `thoughts/handoffs/` with:
+- Task status and progress
+- Key learnings and patterns discovered
+- Recent changes made (with file:line references)
+- Unsolved issues and blockers
+- Artifacts created
+- Action items for continuation
+
+To resume work from a handoff:
+
+```
+/resume_handoff thoughts/handoffs/2025.11.08-username-feature-implementation.md
+```
+
+This will:
+- Read and analyze the handoff document
+- Verify current state matches handoff expectations
+- Load all referenced artifacts (research, plans, etc.)
+- Create a task list for continuation
+- Propose next steps interactively
+
 ## 📁 Project Structure
+
+After installing both frameworks, your project will look like:
 
 ```
 your-project/
 ├── .claude/
-│   ├── commands/
-│   │   ├── research.md      # Research phase command
-│   │   ├── plan.md          # Planning phase command
-│   │   └── implement.md     # Implementation phase command
-│   └── agents/
-│       ├── codebase-locator.md        # Finds WHERE things are
-│       ├── codebase-analyzer.md       # Understands HOW code works
-│       ├── codebase-pattern-finder.md # Discovers patterns to follow
-│       ├── web-search-researcher.md   # External documentation research
-│       ├── file-analyzer.md           # Reduces large files by 80-90%
-│       ├── bug-hunter.md             # Elite bug detection specialist
-│       └── test-runner.md            # Executes tests without context pollution
-├── research/                 # Generated research documents
-│   └── YYYY-MM-DD-topic.md
-├── plans/                    # Generated implementation plans
-│   └── YYYY-MM-DD-feature.md
-└── CLAUDE.md                 # Project configuration for Claude
+│   ├── config.yaml               # Username configuration (gitignored)
+│   ├── commands/                 # RPI workflow commands
+│   │   ├── research.md
+│   │   ├── plan.md
+│   │   ├── implement.md
+│   │   ├── epic-oneshot.md
+│   │   ├── standup.md
+│   │   ├── blocked.md
+│   │   ├── create_handoff.md
+│   │   └── resume_handoff.md
+│   └── agents/                   # RPI specialized agents
+│       ├── codebase-locator.md
+│       ├── codebase-analyzer.md
+│       ├── codebase-pattern-finder.md
+│       ├── web-search-researcher.md
+│       ├── file-analyzer.md
+│       ├── bug-hunter.md
+│       └── test-runner.md
+├── docs/
+│   ├── AGENTS.md                 # [RDF L1] AI agent registry
+│   ├── ai/                       # [RDF L3] AI guidance
+│   │   ├── protocols/            # Task protocols
+│   │   └── checklists/           # Quality checklists
+│   ├── guides/                   # [RDF L3] Developer guides
+│   └── coding-standards/         # Team coding standards (optional)
+├── src/
+│   └── .folder.md                # [RDF L2] Folder documentation
+├── thoughts/                     # RPI artifacts
+│   ├── research/
+│   ├── plans/
+│   └── handoffs/
+├── .repomap.yaml                 # [RDF L1] Project overview
+├── REPOMAP.yaml                  # [RDF L4] Generated file index
+└── CLAUDE.md                     # [RDF L1] Project instructions
 ```
 
 ### Enhanced Agents
@@ -192,7 +379,7 @@ your-project/
    **Changes**: Add OAuth provider settings
    ```typescript
    // Code to add
-   ```
+```
 
 ### Success Criteria:
 #### Automated Verification:
@@ -219,6 +406,95 @@ your-project/
 - Plan checkboxes updated as completed
 - TodoWrite list maintained
 - Issues documented and resolved
+
+## 📚 RDF Framework (Repo Documentation Framework)
+
+RDF provides a layer-based approach to making your codebase AI-friendly. Each layer builds on the previous.
+
+### Layer Architecture
+
+```mermaid
+graph TD
+    L1[Layer 1: Entry Points] --> L2[Layer 2: Folder Docs]
+    L2 --> L3[Layer 3: AI Guidance]
+    L3 --> L4[Layer 4: Python Tools]
+    L4 --> L5[Layer 5: CI/CD]
+
+    L1 -.->|AGENTS.md, CLAUDE.md| A1[Minimal AI setup]
+    L2 -.->|.folder.md| A2[Directory context]
+    L3 -.->|protocols/, guides/| A3[AI behavior guidance]
+    L4 -.->|rdf CLI| A4[Automated generation]
+    L5 -.->|Linting| A5[Quality enforcement]
+```
+
+### Layer 1: Entry Points (Minimal)
+- `docs/AGENTS.md` - AI agent registry and capabilities
+- `CLAUDE.md` - Project-specific Claude instructions
+- `.repomap.yaml` - Quick project overview for AI
+
+### Layer 2: Folder Documentation
+- `.folder.md` files in each directory
+- Hybrid format: human-authored Purpose/Invariants + auto-generated file tables
+- Helps AI understand folder organization
+
+### Layer 3: AI Guidance
+- `docs/ai/protocols/` - How to perform specific tasks
+- `docs/ai/checklists/` - Pre-commit, PR review, deployment checklists
+- `docs/guides/` - Developer and AI onboarding
+
+### Layer 4: Python Tooling
+
+Install the `rdf` CLI for automated documentation:
+
+```bash
+pip install -e /path/to/maximal-ai  # Or uv pip install -e /path/to/maximal-ai
+```
+
+**Available Commands:**
+
+```bash
+# Initialize RDF structure
+rdf init
+
+# Generate .folder.md files
+rdf scaffold-folders src/
+
+# Generate REPOMAP.yaml
+rdf generate-repomap --source src/
+
+# Validate docstrings (NumPy style)
+rdf validate --path src/ --strictness standard
+```
+
+**Strictness Levels:**
+- `minimal` - Module, class, function docstrings required
+- `standard` - Above + Returns section required
+- `strict` - Above + Position/Invariants sections required
+
+### Layer 5: CI/CD Integration
+
+Add to your CI pipeline:
+
+```yaml
+# GitHub Actions example
+- name: Validate docstrings
+  run: |
+    pip install -e /path/to/maximal-ai
+    rdf validate --path src/ --strictness standard --strict
+```
+
+### RDF + RPI Integration
+
+The frameworks complement each other:
+- RDF provides the **documentation** that makes AI understand your codebase
+- RPI provides the **workflow** that makes AI effective at making changes
+
+```
+/research How does authentication work?
+→ Uses REPOMAP.yaml to find entry points
+→ Reads .folder.md files for context
+→ Follows protocols/ for research patterns
+```
 
 ## 🎯 Best Practices
 
@@ -249,6 +525,85 @@ your-project/
 
 ## 🛠 Advanced Features
 
+### Automatic Coding Standards Integration
+
+The workflow automatically loads and enforces your coding standards if they exist in your repository.
+
+#### Setup
+
+1. **Create a coding standards directory**:
+   ```bash
+   mkdir -p docs/coding-standards
+   ```
+
+2. **Add your standards as markdown files**:
+   ```
+   docs/coding-standards/
+   ├── architecture.md       # Package structure, file organization
+   ├── best-practices.md     # Coding patterns, anti-patterns
+   ├── style-guide.md        # Formatting, naming conventions
+   └── testing.md            # Testing requirements and patterns
+   ```
+
+#### How It Works
+
+When you run `/research`, `/plan`, or `/implement`, the commands will:
+
+1. **Automatically detect** the `docs/coding-standards/` directory
+2. **Load and synthesize** all markdown files using a specialized agent
+3. **Apply standards** throughout the workflow:
+   - Research phase includes "Coding Standards Adherence" section
+   - Planning phase validates decisions against standards
+   - Implementation phase follows standards for all code changes
+4. **Gracefully degrade** if no standards exist (no errors or warnings)
+
+#### Example Standards File
+
+```markdown
+# Architecture Standards
+
+## Package Structure
+- Use domain-driven design with `/domain`, `/application`, `/infrastructure`
+- Reference: `src/domain/user/user.ts:1-50`
+
+## Anti-Patterns to Avoid
+- ❌ No circular dependencies between packages
+- ❌ No direct database access from controllers
+- ✅ Always use repository pattern for data access
+
+## Technology Guidelines
+- Use async/await instead of .then() for promises
+- All API responses must use standard error format
+```
+
+#### Benefits
+
+- ✅ **Consistent code quality** - AI follows your team's patterns
+- ✅ **Automatic enforcement** - No need to remind AI about standards
+- ✅ **Contextual guidance** - Standards applied when most relevant
+- ✅ **Zero configuration** - Just add files to `docs/coding-standards/`
+- ✅ **Version controlled** - Standards evolve with your codebase
+
+#### What to Include in Coding Standards
+
+**Essential:**
+- Package/module organization patterns
+- Critical anti-patterns to avoid
+- Technology-specific guidelines (async patterns, dependency management)
+- Code quality standards (testing, error handling)
+
+**Optional:**
+- Formatting rules (if not handled by linters)
+- Naming conventions
+- Documentation requirements
+- Performance guidelines
+
+**Keep It Concise:**
+- Focus on what impacts architectural decisions
+- Include specific file:line references to examples
+- Avoid duplicating what linters catch
+- Update as patterns evolve
+
 ### Custom Agents
 
 You can add specialized agents for your domain:
@@ -267,9 +622,9 @@ tools: Read, Bash, Edit
 
 Extend commands for your specific needs:
 - Add domain-specific research patterns
-- Include company coding standards
 - Integrate with your CI/CD pipeline
 - Add custom verification steps
+- Create project-specific templates
 
 ## 📊 Success Metrics
 
@@ -330,6 +685,12 @@ This workflow is continuously evolving. Contributions welcome:
 - Industry-specific patterns
 - Integration examples
 - Success stories
+
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes to this project.
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 📖 References
 

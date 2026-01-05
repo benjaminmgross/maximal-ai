@@ -1,0 +1,235 @@
+# Guide: Architecture Overview
+
+> **Purpose:** Help developers understand the system design and where code belongs.
+> **Audience:** New developers, AI agents exploring the codebase.
+> **Update Trigger:** Modify when layer responsibilities or patterns change.
+
+## System Architecture
+
+```
++---------------------------------------------------------------------+
+|                           Client Layer                               |
+|  (Web App, Mobile App, CLI, External Services)                       |
++-----------------------------+---------------------------------------+
+                              | HTTP/WebSocket
+                              v
++---------------------------------------------------------------------+
+|                         API Gateway                                  |
+|  (Rate Limiting, Auth, Request Routing)                             |
++-----------------------------+---------------------------------------+
+                              |
+                              v
++---------------------------------------------------------------------+
+|                      Application Layer                               |
+|  +-------------+   +-------------+   +-------------+               |
+|  |   Routes    |-->|  Services   |-->|   Models    |               |
+|  |  (FastAPI)  |   |  (Logic)    |   | (SQLAlchemy)|               |
+|  +-------------+   +-------------+   +-------------+               |
+|         |                 |                 |                        |
+|         v                 |                 |                        |
+|  +-------------+         |                 |                        |
+|  |   Schemas   |         |                 |                        |
+|  | (Pydantic)  |         |                 |                        |
+|  +-------------+         |                 |                        |
++--------------------------+------------------+-----------------------+
+                           |                 |
+                           v                 v
++---------------------------------------------------------------------+
+|                       Data Layer                                     |
+|  +-------------+   +-------------+   +-------------+               |
+|  | PostgreSQL  |   |    Redis    |   |     S3      |               |
+|  | (Primary)   |   |   (Cache)   |   |  (Files)    |               |
+|  +-------------+   +-------------+   +-------------+               |
++---------------------------------------------------------------------+
+```
+
+## Layer Responsibilities
+
+### Routes (`src/app/api/routes/`)
+
+**Purpose:** HTTP request handling and response formatting.
+
+**Responsibilities:**
+- Parse and validate incoming requests
+- Authenticate and authorize requests
+- Call appropriate service methods
+- Format responses using Pydantic schemas
+- Handle HTTP-specific concerns (status codes, headers)
+
+**Rules:**
+- Use dependency injection for services and database
+- Use Pydantic schemas for request/response validation
+- Do NOT contain business logic
+- Do NOT import models directly
+
+```python
+# Good: Route delegates to service
+@router.post("/", response_model=UserResponse)
+async def create_user(
+    data: UserCreate,
+    service: Annotated[UserService, Depends(get_user_service)],
+) -> UserResponse:
+    user = await service.create(data)
+    return UserResponse.model_validate(user)
+```
+
+### Services (`src/app/services/`)
+
+**Purpose:** Business logic and orchestration.
+
+**Responsibilities:**
+- Implement business rules
+- Coordinate between multiple models
+- Handle transactions
+- Raise domain-specific exceptions
+
+**Rules:**
+- Contain all business logic
+- Raise domain exceptions (NotFoundError, ValidationError)
+- Use database sessions injected via __init__
+- Do NOT raise HTTPException (that's the route's job)
+- Do NOT format responses (that's the schema's job)
+
+```python
+# Good: Service encapsulates business logic
+class UserService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create(self, data: UserCreate) -> User:
+        # Check business rules
+        existing = await self.get_by_email(data.email)
+        if existing:
+            raise ConflictError(f"Email {data.email} already exists")
+
+        # Create user
+        user = User(**data.model_dump())
+        self.db.add(user)
+        await self.db.commit()
+        return user
+```
+
+### Models (`src/app/models/`)
+
+**Purpose:** Database schema and relationships.
+
+**Responsibilities:**
+- Define database tables
+- Define relationships between tables
+- Provide common fields via base classes
+
+**Rules:**
+- Pure ORM definitions
+- Use SQLAlchemy 2.0 Mapped[] style
+- Do NOT contain business logic
+- Do NOT contain validation logic
+
+```python
+# Good: Model is just data definition
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(default=func.now())
+
+    # Relationships
+    posts: Mapped[list["Post"]] = relationship(back_populates="author")
+```
+
+### Schemas (`src/app/schemas/`)
+
+**Purpose:** Request/response validation and serialization.
+
+**Responsibilities:**
+- Validate incoming request data
+- Define response shapes
+- Convert between models and API representations
+
+**Rules:**
+- Use Pydantic v2 with model_config
+- Separate schemas for Create, Update, Response
+- Do NOT contain business logic
+- Do NOT import models (avoid coupling)
+
+```python
+# Good: Separate schemas for different operations
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8)
+
+class UserUpdate(BaseModel):
+    email: EmailStr | None = None
+    name: str | None = None
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    name: str | None
+    created_at: datetime
+```
+
+---
+
+## Data Flow Example
+
+Here's how a request flows through the system:
+
+```
+1. Client POST /api/v1/users
+   +-> Request hits FastAPI router
+
+2. Route: routes/users.py::create_user()
+   +-> Pydantic validates UserCreate schema
+   +-> Depends() injects UserService
+   +-> Calls service.create(data)
+
+3. Service: services/user_service.py::create()
+   +-> Checks if email exists (business rule)
+   +-> Creates User model instance
+   +-> Commits to database
+   +-> Returns User model
+
+4. Route: routes/users.py::create_user()
+   +-> Wraps User in UserResponse schema
+   +-> Returns 201 with JSON body
+
+5. Client receives:
+   {"id": 1, "email": "user@example.com", ...}
+```
+
+---
+
+## Key Design Decisions
+
+### Why Dependency Injection?
+- Testability: Easy to mock services in tests
+- Flexibility: Swap implementations without changing routes
+- Clarity: Dependencies are explicit in function signatures
+
+### Why Separate Services from Routes?
+- Reusability: Services can be called from background jobs, CLI, etc.
+- Testability: Business logic can be tested without HTTP
+- Clarity: Routes handle HTTP, services handle domain logic
+
+### Why Pydantic Schemas Separate from Models?
+- Decoupling: API can evolve independently from database
+- Security: Only expose what's needed (no password hashes in responses)
+- Validation: Different rules for create vs update vs response
+
+---
+
+## Where to Put New Code
+
+| Type of Code | Location | Example |
+|--------------|----------|---------|
+| New API endpoint | `src/app/api/routes/` | `users.py` |
+| New business logic | `src/app/services/` | `user_service.py` |
+| New database table | `src/app/models/` | `user.py` |
+| New request/response format | `src/app/schemas/` | `user.py` |
+| Shared utilities | `src/app/core/` | `utils.py` |
+| Background job | `src/app/workers/` | `email_worker.py` |
+| Database migration | `alembic/versions/` | auto-generated |

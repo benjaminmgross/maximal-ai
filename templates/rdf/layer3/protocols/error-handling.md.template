@@ -1,0 +1,274 @@
+# Protocol: Error Handling
+
+> **Trigger Conditions:** When implementing error handling, debugging failures,
+> or reviewing code that deals with errors.
+> **Success Criteria:** Errors are caught appropriately, logged, and surfaced correctly.
+> **Update Trigger:** Modify when error categories or logging standards change.
+
+## Overview
+
+This protocol defines how to handle errors consistently across the application.
+Follow the error flow: Detect -> Log -> Transform -> Respond.
+
+---
+
+## Error Classification
+
+### Domain Errors (Expected)
+Business logic violations that should be communicated to users.
+
+| Error Type | HTTP Status | Log Level | Example |
+|------------|-------------|-----------|---------|
+| NotFoundError | 404 | DEBUG | User not found |
+| ValidationError | 422 | DEBUG | Invalid email format |
+| ConflictError | 409 | INFO | Email already exists |
+| AuthenticationError | 401 | INFO | Invalid credentials |
+| AuthorizationError | 403 | WARN | Insufficient permissions |
+
+### Infrastructure Errors (Unexpected)
+System-level failures that require operator attention.
+
+| Error Type | HTTP Status | Log Level | Example |
+|------------|-------------|-----------|---------|
+| DatabaseError | 503 | ERROR | Connection timeout |
+| ExternalServiceError | 502 | ERROR | Payment API failure |
+| ConfigurationError | 500 | CRITICAL | Missing required env var |
+
+---
+
+## Implementation Patterns
+
+### Step 1: Define Domain Exceptions
+
+```python
+# src/app/core/exceptions.py
+
+class DomainError(Exception):
+    """Base class for domain errors."""
+
+    def __init__(self, message: str, code: str | None = None):
+        self.message = message
+        self.code = code or self.__class__.__name__
+        super().__init__(message)
+
+
+class NotFoundError(DomainError):
+    """Resource not found."""
+    pass
+
+
+class ValidationError(DomainError):
+    """Input validation failed."""
+    pass
+
+
+class ConflictError(DomainError):
+    """Resource conflict (e.g., duplicate)."""
+    pass
+```
+
+### Step 2: Raise in Services
+
+```python
+# src/app/services/user_service.py
+
+async def get_user_by_id(self, user_id: int) -> User:
+    """Get user by ID.
+
+    Raises:
+        NotFoundError: If user doesn't exist.
+    """
+    user = await self.db.get(User, user_id)
+    if not user:
+        raise NotFoundError(f"User with ID {user_id} not found")
+    return user
+```
+
+### Step 3: Transform in Exception Handlers
+
+```python
+# src/app/api/exception_handlers.py
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+from app.core.exceptions import DomainError, NotFoundError
+
+@app.exception_handler(NotFoundError)
+async def not_found_handler(request: Request, exc: NotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+            }
+        },
+    )
+
+@app.exception_handler(DomainError)
+async def domain_error_handler(request: Request, exc: DomainError):
+    # Default handler for other domain errors
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+            }
+        },
+    )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    # Log unexpected errors with full traceback
+    logger.exception("Unhandled exception", exc_info=exc)
+
+    # Return generic error to client (don't leak internals)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected error occurred",
+            }
+        },
+    )
+```
+
+---
+
+## Logging Standards
+
+### What to Log
+
+| Context | Include |
+|---------|---------|
+| Always | timestamp, level, message |
+| Requests | request_id, user_id, path, method |
+| Errors | error_type, error_message, stack_trace |
+| Performance | duration_ms, db_query_count |
+
+### Log Levels
+
+```python
+# DEBUG: Detailed diagnostic info
+logger.debug(f"Looking up user {user_id}")
+
+# INFO: Normal operation events
+logger.info(f"User {user_id} logged in")
+
+# WARNING: Something unexpected but handled
+logger.warning(f"Rate limit approaching for user {user_id}")
+
+# ERROR: Something failed, requires attention
+logger.error(f"Failed to process payment", exc_info=True)
+
+# CRITICAL: System is unusable
+logger.critical(f"Database connection pool exhausted")
+```
+
+### Structured Logging Example
+
+```python
+import structlog
+
+logger = structlog.get_logger()
+
+async def process_order(order_id: int):
+    log = logger.bind(order_id=order_id)
+
+    try:
+        log.info("processing_order_started")
+        result = await _process(order_id)
+        log.info("processing_order_completed", result=result)
+        return result
+    except PaymentError as e:
+        log.error("payment_failed", error=str(e))
+        raise
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### Silent Failures
+```python
+# BAD: Error is swallowed
+try:
+    await send_email(user)
+except Exception:
+    pass  # Email might be critical!
+```
+
+### Log and Handle Appropriately
+```python
+# GOOD: Log and decide based on criticality
+try:
+    await send_email(user)
+except EmailError as e:
+    logger.error("Failed to send email", user_id=user.id, error=str(e))
+    # If email is critical, re-raise; otherwise, continue
+```
+
+### Catching Too Broadly
+```python
+# BAD: Catches everything including programming errors
+try:
+    result = process_data(data)
+except Exception:
+    return {"error": "Something went wrong"}
+```
+
+### Catch Specific Exceptions
+```python
+# GOOD: Catch what you expect, let bugs surface
+try:
+    result = process_data(data)
+except ValidationError as e:
+    return {"error": e.message}
+# Let other exceptions propagate to global handler
+```
+
+---
+
+## Testing Error Handling
+
+```python
+# tests/unit/test_error_handling.py
+
+import pytest
+from app.core.exceptions import NotFoundError
+from app.services.user_service import UserService
+
+async def test_get_user_not_found_raises_error(user_service: UserService):
+    """Service raises NotFoundError for missing user."""
+    with pytest.raises(NotFoundError) as exc_info:
+        await user_service.get_user_by_id(99999)
+
+    assert "not found" in str(exc_info.value.message)
+
+
+async def test_get_user_not_found_returns_404(client: TestClient):
+    """API returns 404 for missing user."""
+    response = await client.get("/api/v1/users/99999")
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "NotFoundError"
+```
+
+---
+
+## Recovery Procedures
+
+### Database Connection Failures
+1. Log the error with full context
+2. Return 503 Service Unavailable
+3. Trigger alert if persistent (>3 failures in 1 minute)
+4. Check connection pool settings
+
+### External Service Failures
+1. Implement circuit breaker pattern
+2. Return cached data if available
+3. Queue for retry if idempotent
+4. Return 502 Bad Gateway with retry-after header

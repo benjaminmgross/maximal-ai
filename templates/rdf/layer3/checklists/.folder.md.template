@@ -1,0 +1,28 @@
+# Folder: checklists/
+
+> **Update Trigger:** Add new checklist when repetitive verification needed.
+> Update existing checklists when requirements change.
+
+## Purpose
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+Contains verification checklists for AI agents to ensure completeness.
+Each checklist provides a structured way to verify work is complete.
+
+## Invariants
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+- Checklists must be actionable (checkable items)
+- Items should be specific and verifiable
+- Group related items under clear headings
+
+---
+
+<!-- AUTO-GENERATED BELOW - DO NOT EDIT MANUALLY -->
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `pre-commit.md` | Checklist before committing code |
+| `pr-review.md` | Pull request review checklist |

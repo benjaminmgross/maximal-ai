@@ -26,7 +26,7 @@ Please provide:
 
 I'll analyze this information and work with you to create a comprehensive plan.
 
-Tip: You can also invoke this command with a research file directly: `/plan research/2025-01-08-authentication-flow.md`
+Tip: You can also invoke this command with a research file directly: `/plan thoughts/research/2025.01.08-username-authentication-flow.md`
 ```
 
 ## Process Steps
@@ -58,6 +58,51 @@ Tip: You can also invoke this command with a research file directly: `/plan rese
    - Read them FULLY into the main context
    - This ensures you have complete understanding before proceeding
 
+3.5. **Load Coding Standards (If Present)**:
+
+After reading files identified by research tasks and before analyzing understanding:
+
+1. **Check for coding standards using priority order**:
+   ```bash
+   # Priority 1: External standards via EXTERNAL_DOCS_PATH environment variable
+   if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/"
+       echo "Found external coding standards (via EXTERNAL_DOCS_PATH)"
+   # Priority 2: Local repository standards
+   elif [ -d "docs/coding-standards/" ]; then
+       STANDARDS_PATH="docs/coding-standards/"
+       echo "Found local coding standards"
+   else
+       STANDARDS_PATH=""
+   fi
+   ```
+
+2. **If standards found** (`STANDARDS_PATH` is not empty):
+   - Spawn a **codebase-analyzer** sub-agent with this prompt:
+     ```
+     Read and synthesize all markdown files in [STANDARDS_PATH] directory.
+
+     Extract and return:
+     1. Architectural patterns that must be followed
+     2. Critical anti-patterns to avoid (with examples from standards)
+     3. Technology-specific requirements (e.g., which libraries to use, async patterns)
+     4. Code organization rules (where files should live, import patterns)
+     5. Testing and verification requirements
+     6. Dependency management guidelines
+
+     Format as a concise summary with specific file:line references.
+     Prioritize patterns that would affect design decisions and implementation approach.
+     ```
+
+   - Wait for the sub-agent to complete before proceeding
+   - Store the synthesized standards in context for reference during planning
+
+3. **If no standards found**:
+   - Continue normally without standards (graceful degradation)
+   - No need to mention absence to the user
+
+**IMPORTANT**: Load standards BEFORE presenting initial understanding to the user, so your analysis already incorporates standards compliance.
+
 4. **Analyze and verify understanding**:
    - Cross-reference requirements with actual code
    - Identify any discrepancies or misunderstandings
@@ -67,18 +112,24 @@ Tip: You can also invoke this command with a research file directly: `/plan rese
 5. **Present informed understanding and focused questions**:
    ```
    Based on my research of the codebase, I understand we need to [accurate summary].
-   
+
    I've found that:
    - [Current implementation detail with file:line reference]
    - [Relevant pattern or constraint discovered]
    - [Potential complexity or edge case identified]
-   
+
+   **Coding Standards Considerations** [only if standards were loaded]:
+   According to `docs/coding-standards/`:
+   - [Relevant architectural pattern we should follow] (repo-standards.md:123)
+   - [Anti-pattern we must avoid] (repo-standards.md:240)
+   - [Technology guideline that affects our approach] (repo-standards.md:305)
+
    Questions that my research couldn't answer:
    - [Specific technical question that requires human judgment]
    - [Business logic clarification]
    - [Design preference that affects implementation]
    ```
-   
+
    Only ask questions that you genuinely cannot answer through code investigation.
 
 ### Step 2: Research & Discovery
@@ -132,15 +183,20 @@ Once aligned on approach:
 1. **Create initial plan outline**:
    ```
    Here's my proposed plan structure:
-   
+
    ## Overview
    [1-2 sentence summary]
-   
+
+   **Standards Alignment** [only if standards were loaded]:
+   This approach follows:
+   - [Pattern from standards] - Reference: repo-standards.md:123
+   - [Another relevant guideline] - Reference: visual-formatting.md:45
+
    ## Implementation Phases:
    1. [Phase name] - [what it accomplishes]
    2. [Phase name] - [what it accomplishes]
    3. [Phase name] - [what it accomplishes]
-   
+
    Does this phasing make sense? Should I adjust the order or granularity?
    ```
 
@@ -150,7 +206,36 @@ Once aligned on approach:
 
 After structure approval:
 
-1. **Write the plan** to `plans/YYYY-MM-DD-description.md`
+### Username Detection for File Naming
+
+Before creating the plan document, detect the username to use in the filename:
+
+1. **Detect username with priority order**:
+   ```bash
+   # Priority 1: Check .claude/config.yaml for username
+   if [ -f ".claude/config.yaml" ]; then
+       CONFIG_USERNAME=$(grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+   fi
+
+   # Priority 2: Check RPI_USERNAME environment variable
+   # Priority 3: Fallback to git config user.name
+   # Priority 4: Default to "user"
+   RPI_USERNAME="${CONFIG_USERNAME:-${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}}"
+   RPI_USERNAME="${RPI_USERNAME:-user}"
+
+   echo "Using username: $RPI_USERNAME"
+```
+
+2. **Format the date with dots**: Use `YYYY.MM.DD` format instead of `YYYY-MM-DD`
+   ```bash
+   CURRENT_DATE=$(date +%Y.%m.%d)
+   ```
+
+3. **Construct filename**: `{CURRENT_DATE}-{RPI_USERNAME}-{description}.md`
+   - Example: `2025.11.13-benjamin-oauth-support.md`
+   - Example: `2025.11.13-shared-refactor-plan.md`
+
+1. **Write the plan** to `thoughts/plans/YYYY.MM.DD-{username}-description.md`
 2. **Use this template structure**:
 
 ```markdown
@@ -181,10 +266,72 @@ After structure approval:
 
 [High-level strategy and reasoning]
 
+## Coding Standards Compliance
+[**Only include this section if coding standards were loaded**]
+
+**Standards Location**: `docs/coding-standards/*.md`
+
+### Patterns Applied:
+- **[Pattern Name]** (repo-standards.md:123): [How we're following this pattern in our implementation]
+- **[Another Pattern]** (repo-standards.md:240): [Application in this plan]
+
+### Anti-Patterns Avoided:
+- **[Anti-pattern Name]** (repo-standards.md:305): [How we're avoiding this]
+- We explicitly DO NOT do [thing] because standards prohibit it
+
+### Guidelines Followed:
+- **[Guideline Category]** (visual-formatting.md:45): [Specific application]
+- **[Tool Usage]** (repo-standards.md:608): [How we're using tools per standards]
+
+## TDD Commit Strategy
+
+For each implementation phase, follow this commit pattern:
+
+1. **test: [phase] Add/update tests (RED)**
+   - Write tests that define expected behavior
+   - Tests MUST fail at this point
+   - Commit message: `test: Phase N - add tests for [feature]`
+
+2. **feat: [phase] Implement feature (GREEN)**
+   - Write minimal code to pass tests
+   - Commit message: `feat: Phase N - implement [feature]`
+
+3. **refactor: [phase] Clean up (REFACTOR)**
+   - Improve code quality, apply standards
+   - Tests must stay green
+   - Commit message: `refactor: Phase N - clean up [feature]`
+
+---
+
 ## Phase 1: [Descriptive Name]
 
 ### Overview
 [What this phase accomplishes]
+
+### Acceptance Test for This Phase
+
+**Test file:** `tests/path/to/test_phase_1.py`
+
+**Test code:**
+```python
+def test_phase_1_acceptance():
+    """
+    Given: [initial state]
+    When: [action taken in this phase]
+    Then: [expected outcome]
+    """
+    # Arrange
+    [setup code]
+
+    # Act
+    result = [action]
+
+    # Assert
+    assert result == [expected]
+```
+
+**Why this test proves the phase works:**
+[Explanation of what this test validates]
 
 ### Changes Required:
 
@@ -198,11 +345,17 @@ After structure approval:
 
 ### Success Criteria:
 
+#### TDD Verification:
+- [ ] Tests written BEFORE implementation
+- [ ] Tests failed initially (RED phase verified)
+- [ ] Tests pass after implementation (GREEN phase verified)
+- [ ] Code cleaned up with tests still passing (REFACTOR phase verified)
+
 #### Automated Verification:
-- [ ] Tests pass: `npm test` or `make test`
-- [ ] Type checking passes: `npm run typecheck`
-- [ ] Linting passes: `npm run lint`
-- [ ] Build succeeds: `npm run build`
+- [ ] Tests pass: `npm test` or `pytest`
+- [ ] Type checking passes: `npm run typecheck` or `mypy .`
+- [ ] Linting passes: `npm run lint` or `ruff check .`
+- [ ] Build succeeds: `npm run build` or `python -m build`
 
 #### Manual Verification:
 - [ ] Feature works as expected when tested via UI
@@ -214,7 +367,45 @@ After structure approval:
 
 ## Phase 2: [Descriptive Name]
 
-[Similar structure with both automated and manual success criteria...]
+### Overview
+[What this phase accomplishes]
+
+### Acceptance Test for This Phase
+
+**Test file:** `tests/path/to/test_phase_2.py`
+
+**Test code:**
+```python
+def test_phase_2_acceptance():
+    """
+    Given: [initial state]
+    When: [action taken in this phase]
+    Then: [expected outcome]
+    """
+    # Arrange
+    [setup code]
+
+    # Act
+    result = [action]
+
+    # Assert
+    assert result == [expected]
+```
+
+**Why this test proves the phase works:**
+[Explanation of what this test validates]
+
+### Changes Required:
+
+[Specific changes for this phase]
+
+### Success Criteria:
+
+#### Automated Verification:
+[Automated checks for this phase]
+
+#### Manual Verification:
+[Manual checks for this phase]
 
 ---
 
@@ -242,7 +433,7 @@ After structure approval:
 
 ## References
 
-- Original research: `research/[relevant].md`
+- Original research: `thoughts/research/[relevant].md`
 - Similar implementation: `[file:line]`
 ```
 
@@ -251,7 +442,7 @@ After structure approval:
 1. **Present the draft plan location**:
 ```
    I've created the initial implementation plan at:
-   `plans/YYYY-MM-DD-description.md`
+   `thoughts/plans/YYYY.MM.DD-{username}-description.md`
 
    Please review it and let me know:
    - Are the phases properly scoped?
@@ -305,6 +496,13 @@ After structure approval:
    - Do NOT write the plan with unresolved questions
    - The implementation plan must be complete and actionable
    - Every decision must be made before finalizing the plan
+
+7. **Follow Coding Standards** [when present]:
+   - Reference loaded coding standards throughout planning
+   - Validate design decisions against documented patterns
+   - Explicitly note which standards apply to each phase
+   - Call out any necessary deviations with justification
+   - Ensure anti-patterns are avoided
 
 ## Success Criteria Guidelines
 

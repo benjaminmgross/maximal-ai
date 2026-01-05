@@ -1,0 +1,132 @@
+# Checklist: Pre-Commit
+
+> **When to use:** Before committing any code changes.
+> **Time estimate:** 2-5 minutes for small changes.
+> **Update Trigger:** Modify when adding new tools or changing commit standards.
+
+## Quick Check (Every Commit)
+
+### Code Quality
+- [ ] **Tests pass**: `uv run pytest`
+- [ ] **Lint passes**: `uv run ruff check .`
+- [ ] **Format applied**: `uv run ruff format .`
+- [ ] **Types check**: `uv run mypy src/`
+
+### Changes Review
+- [ ] No debugging code left (print statements, debugger breakpoints)
+- [ ] No commented-out code blocks
+- [ ] No TODO/FIXME without linked issue
+- [ ] No secrets or credentials in code
+
+### Git Hygiene
+- [ ] Changes are logically grouped (single purpose per commit)
+- [ ] Commit message follows format: `type(scope): description`
+- [ ] Untracked files reviewed (nothing accidentally excluded)
+
+---
+
+## Extended Check (Features/Bug Fixes)
+
+### Documentation
+- [ ] Public functions have docstrings
+- [ ] Complex logic has inline comments
+- [ ] README updated if user-facing change
+- [ ] API documentation updated (OpenAPI schemas)
+
+### Testing
+- [ ] New functionality has tests
+- [ ] Edge cases covered
+- [ ] Error paths tested
+- [ ] No flaky tests introduced
+
+### Security
+- [ ] Input validation on user data
+- [ ] No SQL injection vulnerabilities
+- [ ] No XSS vulnerabilities
+- [ ] Auth/authz checks present where needed
+
+---
+
+## Commit Message Format
+
+```
+type(scope): short description
+
+[optional body]
+
+[optional footer]
+```
+
+### Types
+| Type | When to Use |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `refactor` | Code restructuring (no behavior change) |
+| `test` | Adding or updating tests |
+| `docs` | Documentation only |
+| `chore` | Build, deps, or tooling changes |
+| `perf` | Performance improvement |
+
+### Examples
+```
+feat(auth): add OAuth2 Google provider
+
+fix(users): handle null email in profile update
+
+refactor(api): extract common validation logic
+
+test(services): add user service integration tests
+
+docs(readme): update installation instructions
+
+chore(deps): upgrade fastapi to 0.115.0
+```
+
+---
+
+## Commands Reference
+
+```bash
+# Run all checks
+uv run pytest && uv run ruff check . && uv run mypy src/
+
+# Fix auto-fixable issues
+uv run ruff check . --fix
+uv run ruff format .
+
+# Check specific files
+uv run pytest tests/unit/test_users.py -v
+uv run ruff check src/app/api/routes/users.py
+
+# View what will be committed
+git diff --staged
+git status
+```
+
+---
+
+## Recovery: If a Check Fails
+
+### Tests Failing
+1. Read the test failure output
+2. Check if it's your change or a flaky test
+3. Fix the issue or mark test as `@pytest.mark.skip(reason="...")`
+4. Re-run tests
+
+### Lint Failing
+1. Run `uv run ruff check . --fix` for auto-fixes
+2. For remaining issues, check the rule explanation
+3. Fix manually or add `# noqa: RULE` with justification
+
+### Type Check Failing
+1. Read the mypy error
+2. Add type hints if missing
+3. For complex cases, use `cast()` or `# type: ignore[reason]`
+
+### Secrets Detected
+1. **DO NOT COMMIT**
+2. Remove the secret from the code
+3. Add to environment variables instead
+4. Update `.env.example` with placeholder
+5. If already committed, rotate the secret immediately

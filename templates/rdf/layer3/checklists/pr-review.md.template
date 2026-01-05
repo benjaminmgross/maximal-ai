@@ -1,0 +1,163 @@
+# Checklist: Pull Request Review
+
+> **When to use:** When reviewing or creating a pull request.
+> **Applies to:** All code changes before merge.
+> **Update Trigger:** Modify when review requirements or PR templates change.
+
+## PR Author Checklist
+
+Complete before requesting review:
+
+### Code
+- [ ] All tests pass locally
+- [ ] New tests added for new functionality
+- [ ] Lint and type checks pass
+- [ ] No unrelated changes included
+- [ ] Code follows existing patterns
+
+### Documentation
+- [ ] PR description explains what and why
+- [ ] Breaking changes documented
+- [ ] API changes reflected in docs/schemas
+- [ ] Complex logic has comments
+
+### Testing
+- [ ] Happy path tested
+- [ ] Error cases tested
+- [ ] Edge cases considered
+- [ ] No flaky tests introduced
+
+### Security
+- [ ] No secrets in code
+- [ ] Input validation present
+- [ ] Auth checks where needed
+- [ ] OWASP top 10 considered
+
+---
+
+## PR Reviewer Checklist
+
+### Before Reviewing
+- [ ] Understand the PR purpose (read description)
+- [ ] Check linked issues/tickets
+- [ ] CI is passing
+
+### Code Quality
+- [ ] Logic is correct
+- [ ] Code is readable
+- [ ] No obvious bugs
+- [ ] Error handling appropriate
+- [ ] Performance considerations addressed
+
+### Architecture
+- [ ] Changes fit existing patterns
+- [ ] No unnecessary complexity
+- [ ] Dependencies flow correctly
+- [ ] Single responsibility maintained
+
+### Testing
+- [ ] Test coverage adequate
+- [ ] Tests are meaningful (not just for coverage)
+- [ ] Edge cases covered
+- [ ] Tests are deterministic
+
+### Security
+- [ ] No hardcoded secrets
+- [ ] Input properly validated
+- [ ] Output properly encoded
+- [ ] Permissions checked
+
+### Final Steps
+- [ ] All conversations resolved
+- [ ] Approval given or changes requested
+- [ ] Blocking issues clearly stated
+
+---
+
+## PR Description Template
+
+```markdown
+## Summary
+<!-- 1-3 sentences describing what this PR does -->
+
+## Changes
+<!-- Bullet list of specific changes -->
+- Added X
+- Modified Y
+- Removed Z
+
+## Testing
+<!-- How was this tested? -->
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+
+## Screenshots (if UI changes)
+<!-- Before/after screenshots -->
+
+## Checklist
+- [ ] Tests pass
+- [ ] Lint passes
+- [ ] Documentation updated
+- [ ] No breaking changes (or documented)
+
+## Related Issues
+<!-- Link related issues -->
+Closes #123
+```
+
+---
+
+## Review Feedback Templates
+
+### Approve
+```
+LGTM! Nice work.
+
+**Reviewed:**
+- [Key areas you looked at]
+
+**Notes:**
+- [Optional non-blocking suggestions]
+```
+
+### Request Changes
+```
+Please address the following:
+
+**Blocking:**
+1. [Issue with file:line reference]
+
+**Questions:**
+1. [Clarification needed]
+
+Happy to re-review once addressed!
+```
+
+### Comment Only
+```
+Some thoughts (not blocking):
+
+- [Suggestion 1]
+- [Suggestion 2]
+
+Otherwise looks good to me.
+```
+
+---
+
+## Review Best Practices
+
+### Do
+- Be specific with feedback (include file:line)
+- Explain *why* something is an issue
+- Offer solutions, not just problems
+- Acknowledge good work
+- Review promptly (< 24 hours)
+
+### Don't
+- Nitpick style if linter doesn't catch it
+- Request changes for personal preference
+- Leave vague comments ("this seems wrong")
+- Block on minor issues
+- Review when you don't have time to do it well

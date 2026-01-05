@@ -1,0 +1,128 @@
+# REPOMAP.yaml - Repository Structure Map
+#
+# This file provides AI agents with a high-level understanding of the codebase.
+# Update when adding new top-level directories or significant structural changes.
+#
+# Update Trigger: Add new top-level directories, change project structure,
+#                 or modify key patterns/boundaries.
+#
+# Schema version: 1.0
+
+version: "1.0"
+updated: "2026-01-04"
+
+project:
+  name: "my-fastapi-app"
+  type: "web-api"
+  language: "python"
+  framework: "fastapi"
+  package_manager: "uv"
+
+# Directory structure with purposes
+structure:
+  src/app/:
+    purpose: "Main application code"
+    children:
+      api/:
+        purpose: "HTTP layer - routes and request handling"
+        key_files:
+          - "routes/*.py - API endpoint definitions"
+          - "deps.py - Dependency injection utilities"
+      core/:
+        purpose: "Application configuration and utilities"
+        key_files:
+          - "config.py - Pydantic settings"
+          - "security.py - JWT/OAuth utilities"
+          - "exceptions.py - Custom exception classes"
+      models/:
+        purpose: "SQLAlchemy ORM models"
+        key_files:
+          - "user.py - User model with relationships"
+          - "base.py - Base model with common fields"
+      schemas/:
+        purpose: "Pydantic models for request/response validation"
+        key_files:
+          - "user.py - UserCreate, UserUpdate, UserResponse"
+          - "auth.py - Token schemas"
+      services/:
+        purpose: "Business logic layer"
+        key_files:
+          - "user_service.py - User CRUD operations"
+          - "auth_service.py - Authentication logic"
+
+  tests/:
+    purpose: "Test suite"
+    children:
+      unit/:
+        purpose: "Fast, isolated unit tests"
+      integration/:
+        purpose: "Database and API integration tests"
+      e2e/:
+        purpose: "End-to-end browser tests (optional)"
+    key_files:
+      - "conftest.py - Shared fixtures and test database setup"
+
+  alembic/:
+    purpose: "Database migration scripts"
+    key_files:
+      - "versions/*.py - Migration files (auto-generated)"
+      - "env.py - Migration environment configuration"
+
+  docs/:
+    purpose: "Documentation for humans and AI"
+    children:
+      ai/:
+        purpose: "AI-specific documentation"
+        children:
+          protocols/:
+            purpose: "Step-by-step workflow protocols"
+          guides/:
+            purpose: "How-to guides and explanations"
+          checklists/:
+            purpose: "Verification checklists"
+
+  .github/:
+    purpose: "GitHub configuration"
+    key_files:
+      - "workflows/ci.yml - CI pipeline"
+      - "CODEOWNERS - Review requirements"
+
+# Entry points for common tasks
+entry_points:
+  development:
+    - "src/app/main.py - FastAPI application entry"
+    - "pyproject.toml - Project configuration"
+  testing:
+    - "tests/conftest.py - Test configuration"
+    - "pytest.ini - pytest settings"
+  deployment:
+    - "Dockerfile - Container build"
+    - "docker-compose.yml - Local development"
+    - ".github/workflows/ci.yml - CI/CD pipeline"
+
+# Key patterns used in this codebase
+patterns:
+  dependency_injection:
+    description: "FastAPI Depends() for database sessions, auth, services"
+    example_file: "src/app/api/deps.py"
+
+  repository_pattern:
+    description: "Services encapsulate database operations"
+    example_file: "src/app/services/user_service.py"
+
+  pydantic_settings:
+    description: "Environment-based configuration with validation"
+    example_file: "src/app/core/config.py"
+
+# Boundaries and constraints
+boundaries:
+  - "Routes never import models directly - use services"
+  - "Services never raise HTTPException - return None or raise domain errors"
+  - "Models don't contain business logic - only ORM definitions"
+  - "Schemas are pure data containers - no methods beyond validation"
+
+# Files AI should avoid modifying without explicit permission
+sensitive_files:
+  - "alembic/versions/*.py - Auto-generated migrations"
+  - ".env* - Environment secrets"
+  - "src/app/core/security.py - Security-critical code"

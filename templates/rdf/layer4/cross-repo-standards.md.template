@@ -1,0 +1,310 @@
+# Cross-Repository Standards
+
+> **Purpose:** Shared coding standards applied across all repositories.
+> **Location:** `$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/`
+> **Update Process:** Changes require team review before propagation.
+> **Update Trigger:** Modify when standards, tools, or conventions change.
+
+## Python Code Standards
+
+### Type Hints (Required)
+
+All public functions must have type hints.
+
+```python
+# Good
+def get_user_by_email(email: str) -> User | None:
+    ...
+
+async def create_user(data: UserCreate) -> User:
+    ...
+
+def process_items(items: list[Item], *, limit: int = 100) -> ProcessResult:
+    ...
+
+# Bad
+def get_user_by_email(email):
+    ...
+```
+
+### Docstrings (NumPy Style)
+
+Use NumPy-style docstrings for public APIs.
+
+```python
+def calculate_discount(
+    price: Decimal,
+    discount_percent: float,
+    *,
+    max_discount: Decimal | None = None,
+) -> Decimal:
+    """Calculate the discounted price.
+
+    Parameters
+    ----------
+    price : Decimal
+        Original price before discount.
+    discount_percent : float
+        Discount as percentage (0-100).
+    max_discount : Decimal, optional
+        Maximum discount amount cap.
+
+    Returns
+    -------
+    Decimal
+        Final price after discount applied.
+
+    Raises
+    ------
+    ValueError
+        If discount_percent is negative or > 100.
+
+    Examples
+    --------
+    >>> calculate_discount(Decimal("100"), 10.0)
+    Decimal("90.00")
+    >>> calculate_discount(Decimal("100"), 50.0, max_discount=Decimal("20"))
+    Decimal("80.00")
+    """
+```
+
+### Error Handling
+
+```python
+# Good: Specific exceptions with context
+class UserNotFoundError(Exception):
+    def __init__(self, user_id: int):
+        self.user_id = user_id
+        super().__init__(f"User {user_id} not found")
+
+# Bad: Generic exceptions
+raise Exception("User not found")
+```
+
+### Async/Await
+
+```python
+# Good: Proper async patterns
+async def fetch_all_users(user_ids: list[int]) -> list[User]:
+    tasks = [fetch_user(uid) for uid in user_ids]
+    return await asyncio.gather(*tasks)
+
+# Bad: Blocking in async context
+async def fetch_user(user_id: int) -> User:
+    return requests.get(f"/users/{user_id}")  # Blocks event loop!
+```
+
+---
+
+## Git Standards
+
+### Branch Naming
+
+```
+<type>/<ticket-id>-<short-description>
+
+Examples:
+  feature/PROJ-123-user-authentication
+  fix/PROJ-456-login-redirect
+  refactor/PROJ-789-api-cleanup
+  docs/PROJ-101-readme-update
+```
+
+### Commit Messages
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+| Type | Purpose |
+|------|---------|
+| feat | New feature |
+| fix | Bug fix |
+| refactor | Code restructuring |
+| test | Test changes |
+| docs | Documentation |
+| chore | Build/tooling |
+| perf | Performance |
+
+**Examples:**
+```
+feat(auth): add OAuth2 Google provider
+
+- Add Google OAuth configuration
+- Create callback endpoint
+- Update user creation flow
+
+Closes #123
+
+---
+
+fix(users): handle null email in profile update
+
+Previously, updating a profile without email would cause a 500 error.
+Now returns 422 with proper validation message.
+
+Fixes #456
+```
+
+### PR Requirements
+
+- [ ] Linked to issue/ticket
+- [ ] Tests pass
+- [ ] Coverage maintained
+- [ ] At least 1 approval
+- [ ] No unresolved conversations
+
+---
+
+## Testing Standards
+
+### Coverage Requirements
+
+| Category | Minimum |
+|----------|---------|
+| Overall | 80% |
+| Critical paths (auth, payments) | 95% |
+| New code | 80% |
+
+### Test Naming
+
+```python
+def test_<method>_<scenario>_<expected>():
+    """<Method> should <expected behavior> when <scenario>."""
+
+# Examples:
+def test_create_user_with_valid_data_returns_user():
+    """create_user should return User when data is valid."""
+
+def test_create_user_with_duplicate_email_raises_conflict():
+    """create_user should raise ConflictError when email exists."""
+```
+
+### Test Organization
+
+```
+tests/
++-- conftest.py          # Shared fixtures
++-- unit/                # Isolated tests (no I/O)
++-- integration/         # Tests with database/network
++-- e2e/                 # Full workflow tests
+```
+
+---
+
+## API Standards
+
+### Response Format
+
+```json
+{
+  "data": { ... },
+  "meta": {
+    "request_id": "uuid",
+    "timestamp": "2026-01-04T12:00:00Z"
+  }
+}
+```
+
+### Error Format
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Human readable message",
+    "details": {
+      "field": "email",
+      "reason": "Invalid format"
+    }
+  },
+  "meta": {
+    "request_id": "uuid",
+    "timestamp": "2026-01-04T12:00:00Z"
+  }
+}
+```
+
+### HTTP Status Codes
+
+| Status | When to Use |
+|--------|-------------|
+| 200 | Successful GET, PUT, PATCH |
+| 201 | Successful POST (resource created) |
+| 204 | Successful DELETE (no content) |
+| 400 | Bad request (malformed JSON) |
+| 401 | Unauthenticated |
+| 403 | Unauthorized (forbidden) |
+| 404 | Resource not found |
+| 409 | Conflict (duplicate resource) |
+| 422 | Validation error |
+| 500 | Server error (unexpected) |
+| 503 | Service unavailable |
+
+---
+
+## Security Standards
+
+### Secrets Management
+
+- Never commit secrets to git
+- Use environment variables
+- Use secrets manager (AWS Secrets Manager, Vault)
+- Rotate secrets regularly
+
+### Input Validation
+
+- Validate all user input
+- Use Pydantic for schema validation
+- Sanitize for SQL injection
+- Encode output for XSS prevention
+
+### Authentication
+
+- Use industry standards (OAuth2, JWT)
+- Implement rate limiting
+- Log authentication events
+- Require MFA for sensitive operations
+
+---
+
+## Dependency Management
+
+### Adding Dependencies
+
+1. Check for security vulnerabilities
+2. Review license compatibility
+3. Prefer well-maintained packages
+4. Pin versions in `pyproject.toml`
+
+### Update Cadence
+
+- Security patches: Immediate
+- Minor versions: Weekly
+- Major versions: Monthly (with review)
+
+---
+
+## Documentation Standards
+
+### Required Documentation
+
+| Type | Location | Purpose |
+|------|----------|---------|
+| CLAUDE.md | Root | AI agent entry point |
+| AGENTS.md | Root | AI agent detailed guidance |
+| README.md | Root | Human entry point |
+| .folder.md | Each dir | Local context |
+| REPOMAP.yaml | Root | Codebase structure |
+
+### Update Triggers
+
+- **README.md**: User-facing changes, setup changes
+- **AGENTS.md**: Command changes, pattern changes
+- **.folder.md**: File additions/removals, responsibility changes
+- **REPOMAP.yaml**: Directory structure changes

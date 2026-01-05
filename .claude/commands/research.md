@@ -30,6 +30,90 @@ Then wait for the user's research query.
 - **CRITICAL**: Read these files yourself in the main context before spawning any sub-tasks
 - This ensures you have full context before decomposing the research
 
+### Step 1.25: Pre-Research Clarifying Questions
+
+Before spawning agents, ask **minimal clarifying questions** to ensure you understand what to research:
+
+**IMPORTANT**:
+- Ask questions **ONE AT A TIME** (serial, not parallel)
+- Prefer **multiple choice** when possible
+- Focus on **MINIMAL information needed**, not exhaustive discovery
+- Only ask 2-4 questions maximum
+- Goal: Ensure agents research the RIGHT thing, not everything
+
+**Question Framework** (adapt to context, don't ask all):
+
+1. **Feature Type**:
+   - "What type of work is this? (A) New feature, (B) Bug fix, (C) Refactoring, (D) Investigation"
+
+2. **Expected Scope** (if unclear from initial query):
+   - "Which repos do you expect this to touch? (A) Single repo: [name], (B) Multiple repos: [list], (C) Unknown - please investigate"
+
+3. **Integration Concerns** (if feature spans repos):
+   - "Does this feature involve: (A) API calls between services, (B) Shared data models, (C) Database changes, (D) All of the above, (E) None - isolated feature"
+
+4. **Acceptance Criteria** (if not provided):
+   - "How will we know this works? (A) Specific test passes, (B) User can perform action X, (C) System behaves as Y, (D) Not sure - help me define this"
+
+**When to Skip Questions**:
+- User provided a detailed research document or spec → Skip, read the doc
+- Query is clearly scoped investigation ("How does X work?") → Skip, research is the answer
+- User explicitly said "just investigate" → Skip, open-ended research
+
+**Output Format**:
+```
+I have a few quick questions before I start researching:
+
+1. [First question with multiple choice options]
+
+[Wait for response, then ask next question if needed]
+```
+
+Only proceed to Step 1.5 (Load Coding Standards) after getting answers or determining questions aren't needed.
+
+### Step 1.5: Load Coding Standards (If Present)
+
+Before decomposing the research query, check for repository coding standards:
+
+1. **Check for coding standards using priority order**:
+   ```bash
+   # Priority 1: External standards via EXTERNAL_DOCS_PATH environment variable
+   if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/"
+       echo "Found external coding standards (via EXTERNAL_DOCS_PATH)"
+   # Priority 2: Local repository standards
+   elif [ -d "docs/coding-standards/" ]; then
+       STANDARDS_PATH="docs/coding-standards/"
+       echo "Found local coding standards"
+   else
+       STANDARDS_PATH=""
+   fi
+   ```
+
+2. **If standards found** (`STANDARDS_PATH` is not empty):
+   - Spawn a **codebase-analyzer** sub-agent with this prompt:
+     ```
+     Read and synthesize all markdown files in [STANDARDS_PATH] directory.
+
+     Extract and return:
+     1. Key architectural patterns (e.g., package structure, file organization)
+     2. Critical anti-patterns to avoid
+     3. Technology-specific guidelines (e.g., async usage, dependency management)
+     4. Code quality standards (formatting, testing, imports)
+
+     Format as a concise summary with specific file:line references for each guideline.
+     Limit response to essential patterns only - focus on what would impact development decisions.
+     ```
+
+   - Wait for the sub-agent to complete before proceeding
+   - Store the synthesized standards in context for reference during analysis
+
+3. **If no standards found**:
+   - Continue normally without standards (graceful degradation)
+   - No need to mention absence to the user
+
+**IMPORTANT**: Standards loading should happen BEFORE decomposing the research query, so architectural patterns can inform which components to investigate.
+
 ### Step 2: Analyze and Decompose
 - Break down the user's query into composable research areas
 - Take time to think deeply about the underlying patterns, connections, and architectural implications
@@ -60,13 +144,48 @@ The key is to use these agents intelligently:
 - **IMPORTANT**: Wait for ALL sub-agent tasks to complete before proceeding
 - Compile all sub-agent results
 - Connect findings across different components
+- **If coding standards were loaded**: Cross-reference findings with established patterns
+  - Note where current implementation follows standards
+  - Highlight any deviations from documented patterns
+  - Reference specific standards when applicable (e.g., "Uses async pattern contrary to docs/coding-standards/repo-standards.md:240")
 - Include specific file paths and line numbers for reference
 - Highlight patterns, connections, and architectural decisions
 - Answer the user's specific questions with concrete evidence
 
 ### Step 5: Generate Research Document
 
-Create the document at `research/YYYY-MM-DD-description.md` with this structure:
+**IMPORTANT**: After generating the research document, complete the "Research Validation Checks" section at the end to ensure no hallucinations or placeholders remain.
+
+### Username Detection for File Naming
+
+Before creating the research document, detect the username to use in the filename:
+
+1. **Detect username with priority order**:
+   ```bash
+   # Priority 1: Check .claude/config.yaml for username
+   if [ -f ".claude/config.yaml" ]; then
+       CONFIG_USERNAME=$(grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+   fi
+
+   # Priority 2: Check RPI_USERNAME environment variable
+   # Priority 3: Fallback to git config user.name
+   # Priority 4: Default to "user"
+   RPI_USERNAME="${CONFIG_USERNAME:-${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}}"
+   RPI_USERNAME="${RPI_USERNAME:-user}"
+
+   echo "Using username: $RPI_USERNAME"
+```
+
+2. **Format the date with dots**: Use `YYYY.MM.DD` format instead of `YYYY-MM-DD`
+   ```bash
+   CURRENT_DATE=$(date +%Y.%m.%d)
+   ```
+
+3. **Construct filename**: `{CURRENT_DATE}-{RPI_USERNAME}-{description}.md`
+   - Example: `2025.11.13-benjamin-authentication-flow.md`
+   - Example: `2025.11.13-shared-api-documentation.md`
+
+Create the document at `thoughts/research/YYYY.MM.DD-{username}-description.md` with this structure:
 
 ```markdown
 ---
@@ -96,6 +215,19 @@ last_updated_by: [Your name]
 ## Summary
 [High-level findings answering the user's question - 2-3 paragraphs]
 
+## Expected Repos Involved
+
+**Primary Repository**: [repo name where main changes occur]
+
+**Secondary Repositories**:
+- [repo name]: [why it's involved - API consumer, shared model, etc.]
+- [repo name]: [why it's involved]
+
+**Rationale**: [Brief explanation of why these repos are involved based on research findings]
+
+**Cross-Repo Dependencies**:
+- [Repo A] → [Repo B]: [nature of dependency - API call, shared model, etc.]
+
 ## Detailed Findings
 
 ### [Component/Area 1]
@@ -113,11 +245,97 @@ last_updated_by: [Your name]
 ## Architecture Insights
 [Patterns, conventions, and design decisions discovered]
 
+## Integration Points
+
+[**Only include this section if the feature spans multiple repos or services**]
+
+### API Calls Between Services:
+- **[Service A] → [Service B]**:
+  - Endpoint: `[HTTP method] /path/to/endpoint`
+  - Purpose: [what data is exchanged]
+  - File reference: `service-a/file.py:123`
+  - OpenAPI client used: [yes/no, which client]
+
+### Shared Data Models/Schemas:
+- **[Model Name]**:
+  - Defined in: `repo/path/to/model.py:45`
+  - Used by: [list repos/services]
+  - Schema validation: [where defined]
+
+### Database Changes Required:
+- **[Table name]**:
+  - Changes: [new columns, indices, etc.]
+  - Migration location: [path to migration]
+  - Affects repos: [list]
+
+### External Dependencies:
+- **[Library/Service name]**:
+  - Purpose: [why needed]
+  - Integration pattern: [how it's used]
+  - Configuration: [where config lives]
+
+## Coding Standards Adherence
+[**Only include this section if coding standards were loaded**]
+
+**Standards Location**: `docs/coding-standards/*.md`
+
+### Patterns Followed:
+- [Pattern from standards that current code follows] - Reference: repo-standards.md:123
+- [Another pattern that's being used correctly]
+
+### Deviations Found:
+- [Deviation from documented standards] - Reference: repo-standards.md:240
+  - Current implementation: [what exists]
+  - Expected per standards: [what standards recommend]
+  - Impact: [Low/Medium/High]
+
+### Recommendations:
+- [Suggestion for aligning with standards, if relevant to research query]
+
 ## Related Research
 [Links to other research documents if available]
 
-## Open Questions
-[Any areas that need further investigation]
+## Questions for Hardened Requirements
+
+**These questions MUST be answered before implementation begins. If research couldn't answer them, flag them explicitly.**
+
+### Integration Questions:
+- [ ] Have all API contracts between services been identified?
+- [ ] Are OpenAPI client versions compatible across repos?
+- [ ] Are shared data model schemas aligned?
+- [ ] Have database migration dependencies been mapped?
+
+### Data Flow Questions:
+- [ ] How does data move between [Component A] and [Component B]?
+- [ ] What happens if [Service X] is unavailable?
+- [ ] Are there race conditions in the data flow?
+- [ ] What validation happens at each boundary?
+
+### Edge Case Questions:
+- [ ] What happens when [expected condition] fails?
+- [ ] How are errors propagated across service boundaries?
+- [ ] What are the rollback procedures if deployment fails?
+- [ ] Are there backwards compatibility concerns?
+
+### Testing Questions:
+- [ ] Can this be tested in isolation or does it require full integration?
+- [ ] What test data is needed?
+- [ ] Are there existing test patterns to follow?
+- [ ] What's the acceptance test that proves this works?
+
+**Unanswered Questions**:
+[List any questions above that research could not answer and require CTO input or further investigation]
+
+## Research Validation Checks
+
+**Before finalizing this research document, verify:**
+
+- [ ] **File Verification**: All mentioned file paths have been confirmed to exist using Read tool
+- [ ] **Code Reference Verification**: All `file:line` references have been verified against actual code
+- [ ] **Test Execution**: If claiming functionality works, tests were run and output verified
+- [ ] **No Placeholders**: No sections contain placeholder text like "[TODO]" or "[TBD]"
+
+**If any checks fail, update the research document before marking as complete.**
 
 ## Next Steps
 [Recommended actions based on the research]

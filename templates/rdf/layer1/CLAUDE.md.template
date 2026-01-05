@@ -1,0 +1,49 @@
+# CLAUDE.md
+
+> This file provides Claude with context about this repository.
+> Keep concise (~60 lines for root). Use @imports for detailed guidance.
+> **Update Trigger:** Modify when quick start, key files, or standards change.
+
+## Project Overview
+
+FastAPI REST API for user authentication and profile management.
+Supports OAuth2 (Google, GitHub), JWT sessions, and profile CRUD operations.
+
+## Quick Start
+
+```bash
+uv sync                              # Install dependencies
+docker compose up -d                 # Start PostgreSQL + Redis
+uv run alembic upgrade head          # Apply migrations
+uv run uvicorn app.main:app --reload # Start dev server (localhost:8000)
+uv run pytest                        # Run test suite
+```
+
+## Key Files
+
+- `src/app/main.py` - FastAPI application entry point
+- `src/app/core/config.py` - Settings (Pydantic BaseSettings)
+- `src/app/core/security.py` - JWT and OAuth2 utilities
+- `src/app/api/deps.py` - Dependency injection (db, auth)
+- `tests/conftest.py` - pytest fixtures and test database setup
+
+## Code Standards
+
+- Follow existing patterns in the codebase
+- Write tests for new functionality (TDD preferred)
+- Use type hints for all function signatures
+- Run `uv run ruff check . && uv run pytest` before commits
+
+## Detailed Guides
+
+For extended documentation, see:
+- @docs/ai/guides/architecture.md - Detailed system design
+- @docs/ai/guides/testing.md - Testing patterns and fixtures
+- @docs/ai/protocols/code-review.md - PR review checklist
+- @docs/ai/protocols/deployment.md - Deployment procedures
+
+## Getting Help
+
+- See `AGENTS.md` for detailed AI guidance and boundaries
+- See `REPOMAP.yaml` for codebase structure
+- See `.folder.md` files in directories for local context

@@ -1,0 +1,114 @@
+meta:
+  version: '1.0'
+  generated: '2026-01-04T14:08:19.230660'
+  generator: rdf v0.1.0
+  files_indexed: 8
+files:
+- path: src/rdf/cli.py
+  rank: 6.9
+  type: entry_point
+  lines: 346
+  position: "Main entry point for all RDF CLI commands. Orchestrates init, scaffold-folders,\n\
+    generate-repomap, and validate operations."
+  invariants:
+  - All commands are idempotent where possible
+  - Dry-run mode available for destructive operations
+  - 'Exit codes: 0=success, 1=validation failure, 2=error'
+  symbols:
+  - name: main
+    type: function
+    line: 35
+  - name: init
+    type: function
+    line: 49
+  - name: scaffold_folders
+    type: function
+    line: 104
+  - name: generate_repomap
+    type: function
+    line: 160
+  - name: validate
+    type: function
+    line: 197
+- path: src/rdf/generators/repomap.py
+  rank: 4.5
+  type: domain_model
+  lines: 352
+  position: "Generates REPOMAP.yaml from Python source code. Parses AST, extracts
+    symbols\nand docstrings, builds import graph, and outputs YAML with semantic sections."
+  invariants:
+  - Output must validate against REPOMAP JSON schema
+  - Must extract Position, Invariants from docstrings where present
+  - Must respect token_budget configuration
+  - Must include dependency information
+  symbols:
+  - name: SymbolInfo
+    type: class
+    line: 30
+  - name: FileInfo
+    type: class
+    line: 53
+  - name: RepomapGenerator
+    type: class
+    line: 87
+- path: src/rdf/linters/docstring.py
+  rank: 4.2
+  type: domain_model
+  lines: 263
+  position: "Validates Python docstrings meet RDF requirements: NumPy format and\n\
+    presence of semantic sections (Position, Invariants, etc.)."
+  invariants:
+  - Does not modify source files (read-only)
+  - 'Exit codes: 0=pass, 1=violations, 2=error'
+  - Configurable strictness levels
+  - 'Output formats: text, JSON, SARIF'
+  symbols:
+  - name: Severity
+    type: class
+    line: 25
+  - name: Strictness
+    type: class
+    line: 33
+  - name: LintViolation
+    type: class
+    line: 42
+  - name: LintResult
+    type: class
+    line: 71
+  - name: DocstringLinter
+    type: class
+    line: 92
+- path: src/rdf/generators/foldermd.py
+  rank: 2.7
+  type: domain_model
+  lines: 203
+  position: "Creates and updates .folder.md files with human-preserved sections and\n\
+    auto-generated file listings. Implements the hybrid documentation pattern."
+  invariants:
+  - Must preserve content between HUMAN-AUTHORED markers
+  - Must replace content after AUTO-GENERATED marker
+  - Must create backup before any modification
+  - Dry-run mode available for previewing changes
+  symbols:
+  - name: FolderMdSections
+    type: class
+    line: 30
+  - name: FolderMdGenerator
+    type: class
+    line: 49
+- path: src/rdf/__init__.py
+  rank: 0.1
+  type: package
+  lines: 8
+- path: src/rdf/generators/__init__.py
+  rank: 0.1
+  type: package
+  lines: 6
+- path: src/rdf/linters/__init__.py
+  rank: 0.0
+  type: package
+  lines: 5
+- path: src/rdf/utils/__init__.py
+  rank: 0.0
+  type: package
+  lines: 1

@@ -6,6 +6,131 @@ This file configures Claude to use the advanced three-phase development workflow
 
 This repository implements the advanced context engineering workflow for AI-driven development, based on the principles from the "Advanced Context Engineering for Coding Agents" methodology.
 
+## Username Configuration
+
+RPI commands automatically detect your username for file naming. Priority order:
+
+1. **`.claude/config.yaml`** (recommended - per repository)
+2. **`RPI_USERNAME`** environment variable (global default)
+3. **`git config user.name`** (automatic fallback)
+4. **"user"** (last resort default)
+
+**Quick Setup:**
+```bash
+# Option 1: Create local config (recommended)
+cat > .claude/config.yaml << EOF
+username: benjamin
+EOF
+
+# Option 2: Set environment variable
+export RPI_USERNAME="benjamin"
+
+# Option 3: Use git username automatically (no setup needed)
+git config user.name  # This will be auto-converted
+```
+
+Files will be named: `YYYY.MM.DD-{username}-description.md`
+
+## Coding Standards Integration
+
+The RPI workflow automatically loads coding standards from multiple sources:
+
+### Priority Order:
+1. **Environment**: `$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/`
+2. **Local**: `docs/coding-standards/` in the current repository
+
+### Configuration:
+
+**Option 1: Use external standards via environment variable**
+```bash
+# Set EXTERNAL_DOCS_PATH to your external standards repository
+export EXTERNAL_DOCS_PATH="/path/to/your/standards-repo"
+```
+
+**Option 2: Use local standards (project-specific rules)**
+```bash
+mkdir -p docs/coding-standards
+# Add your .md files with coding standards
+```
+
+**Option 3: No configuration needed**
+- If no standards exist anywhere, commands continue gracefully
+- No error messages or warnings
+
+### Standards Format:
+Standards should be markdown files containing:
+- Code style guidelines
+- Architectural patterns
+- Anti-patterns to avoid
+- Testing requirements
+
+## Documentation Updates
+
+The RPI workflow supports automatic documentation updates after implementation. Documentation can flow to two destinations:
+
+### Destinations
+
+| Type | Path | When to Use |
+|------|------|-------------|
+| Cross-cutting | `$EXTERNAL_DOCS_PATH/cross-cutting/` | Patterns, standards, or behaviors affecting multiple repos |
+| Repo-specific | `docs/` | Features, APIs, or behaviors specific to this repository |
+
+### Workflow
+
+After implementation completes, the `/implement` command will:
+
+1. **Check** if documentation updates are warranted (new feature, changed behavior, new pattern)
+2. **Determine** the appropriate destination based on scope:
+   - Cross-cutting → `$EXTERNAL_DOCS_PATH`
+   - Repo-specific → `docs/`
+3. **Prompt** for documentation if a destination exists
+4. **Skip silently** if no documentation destination is configured
+
+### Configuration
+
+**For cross-cutting documentation:**
+```bash
+# Set in ~/.zshrc or ~/.bashrc
+export EXTERNAL_DOCS_PATH="/path/to/external-docs"
+```
+
+**For repo-specific documentation:**
+```bash
+# Create docs directory in your repository
+mkdir -p docs/
+```
+
+### Graceful Degradation
+
+If neither `$EXTERNAL_DOCS_PATH` is configured nor the `docs/` folder is populated:
+- No errors or warnings are shown
+- The workflow continues normally
+- Users can add documentation manually later
+
+This ensures the RPI workflow works for all users regardless of their documentation setup.
+
+## Test-Driven Development (TDD)
+
+The RPI workflow encourages TDD practices during implementation:
+
+### Workflow:
+1. **RED**: Write/update tests FIRST - tests must fail initially
+2. **GREEN**: Write minimal code to make tests pass
+3. **REFACTOR**: Clean up while keeping tests green
+
+### Commit Strategy:
+```
+test: Phase N - add tests for [feature]     # RED
+feat: Phase N - implement [feature]          # GREEN
+refactor: Phase N - clean up [feature]       # REFACTOR
+```
+
+### Skill Integration:
+The `/implement` command will invoke `superpowers:test-driven-development` skill (if available) to guide proper test-first development.
+
+### Opting Out:
+TDD is **strongly recommended** but can be bypassed if explicitly stated in the task. However, this should be rare and justified.
+
 ## Core Workflow
 
 ### The Three Phases
@@ -39,6 +164,8 @@ This repository implements the advanced context engineering workflow for AI-driv
 - `/epic-oneshot [task]` - Execute complete RPI workflow in one session
 - `/standup` - Generate progress report from RPI artifacts
 - `/blocked` - Identify and analyze implementation blockers
+- `/create_handoff` - Create handoff documentation for session transfer
+- `/resume_handoff [handoff-file]` - Resume work from handoff document
 
 ### Usage Examples
 ```bash
@@ -46,10 +173,16 @@ This repository implements the advanced context engineering workflow for AI-driv
 /research How does the authentication system work?
 
 # Create a plan based on research
-/plan research/2025-01-08-authentication-flow.md
+/plan thoughts/research/2025.01.08-username-authentication-flow.md
 
 # Implement the plan
-/implement plans/2025-01-08-add-oauth-support.md
+/implement thoughts/plans/2025.01.08-username-add-oauth-support.md
+
+# Create a handoff to transfer work to another session
+/create_handoff
+
+# Resume from a handoff
+/resume_handoff thoughts/handoffs/2025.11.08-username-oauth-implementation.md
 ```
 
 ## Key Principles
@@ -66,6 +199,48 @@ This repository implements the advanced context engineering workflow for AI-driv
 - **Mental alignment** - Plans are easier to review than PRs
 - **Measurable success** - Clear verification criteria
 
+## Automated Hooks
+
+This framework includes Claude Code hooks that automate verification and formatting.
+
+### Hook Behavior
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| **auto-format** | After Edit/Write | Runs Prettier (JS/TS) or Ruff (Python) |
+| **post-edit** | After Edit/Write | Runs tests in background, logs to `/tmp/claude-test-results.log` |
+| **pre-commit-check** | Before `git commit` | Blocks commit if tests fail (exit 2) |
+| **session-complete** | On Stop | Logs session summary to `/tmp/claude-session-summary.log` |
+
+### Verification Philosophy
+
+> "Give Claude a way to verify its work. If Claude has that feedback loop, it will 2-3x the quality of the final result." — Boris Cherny
+
+The hooks create automatic feedback loops:
+- **Formatting** happens instantly after every edit
+- **Tests** run in background to catch regressions early
+- **Commits** are blocked if tests fail
+- **Sessions** end with a summary of uncommitted work
+
+### Checking Hook Logs
+
+```bash
+# View test results from background runs
+tail -f /tmp/claude-test-results.log
+
+# View session summaries
+cat /tmp/claude-session-summary.log
+```
+
+### Customizing Hooks
+
+Hook scripts are in `.claude/hooks/`. Modify them for project-specific needs:
+- Add additional formatters
+- Change test commands
+- Adjust timeout thresholds
+
+Configuration is in `.claude/settings.json`.
+
 ## File Organization
 
 ```
@@ -74,20 +249,35 @@ project-root/
 │   ├── commands/       # Workflow commands
 │   │   ├── research.md
 │   │   ├── plan.md
-│   │   └── implement.md
-│   └── agents/         # Specialized sub-agents
-│       ├── codebase-locator.md
-│       ├── codebase-analyzer.md
-│       ├── codebase-pattern-finder.md
-│       ├── web-search-researcher.md
-│       ├── file-analyzer.md
-│       ├── bug-hunter.md
-│       └── test-runner.md
-├── research/           # Research documents (OUTPUT from phase 1)
-│   └── YYYY-MM-DD-topic.md
-├── plans/             # Implementation plans (OUTPUT from phase 2)
-│   └── YYYY-MM-DD-feature.md
-└── CLAUDE.md          # This file
+│   │   ├── implement.md
+│   │   ├── epic-oneshot.md
+│   │   ├── standup.md
+│   │   ├── blocked.md
+│   │   ├── create_handoff.md
+│   │   └── resume_handoff.md
+│   ├── agents/         # Specialized sub-agents
+│   │   ├── codebase-locator.md
+│   │   ├── codebase-analyzer.md
+│   │   ├── codebase-pattern-finder.md
+│   │   ├── web-search-researcher.md
+│   │   ├── file-analyzer.md
+│   │   ├── bug-hunter.md
+│   │   ├── test-runner.md
+│   │   └── code-simplifier.md
+│   ├── hooks/          # Automation hooks
+│   │   ├── auto-format.sh
+│   │   ├── post-edit.sh
+│   │   ├── pre-commit-check.sh
+│   │   └── session-complete.sh
+│   └── settings.json   # Hooks configuration
+├── thoughts/           # RPI artifacts (symlinked to minty-thoughts)
+│   ├── research/       # Research documents (OUTPUT from phase 1)
+│   │   └── YYYY.MM.DD-username-description.md
+│   ├── plans/          # Implementation plans (OUTPUT from phase 2)
+│   │   └── YYYY.MM.DD-username-description.md
+│   └── handoffs/       # Session handoff documents
+│       └── YYYY.MM.DD-username-description.md
+└── CLAUDE.md           # This file
 ```
 
 ## Critical Workflow: Context Resets Between Phases
@@ -96,16 +286,16 @@ project-root/
 
 1. **Phase 1 (Research)**: Start fresh Claude session
    - Run: `/research How does authentication work?`
-   - Output: `research/2025-01-12-authentication.md`
+   - Output: `thoughts/research/2025.01.12-username-authentication.md`
    - Close/clear context
 
 2. **Phase 2 (Planning)**: Start fresh Claude session
-   - Run: `/plan research/2025-01-12-authentication.md`
-   - Output: `plans/2025-01-12-oauth-support.md`
+   - Run: `/plan thoughts/research/2025.01.12-username-authentication.md`
+   - Output: `thoughts/plans/2025.01.12-username-oauth-support.md`
    - Close/clear context
 
 3. **Phase 3 (Implementation)**: Start fresh Claude session
-   - Run: `/implement plans/2025-01-12-oauth-support.md`
+   - Run: `/implement thoughts/plans/2025.01.12-username-oauth-support.md`
    - Execute the plan with verification
    - Complete implementation
 
@@ -114,16 +304,25 @@ This intentional context reset prevents overflow and ensures each phase starts w
 ## Document Formats
 
 ### Research Documents
-- Located in `research/` directory
-- Named: `YYYY-MM-DD-description.md`
+- Located in `thoughts/research/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/research/`
+- Named: `YYYY.MM.DD-username-description.md`
 - Include findings, code references, and insights
 - Self-contained with all necessary context
 
 ### Implementation Plans
-- Located in `plans/` directory
-- Named: `YYYY-MM-DD-description.md`
+- Located in `thoughts/plans/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/plans/`
+- Named: `YYYY.MM.DD-username-description.md`
 - Include phases, specific changes, and success criteria
 - Separate automated and manual verification
+
+### Handoff Documents
+- Located in `thoughts/handoffs/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/handoffs/`
+- Named: `YYYY.MM.DD-username-description.md`
+- Include task status, learnings, recent changes, and action items
+- Enable context transfer between sessions
 
 ## Enhanced Capabilities
 
@@ -135,6 +334,9 @@ The bug-hunter agent provides elite-level bug detection, identifying security vu
 
 ### Test Execution
 The test-runner agent executes tests in an isolated context, preventing test output from polluting your main conversation while still providing actionable results.
+
+### Code Simplification
+The code-simplifier agent cleans up code after implementation, reducing complexity and nesting without changing functionality. Invoke with: "Use the code-simplifier agent to clean up the files I just modified."
 
 ### Project Management
 - **Epic Oneshot**: Chain all three phases for quick feature implementation

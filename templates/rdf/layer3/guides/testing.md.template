@@ -1,0 +1,383 @@
+# Guide: Testing Patterns
+
+> **Purpose:** Help developers write effective tests.
+> **Audience:** Developers adding or modifying tests.
+> **Update Trigger:** Modify when testing tools or patterns change.
+
+## Testing Philosophy
+
+We follow the **Testing Pyramid**:
+
+```
+          /\
+         /  \     E2E Tests (few)
+        /----\    - Browser/API integration
+       /      \   - Slow, expensive
+      /--------\
+     /          \  Integration Tests (some)
+    /------------\ - Database, external services
+   /              \- Medium speed
+  /----------------\
+ /                  \ Unit Tests (many)
+/--------------------\- Fast, isolated
+```
+
+**Goals:**
+- Fast feedback during development
+- Confidence in deployments
+- Living documentation of behavior
+
+---
+
+## Test Structure
+
+```
+tests/
++-- conftest.py          # Shared fixtures
++-- unit/                # Fast, isolated tests
+|   +-- test_services.py
+|   +-- test_utils.py
++-- integration/         # Database/API tests
+|   +-- test_routes.py
+|   +-- test_repositories.py
++-- e2e/                 # End-to-end (optional)
+    +-- test_workflows.py
+```
+
+---
+
+## Unit Tests
+
+**Purpose:** Test individual functions/classes in isolation.
+
+### Characteristics
+- No database, no network, no file system
+- Fast (< 10ms per test)
+- Deterministic (no flakiness)
+- Test one thing per test
+
+### Pattern: Arrange-Act-Assert
+
+```python
+# tests/unit/test_user_service.py
+
+import pytest
+from unittest.mock import AsyncMock, Mock
+
+from app.services.user_service import UserService
+from app.schemas.user import UserCreate
+
+
+class TestUserService:
+    """Tests for UserService business logic."""
+
+    async def test_create_user_success(self):
+        """Creates user when email is unique."""
+        # Arrange
+        mock_db = AsyncMock()
+        mock_db.get.return_value = None  # No existing user
+        service = UserService(db=mock_db)
+        data = UserCreate(email="new@example.com", password="securepass123")
+
+        # Act
+        result = await service.create(data)
+
+        # Assert
+        assert result.email == "new@example.com"
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
+
+    async def test_create_user_duplicate_email_raises(self):
+        """Raises ConflictError when email exists."""
+        # Arrange
+        mock_db = AsyncMock()
+        mock_db.execute.return_value.scalar_one_or_none.return_value = Mock(id=1)
+        service = UserService(db=mock_db)
+        data = UserCreate(email="existing@example.com", password="securepass123")
+
+        # Act & Assert
+        with pytest.raises(ConflictError) as exc_info:
+            await service.create(data)
+
+        assert "already exists" in str(exc_info.value)
+```
+
+### Fixtures for Unit Tests
+
+```python
+# tests/unit/conftest.py
+
+import pytest
+from unittest.mock import AsyncMock
+
+@pytest.fixture
+def mock_db():
+    """Mock database session."""
+    return AsyncMock()
+
+@pytest.fixture
+def user_service(mock_db):
+    """UserService with mocked database."""
+    return UserService(db=mock_db)
+```
+
+---
+
+## Integration Tests
+
+**Purpose:** Test components working together with real infrastructure.
+
+### Characteristics
+- Uses test database (transactions rolled back)
+- Tests real queries and constraints
+- Slower but more realistic
+- May require Docker for services
+
+### Database Testing Pattern
+
+```python
+# tests/integration/test_user_repository.py
+
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.user import User
+from app.services.user_service import UserService
+
+
+@pytest.mark.asyncio
+class TestUserServiceIntegration:
+    """Integration tests with real database."""
+
+    async def test_create_user_persists_to_database(
+        self,
+        db_session: AsyncSession,
+    ):
+        """User is actually saved to database."""
+        # Arrange
+        service = UserService(db=db_session)
+        data = UserCreate(email="test@example.com", password="securepass123")
+
+        # Act
+        user = await service.create(data)
+
+        # Assert
+        assert user.id is not None
+        fetched = await db_session.get(User, user.id)
+        assert fetched is not None
+        assert fetched.email == "test@example.com"
+
+    async def test_create_user_unique_constraint(
+        self,
+        db_session: AsyncSession,
+    ):
+        """Database enforces unique email constraint."""
+        service = UserService(db=db_session)
+
+        # Create first user
+        await service.create(UserCreate(email="dup@example.com", password="pass1234"))
+
+        # Attempt duplicate
+        with pytest.raises(ConflictError):
+            await service.create(UserCreate(email="dup@example.com", password="pass5678"))
+```
+
+### API Testing Pattern
+
+```python
+# tests/integration/test_routes.py
+
+import pytest
+from httpx import AsyncClient
+
+
+@pytest.mark.asyncio
+class TestUserRoutes:
+    """API endpoint tests."""
+
+    async def test_create_user_returns_201(self, client: AsyncClient):
+        """POST /users returns 201 with user data."""
+        response = await client.post(
+            "/api/v1/users",
+            json={"email": "new@example.com", "password": "securepass123"},
+        )
+
+        assert response.status_code == 201
+        data = response.json()
+        assert data["email"] == "new@example.com"
+        assert "password" not in data  # Not exposed
+        assert "id" in data
+
+    async def test_create_user_duplicate_returns_409(
+        self,
+        client: AsyncClient,
+        existing_user: User,  # Fixture creates user
+    ):
+        """POST /users returns 409 for duplicate email."""
+        response = await client.post(
+            "/api/v1/users",
+            json={"email": existing_user.email, "password": "anypassword"},
+        )
+
+        assert response.status_code == 409
+        assert "already exists" in response.json()["error"]["message"]
+```
+
+---
+
+## Fixtures (conftest.py)
+
+```python
+# tests/conftest.py
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.main import app
+from app.core.deps import get_db
+from app.models.base import Base
+
+
+# Test database URL
+TEST_DATABASE_URL = "postgresql+asyncpg://test:test@localhost:5432/test_db"
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create event loop for async tests."""
+    import asyncio
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def db_session():
+    """Database session with automatic rollback."""
+    engine = create_async_engine(TEST_DATABASE_URL)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with async_session() as session:
+        async with session.begin():
+            yield session
+            await session.rollback()  # Rollback after each test
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest_asyncio.fixture
+async def client(db_session: AsyncSession):
+    """Test client with overridden database."""
+    app.dependency_overrides[get_db] = lambda: db_session
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as client:
+        yield client
+
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def existing_user(db_session: AsyncSession):
+    """Create a user for tests that need one."""
+    from app.models.user import User
+
+    user = User(
+        email="existing@example.com",
+        hashed_password="hashed",
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+```
+
+---
+
+## Testing Best Practices
+
+### Do
+- Test behavior, not implementation
+- Use descriptive test names that explain what's tested
+- One assertion per test (when possible)
+- Use fixtures for common setup
+- Test edge cases and error paths
+
+### Don't
+- Test private methods directly
+- Write tests that depend on other tests
+- Use `sleep()` for timing (use mocks)
+- Test third-party library behavior
+- Over-mock (if mocking everything, test is useless)
+
+### Naming Convention
+
+```python
+# Pattern: test_<method>_<scenario>_<expected_result>
+
+def test_get_user_with_valid_id_returns_user():
+    ...
+
+def test_get_user_with_invalid_id_raises_not_found():
+    ...
+
+def test_create_user_with_duplicate_email_raises_conflict():
+    ...
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov=app --cov-report=term-missing
+
+# Run specific test file
+uv run pytest tests/unit/test_services.py -v
+
+# Run specific test class
+uv run pytest tests/unit/test_services.py::TestUserService -v
+
+# Run specific test
+uv run pytest tests/unit/test_services.py::TestUserService::test_create_user_success -v
+
+# Run tests matching pattern
+uv run pytest -k "user and create"
+
+# Run with extra output
+uv run pytest -v --tb=short
+
+# Run fast (stop on first failure)
+uv run pytest -x
+
+# Run parallel (requires pytest-xdist)
+uv run pytest -n auto
+```
+
+---
+
+## Coverage Requirements
+
+- **Minimum:** 80% overall
+- **Critical paths:** 100% (auth, payments, etc.)
+- **New code:** Must maintain or improve coverage
+
+```bash
+# Generate HTML coverage report
+uv run pytest --cov=app --cov-report=html
+open htmlcov/index.html
+```

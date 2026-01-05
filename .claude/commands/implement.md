@@ -12,6 +12,49 @@ When given a plan path:
 - Read the plan completely and check for any existing checkmarks (- [x])
 - Read any original research documents mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
+- **Load coding standards if present**:
+  - Check for standards using this priority order:
+    ```bash
+    # Priority 1: External standards via EXTERNAL_DOCS_PATH environment variable
+    if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+        STANDARDS_PATH="$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/"
+        echo "Found external coding standards (via EXTERNAL_DOCS_PATH)"
+    # Priority 2: Local repository standards
+    elif [ -d "docs/coding-standards/" ]; then
+        STANDARDS_PATH="docs/coding-standards/"
+        echo "Found local coding standards"
+    else
+        STANDARDS_PATH=""
+        echo "No coding standards found - continuing without standards"
+    fi
+    ```
+  - If standards found (`STANDARDS_PATH` is not empty), spawn a **codebase-analyzer** sub-agent:
+    ```
+    Read and synthesize all markdown files in [STANDARDS_PATH] directory.
+
+    Extract and return:
+    1. Code organization patterns (file placement, package structure)
+    2. Anti-patterns to avoid during implementation
+    3. Code style and formatting requirements
+    4. Import patterns and dependency usage rules
+    5. Testing requirements and patterns
+    6. Common implementation gotchas from standards
+
+    Format as actionable implementation checklist with specific file:line references.
+    Focus on patterns that affect how code should be written and organized.
+    ```
+  - Wait for synthesis to complete before starting implementation
+  - Keep standards in context for reference during implementation
+  - If no standards found, continue normally (graceful degradation - NO error, NO user notification)
+- **Invoke TDD Skill (if available)**:
+  - Check if `superpowers:test-driven-development` skill is available
+  - If available, use the Skill tool to invoke it
+  - This skill enforces the RED-GREEN-REFACTOR cycle:
+    1. **RED**: Write/update tests FIRST - they MUST fail initially
+    2. **GREEN**: Write minimal code to make tests pass
+    3. **REFACTOR**: Clean up while keeping tests green
+  - If TDD skill is not available, follow the TDD workflow manually as described in "Make the Changes" section
+  - TDD is strongly recommended for all implementation work
 - Think deeply about how the pieces fit together
 - Create a todo list to track your progress
 - Start implementing if you understand what needs to be done
@@ -22,11 +65,20 @@ If no plan path provided, ask for one.
 
 Plans are carefully designed, but reality can be messy. Your job is to:
 - Follow the plan's intent while adapting to what you find
+- **Adhere to coding standards** (if present) for all new/modified code
 - Implement each phase fully before moving to the next
 - Verify your work makes sense in the broader codebase context
 - Update checkboxes in the plan as you complete sections
+- **Reference standards when making decisions** about code organization, patterns, and style
 
 When things don't match the plan exactly, think about why and communicate clearly. The plan is your guide, but your judgment matters too.
+
+**When standards exist and affect implementation**:
+- Follow documented patterns for code organization
+- Avoid documented anti-patterns
+- Apply required code style and formatting rules
+- Use specified tools and dependencies as documented
+- Reference specific standards in commit messages when applicable
 
 If you encounter a mismatch:
 - STOP and think deeply about why the plan can't be followed
@@ -59,11 +111,28 @@ For each phase:
    - Understand what this phase accomplishes
    - Review the success criteria
 
-2. **Make the Changes**
-   - Implement changes in the order specified
-   - Follow the code examples closely
+2. **Make the Changes (TDD Workflow)**
+   - **For each feature/change in the phase**:
+     1. **RED Phase**: Write or update tests FIRST
+        - Run tests to confirm they FAIL
+        - If tests pass before implementation, the tests are not testing the new behavior
+        - Commit: `test: Phase N - add tests for [feature]`
+     2. **GREEN Phase**: Write minimal implementation
+        - Only write code needed to make tests pass
+        - Resist adding features not covered by tests
+        - Commit: `feat: Phase N - implement [feature]`
+     3. **REFACTOR Phase**: Clean up
+        - Improve code quality while keeping tests green
+        - Apply coding standards (if loaded)
+        - Commit: `refactor: Phase N - clean up [feature]`
+   - Follow the code examples from the plan closely
+   - **Apply coding standards** (if loaded) to all new/modified code:
+     - Place files in correct locations per standards
+     - Use documented import patterns
+     - Follow established architectural patterns
+     - Avoid documented anti-patterns
+     - Apply required code style/formatting
    - Adapt to actual code structure as needed
-   - Commit frequently (if user requests)
 
 3. **Verify as You Go**
    - Run automated verification commands after each major change
@@ -93,6 +162,60 @@ Before moving to the next phase:
 2. Update the plan with checkmarks for completed items
 3. Document any significant deviations
 4. Commit your changes if appropriate
+
+### Step 5: Documentation Update
+
+After all implementation phases complete and verification passes, consider whether documentation updates are needed.
+
+1. **Determine if documentation is warranted**:
+   - Was a new feature or capability added?
+   - Were existing behaviors significantly changed?
+   - Were new patterns introduced that others should follow?
+   - Were anti-patterns discovered and resolved?
+
+   If no documentation is needed, skip to Git Commit Best Practices.
+
+2. **Classify documentation type**:
+   ```bash
+   # Check what documentation destinations are available
+   DOCS_DESTINATION=""
+   DOCS_TYPE=""
+
+   # Priority 1: Cross-cutting documentation (affects multiple repos)
+   if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH" ]; then
+       echo "Cross-cutting docs available at: $EXTERNAL_DOCS_PATH"
+       CROSS_CUTTING_AVAILABLE="true"
+   else
+       CROSS_CUTTING_AVAILABLE="false"
+   fi
+
+   # Priority 2: Repo-specific documentation
+   if [ -d "docs/" ]; then
+       echo "Repo-specific docs available at: docs/"
+       REPO_DOCS_AVAILABLE="true"
+   else
+       REPO_DOCS_AVAILABLE="false"
+   fi
+
+   # If neither exists, skip documentation silently
+   if [ "$CROSS_CUTTING_AVAILABLE" = "false" ] && [ "$REPO_DOCS_AVAILABLE" = "false" ]; then
+       echo "No documentation destinations configured - skipping documentation update"
+   fi
+   ```
+
+3. **Determine appropriate destination**:
+   - **Cross-cutting** (`$EXTERNAL_DOCS_PATH/cross-cutting/`): Use for patterns, standards, or behaviors that affect multiple repositories
+   - **Repo-specific** (`docs/`): Use for features, APIs, or behaviors specific to this repository
+
+4. **Create or update documentation**:
+   - Follow existing documentation structure in the destination
+   - Include relevant code references from this implementation
+   - Link back to the implementation plan if applicable
+
+5. **Graceful degradation**:
+   - If the appropriate destination doesn't exist, log what would have been documented
+   - Continue with git commit - missing docs destination is NOT a blocker
+   - User can manually create documentation later if needed
 
 ## Git Commit Best Practices
 
@@ -143,7 +266,7 @@ git commit -m "Phase [N]: [Phase Title]
 - [Brief description of changes]
 - [Key files modified]
 
-Implementation from: plans/[plan-file].md
+Implementation from: thoughts/plans/[plan-file].md
 Phase [N] of [Total]: [Percentage]% complete"
 ```
 
@@ -226,7 +349,7 @@ git commit -m "feat: Add [feature name]
 - Update documentation
 
 Closes: #[issue]
-Plan: plans/YYYY-MM-DD-feature.md"
+Plan: thoughts/plans/YYYY.MM.DD-username-feature.md"
 
 # Bug fix
 git commit -m "fix: Resolve [issue description]
@@ -244,7 +367,7 @@ git commit -m "refactor: Improve [component/area]
 - Reduce complexity from X to Y
 - No functional changes
 
-Part of: plans/YYYY-MM-DD-refactor.md"
+Part of: thoughts/plans/YYYY.MM.DD-username-refactor.md"
 ```
 
 ### Important Git Guidelines
@@ -308,10 +431,13 @@ If the plan has existing checkmarks:
    - Don't jump ahead even if you see the solution
 
 2. **Maintain Code Quality**
-   - Follow existing code patterns
+   - **Follow coding standards** (if present) for all code changes
+     - Reference specific standards in commit messages: "Follows pattern from repo-standards.md:123"
+     - Avoid anti-patterns documented in standards
+   - Follow existing code patterns (and documented standards patterns take precedence)
    - Keep consistent style
    - Add appropriate error handling
-   - Don't introduce new dependencies without approval
+   - Don't introduce new dependencies without approval (check dependency management standards)
 
 3. **Test Continuously**
    - Run tests after each significant change
@@ -347,10 +473,12 @@ You know you're doing well when:
 Before declaring implementation complete:
 - [ ] All phases implemented
 - [ ] All automated verification passing
+- [ ] **Coding standards followed** (if present - spot check 2-3 changes against standards)
 - [ ] Plan updated with completion checkmarks
 - [ ] Any deviations documented
 - [ ] Code follows project conventions
 - [ ] No commented-out code or TODOs left
 - [ ] All tests passing
+- [ ] **Documentation considered** (new feature? → update docs/ or $EXTERNAL_DOCS_PATH)
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.

@@ -1,0 +1,28 @@
+# Folder: guides/
+
+> **Update Trigger:** Add new guide when onboarding material needed.
+> Update existing guides when processes or tools change.
+
+## Purpose
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+Contains how-to guides for developers and AI agents.
+Guides provide context and explanations beyond what's in code comments.
+
+## Invariants
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+- Guides should be beginner-friendly
+- Include working code examples where applicable
+- Keep updated when referenced tools/APIs change
+
+---
+
+<!-- AUTO-GENERATED BELOW - DO NOT EDIT MANUALLY -->
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `architecture.md` | System architecture overview |
+| `testing.md` | Testing patterns and practices |
