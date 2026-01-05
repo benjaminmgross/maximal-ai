@@ -267,8 +267,7 @@ def validate(*, strict: bool, path: str) -> None:
         for v in result.violations[:10]:  # Limit to first 10
             severity_color = "red" if v.severity == Severity.ERROR else "yellow"
             console.print(
-                f"  [{severity_color}]{v.code}[/{severity_color}] "
-                f"{v.path}:{v.line} - {v.message}"
+                f"  [{severity_color}]{v.code}[/{severity_color}] {v.path}:{v.line} - {v.message}"
             )
         if len(result.violations) > 10:
             console.print(f"  ... and {len(result.violations) - 10} more")
@@ -278,9 +277,111 @@ def validate(*, strict: bool, path: str) -> None:
         sys.exit(1)
 
 
+@main.command()
+@click.argument("script", type=click.Path(exists=True), required=False)
+@click.option("--entrypoint", "-e", default="main", help="Function to call")
+@click.option("--non-interactive", is_flag=True, help="Skip human prompts")
+@click.option("--dry-run", is_flag=True, help="Preview without applying")
+@click.option("--filter", "func_filter", help="Only process functions matching pattern")
+@click.option(
+    "--resume",
+    type=click.Path(exists=True),
+    help="Resume from saved observation JSON file",
+)
+def observe(
+    script: str | None,
+    entrypoint: str,
+    *,
+    non_interactive: bool,
+    dry_run: bool,
+    func_filter: str | None,
+    resume: str | None,
+) -> None:
+    """
+    Run a script and interactively generate docstrings.
+
+    Observes function behavior at runtime, infers what it can,
+    and prompts you for business context. Generates complete
+    NumPy-format docstrings.
+
+    \b
+    Examples:
+        rdf observe myapp.py --entrypoint main
+        rdf observe myapp.py --non-interactive --dry-run
+        rdf observe myapp.py --filter "calculate_*"
+        rdf observe --resume observations.json
+    """
+    import fnmatch
+    import json
+
+    from rdf.observe.analyzer import InferenceEngine
+    from rdf.observe.interactive import InteractiveSession
+    from rdf.observe.models import FunctionProfile
+    from rdf.observe.runner import run_with_observation
+    from rdf.observe.writer import apply_docstrings
+
+    # Load from resume file or run observation
+    if resume:
+        console.print(f"[bold]Resuming from {resume}...[/bold]")
+        with open(resume) as f:
+            data = json.load(f)
+        profiles = {k: FunctionProfile.from_dict(v) for k, v in data.get("profiles", {}).items()}
+        console.print(f"[green]✓ Loaded {len(profiles)} function profiles[/green]")
+    elif script:
+        console.print(f"[bold]Running {script}...[/bold]")
+        profiles = run_with_observation(Path(script), entrypoint)
+        total_calls = sum(p.call_count for p in profiles.values())
+        console.print(
+            f"[green]✓ Collected {total_calls} observations from {len(profiles)} functions[/green]"
+        )
+    else:
+        console.print(
+            "[red]Error: Either provide a script to run or --resume with a JSON file[/red]"
+        )
+        sys.exit(2)
+
+    if not profiles:
+        console.print(
+            "[yellow]No functions were observed. "
+            "Make sure functions are decorated with @observe.[/yellow]"
+        )
+        return
+
+    # Filter if requested
+    if func_filter:
+        profiles = {k: v for k, v in profiles.items() if fnmatch.fnmatch(k, f"*{func_filter}*")}
+        console.print(f"[dim]Filtered to {len(profiles)} functions matching '{func_filter}'[/dim]")
+
+    # Analyze
+    console.print("\n[bold]Analyzing...[/bold]")
+    engine = InferenceEngine(profiles)
+    inferences = engine.infer_all()
+
+    # Interactive session
+    session = InteractiveSession(
+        profiles=profiles,
+        inferences=inferences,
+        non_interactive=non_interactive,
+    )
+
+    generated = session.run()
+
+    # Apply or preview
+    if generated:
+        console.print(f"\n[bold]Generated {len(generated)} docstrings[/bold]")
+
+        if dry_run:
+            console.print("[yellow]Dry run - no changes applied[/yellow]")
+        else:
+            apply_docstrings(generated)
+            console.print("[green]✓ Docstrings applied successfully[/green]")
+    else:
+        console.print("[yellow]No docstrings generated[/yellow]")
+
+
 def _agents_template() -> str:
     """Return AGENTS.md template."""
-    return '''# AGENTS.md
+    return """# AGENTS.md
 
 ## Commands
 
@@ -318,12 +419,12 @@ See [REPOMAP.yaml](REPOMAP.yaml) for auto-generated dependency graph.
 
 - Branch naming: `feature/`, `fix/`, `refactor/`
 - Commit messages: conventional commits format
-'''
+"""
 
 
 def _repomap_config_template() -> str:
     """Return .repomap.yaml template."""
-    return '''# REPOMAP.yaml Configuration
+    return """# REPOMAP.yaml Configuration
 # Run: rdf generate-repomap to create REPOMAP.yaml
 
 source_dirs:
@@ -339,7 +440,7 @@ token_budget: 2000
 
 ranking:
   algorithm: simple  # simple or pagerank
-'''
+"""
 
 
 if __name__ == "__main__":
