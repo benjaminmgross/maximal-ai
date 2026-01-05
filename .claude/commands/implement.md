@@ -1,3 +1,7 @@
+---
+description: Execute approved implementation plans with TDD workflow
+---
+
 # Implement
 
 You are tasked with implementing an approved technical plan. These plans contain phases with specific changes and success criteria.

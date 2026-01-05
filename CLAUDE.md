@@ -167,6 +167,13 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 - `/create_handoff` - Create handoff documentation for session transfer
 - `/resume_handoff [handoff-file]` - Resume work from handoff document
 
+### Inner Loop Commands (with Pre-computed Context)
+These commands use inline bash to pre-compute context, eliminating tool call round-trips:
+- `/commit-push-pr` - Commit, push, and create PR with git context pre-loaded
+- `/test-and-fix` - Run tests and fix failures with test output pre-loaded
+- `/verify` - Quick health check (tests, types, lint, build) pre-computed
+- `/review` - Code review with diff context pre-loaded
+
 ### Usage Examples
 ```bash
 # Research how authentication works
@@ -183,6 +190,48 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 
 # Resume from a handoff
 /resume_handoff thoughts/handoffs/2025.11.08-username-oauth-implementation.md
+
+# Quick verification before committing
+/verify
+
+# Commit, push, and create PR
+/commit-push-pr
+
+# Run tests and fix any failures
+/test-and-fix
+
+# Review current branch changes
+/review
+```
+
+## Slash Command Quick Reference
+
+When performing these workflows, use the corresponding command to leverage pre-computed context:
+
+| Workflow | Command | What it Pre-computes |
+|----------|---------|---------------------|
+| Committing code | `/commit-push-pr` | git status, branch, diff, recent commits |
+| Running/fixing tests | `/test-and-fix` | test output, type errors, lint errors |
+| Quick verification | `/verify` | tests, types, lint, build results |
+| Code review | `/review` | branch diff, changed files, commits |
+| Progress report | `/standup` | git activity, RPI artifacts, TODOs |
+
+**Why use these commands?** They use inline bash (`!` backtick syntax) to pre-compute context before Claude sees the prompt. This eliminates multiple tool call round-trips:
+
+```
+Without pre-computation:
+  You: /some-command
+  Claude: "Let me check git status..." [tool call]
+  Claude: "Now let me see the branch..." [tool call]
+  Claude: "Now let me check commits..." [tool call]
+  Claude: "Okay, now I'll proceed..."
+  → 3 round trips before actual work
+
+With inline bash pre-computation:
+  You: /commit-push-pr
+  [bash runs instantly, context embedded in prompt]
+  Claude: "I see you're on feature/xyz with changes to api.ts. Committing now..."
+  → 0 round trips for context gathering
 ```
 
 ## Key Principles

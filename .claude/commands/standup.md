@@ -1,3 +1,7 @@
+---
+description: Generate comprehensive status report from RPI artifacts and git activity
+---
+
 # Standup
 
 Generates a comprehensive status report from recent RPI artifacts and git activity.
@@ -9,30 +13,47 @@ When this command is invoked, respond with:
 I'll generate a standup report from your recent work. Let me analyze your RPI artifacts and git history...
 ```
 
+## Pre-computed Status (Zero Round-Trips)
+
+### Git Status
+!`git status --short 2>/dev/null | head -20 || echo "Not a git repository"`
+
+### Current Branch
+!`git branch --show-current 2>/dev/null || echo "unknown"`
+
+### Recent Commits (last 24 hours)
+!`git log --oneline --since="24 hours ago" 2>/dev/null | head -10 || echo "No recent commits"`
+
+### All Recent Commits (last 10)
+!`git log --oneline -10 2>/dev/null || echo "No commits"`
+
+### Uncommitted Changes Summary
+!`git diff --stat 2>/dev/null | tail -5 || echo "No uncommitted changes"`
+
+### Recent Research Documents
+!`ls -lt thoughts/research/*.md 2>/dev/null | head -5 | awk '{print $NF}' || echo "No research documents found"`
+
+### Recent Plans
+!`ls -lt thoughts/plans/*.md 2>/dev/null | head -5 | awk '{print $NF}' || echo "No plan documents found"`
+
+### Active Handoffs
+!`ls -lt thoughts/handoffs/*.md 2>/dev/null | head -3 | awk '{print $NF}' || echo "No handoffs found"`
+
+### TODO/FIXME Comments in Changed Files
+!`git diff --name-only HEAD~5 2>/dev/null | xargs grep -l "TODO\|FIXME" 2>/dev/null | head -5 || echo "No TODOs in recently changed files"`
+
+### Test Status (quick check)
+!`(npm test 2>&1 || pytest -q 2>&1) 2>/dev/null | tail -5 || echo "Tests not configured or not run"`
+
 ## Process Steps
 
-### Step 1: Gather Information
+### Step 1: Analyze Pre-computed Data
 
-1. **Check git status and history**:
-   ```bash
-   # Get recent commits
-   git log --oneline -10
-
-   # Check current branch
-   git branch --show-current
-
-   # Check uncommitted changes
-   git status --short
-   ```
-
-2. **Scan RPI artifacts**:
-   - List recent files in `thoughts/research/` directory
-   - List recent files in `thoughts/plans/` directory
-   - Check for in-progress implementations
-
-3. **Analyze todos**:
-   - Check for any active TodoWrite items
-   - Look for TODO/FIXME comments in changed files
+Using the pre-computed information above:
+1. Review git status for uncommitted work
+2. Check recent commits for completed work
+3. Scan RPI artifacts for context
+4. Note any TODOs or blockers
 
 ### Step 2: Generate Report
 
