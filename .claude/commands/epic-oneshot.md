@@ -1,3 +1,7 @@
+---
+description: Execute complete research-plan-implement workflow in one session
+---
+
 # Epic Oneshot
 
 Executes a complete research → plan → implement workflow in a single session for well-defined tasks.

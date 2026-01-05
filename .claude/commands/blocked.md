@@ -1,3 +1,7 @@
+---
+description: Identify and analyze implementation blockers with resolution suggestions
+---
+
 # Blocked
 
 Identifies and analyzes implementation blockers, dependencies, and impediments.
