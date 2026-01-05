@@ -15,10 +15,10 @@ When given a plan path:
 - **Load coding standards if present**:
   - Check for standards using this priority order:
     ```bash
-    # Priority 1: External standards via MINTY_DOCS_PATH environment variable
-    if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
-        STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
-        echo "Found external coding standards (via MINTY_DOCS_PATH)"
+    # Priority 1: External standards via EXTERNAL_DOCS_PATH environment variable
+    if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+        STANDARDS_PATH="$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/"
+        echo "Found external coding standards (via EXTERNAL_DOCS_PATH)"
     # Priority 2: Local repository standards
     elif [ -d "docs/coding-standards/" ]; then
         STANDARDS_PATH="docs/coding-standards/"
@@ -182,8 +182,8 @@ After all implementation phases complete and verification passes, consider wheth
    DOCS_TYPE=""
 
    # Priority 1: Cross-cutting documentation (affects multiple repos)
-   if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH" ]; then
-       echo "Cross-cutting docs available at: $MINTY_DOCS_PATH"
+   if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH" ]; then
+       echo "Cross-cutting docs available at: $EXTERNAL_DOCS_PATH"
        CROSS_CUTTING_AVAILABLE="true"
    else
        CROSS_CUTTING_AVAILABLE="false"
@@ -204,7 +204,7 @@ After all implementation phases complete and verification passes, consider wheth
    ```
 
 3. **Determine appropriate destination**:
-   - **Cross-cutting** (`$MINTY_DOCS_PATH/cross-cutting/`): Use for patterns, standards, or behaviors that affect multiple repositories
+   - **Cross-cutting** (`$EXTERNAL_DOCS_PATH/cross-cutting/`): Use for patterns, standards, or behaviors that affect multiple repositories
    - **Repo-specific** (`docs/`): Use for features, APIs, or behaviors specific to this repository
 
 4. **Create or update documentation**:
@@ -479,6 +479,6 @@ Before declaring implementation complete:
 - [ ] Code follows project conventions
 - [ ] No commented-out code or TODOs left
 - [ ] All tests passing
-- [ ] **Documentation considered** (new feature? → update docs/ or $MINTY_DOCS_PATH)
+- [ ] **Documentation considered** (new feature? → update docs/ or $EXTERNAL_DOCS_PATH)
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.

@@ -77,10 +77,10 @@ Before decomposing the research query, check for repository coding standards:
 
 1. **Check for coding standards using priority order**:
    ```bash
-   # Priority 1: External standards via MINTY_DOCS_PATH environment variable
-   if [ -n "$MINTY_DOCS_PATH" ] && [ -d "$MINTY_DOCS_PATH/cross-cutting/coding-standards/" ]; then
-       STANDARDS_PATH="$MINTY_DOCS_PATH/cross-cutting/coding-standards/"
-       echo "Found external coding standards (via MINTY_DOCS_PATH)"
+   # Priority 1: External standards via EXTERNAL_DOCS_PATH environment variable
+   if [ -n "$EXTERNAL_DOCS_PATH" ] && [ -d "$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/" ]; then
+       STANDARDS_PATH="$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/"
+       echo "Found external coding standards (via EXTERNAL_DOCS_PATH)"
    # Priority 2: Local repository standards
    elif [ -d "docs/coding-standards/" ]; then
        STANDARDS_PATH="docs/coding-standards/"

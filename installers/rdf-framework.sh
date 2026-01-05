@@ -26,7 +26,7 @@ show_rdf_help() {
     echo "  1 - Entry Points (AGENTS.md, CLAUDE.md, .repomap.yaml)"
     echo "  2 - Code Docs (.folder.md generator, scaffolding)"
     echo "  3 - Extended Docs (protocols/, checklists/, guides/)"
-    echo "  4 - Cross-Repo (minty-docs linkage via \$MINTY_DOCS_PATH)"
+    echo "  4 - Cross-Repo (external docs linkage via \$EXTERNAL_DOCS_PATH)"
     echo "  5 - Tooling (rdf CLI, linters)"
     echo ""
     echo "Examples:"
@@ -217,27 +217,27 @@ install_layer3() {
 install_layer4() {
     info "Installing Layer 4: Cross-Repo..."
 
-    if [ -n "$MINTY_DOCS_PATH" ]; then
-        echo "  MINTY_DOCS_PATH detected: $MINTY_DOCS_PATH"
-        echo "  Cross-cutting standards available at: $MINTY_DOCS_PATH/cross-cutting/"
+    if [ -n "$EXTERNAL_DOCS_PATH" ]; then
+        echo "  EXTERNAL_DOCS_PATH detected: $EXTERNAL_DOCS_PATH"
+        echo "  Cross-cutting standards available at: $EXTERNAL_DOCS_PATH/cross-cutting/"
 
         # Add reference to AGENTS.md
         if [ -f "$PROJECT_ROOT/docs/AGENTS.md" ]; then
-            if ! grep -q "MINTY_DOCS_PATH" "$PROJECT_ROOT/docs/AGENTS.md"; then
+            if ! grep -q "EXTERNAL_DOCS_PATH" "$PROJECT_ROOT/docs/AGENTS.md"; then
                 cat >> "$PROJECT_ROOT/docs/AGENTS.md" << 'EOFAGENTS'
 
 ## Company-Wide Standards
 
 For organization-wide coding standards, see:
-- **$MINTY_DOCS_PATH/cross-cutting/coding-standards/** - Python style, docstrings, testing
-- **$MINTY_DOCS_PATH/cross-cutting/ai/** - Shared AI protocols and checklists
+- **$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/** - Python style, docstrings, testing
+- **$EXTERNAL_DOCS_PATH/cross-cutting/ai/** - Shared AI protocols and checklists
 EOFAGENTS
-                echo "  Updated docs/AGENTS.md with minty-docs reference"
+                echo "  Updated docs/AGENTS.md with external-docs reference"
             fi
         fi
     else
-        warn "  MINTY_DOCS_PATH not set - skipping cross-repo integration"
-        echo "  Set MINTY_DOCS_PATH in ~/.zshrc to enable cross-repo docs"
+        warn "  EXTERNAL_DOCS_PATH not set - skipping cross-repo integration"
+        echo "  Set EXTERNAL_DOCS_PATH in ~/.zshrc to enable cross-repo docs"
     fi
 }
 

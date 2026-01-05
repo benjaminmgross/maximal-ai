@@ -137,10 +137,10 @@ echo "   - 8 agents: locator, analyzer, pattern-finder, researcher, file-analyze
 echo "   - 4 hooks: auto-format, post-edit (background tests), pre-commit-check, session-complete"
 echo ""
 echo "Documentation destinations:"
-if [ -n "$MINTY_DOCS_PATH" ]; then
-    echo "   - Cross-cutting: $MINTY_DOCS_PATH"
+if [ -n "$EXTERNAL_DOCS_PATH" ]; then
+    echo "   - Cross-cutting: $EXTERNAL_DOCS_PATH"
 else
-    echo "   - Cross-cutting: Not configured (set MINTY_DOCS_PATH for cross-cutting docs)"
+    echo "   - Cross-cutting: Not configured (set EXTERNAL_DOCS_PATH for cross-cutting docs)"
 fi
 if [ -d "$PROJECT_ROOT/docs" ]; then
     echo "   - Repo-specific: docs/"

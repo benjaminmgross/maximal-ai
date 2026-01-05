@@ -20,15 +20,25 @@ error() {
     echo -e "${RED}$1${NC}"
 }
 
-# Verify MAXIMAL_AI_HOME is set
+# Verify MAXIMAL_AI_HOME is set and directory exists
 verify_install_dir() {
     if [ ! -d "$INSTALL_DIR" ]; then
         error "Error: MAXIMAL_AI_HOME directory not found: $INSTALL_DIR"
         echo ""
-        echo "Please ensure:"
-        echo "1. The maximal-ai repo is cloned"
-        echo "2. MAXIMAL_AI_HOME is set correctly in your ~/.zshrc"
-        echo "   export MAXIMAL_AI_HOME=\"\$HOME/dev/maximal-ai\""
+        echo "To fix this, run the following commands:"
+        echo ""
+        echo "  # Clone the repository"
+        echo "  git clone https://github.com/benjaminmgross/maximal-ai.git \$HOME/dev/maximal-ai"
+        echo ""
+        echo "  # Add to your shell configuration (~/.zshrc or ~/.bashrc)"
+        echo "  export MAXIMAL_AI_HOME=\"\$HOME/dev/maximal-ai\""
+        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+        echo ""
+        echo "  # Reload your shell and run the installer"
+        echo "  source ~/.zshrc"
+        echo "  cd \$MAXIMAL_AI_HOME && ./install.sh"
+        echo ""
+        echo "Would you like to set up now? (Run this in a new terminal after setup)"
         exit 1
     fi
 }

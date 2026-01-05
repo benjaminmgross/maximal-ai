@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-01-05
+
+### Fixed
+- Version synchronization between `pyproject.toml` and `install.sh` (both now 2.0.0)
+- Hook scripts now use `$TMPDIR` for log files with fallback to `/tmp`
+
+### Changed
+- Renamed `MINTY_DOCS_PATH` to `EXTERNAL_DOCS_PATH` for more generic naming
+- Improved `verify_install_dir()` with detailed auto-setup instructions
+- Added graceful degradation for hook dependencies (prettier, ruff, pytest)
+  - Hooks now silently continue if optional tools are not installed
+
+### Added
+- Prerequisites section in README with version requirements (Python 3.10+, Git 2.0+, Bash 4.0+, jq 1.5+)
+- Documentation for optional tools (Node.js, Ruff, pytest)
+
 ## [2.0.0] - 2026-01-04
 
 ### Breaking Changes

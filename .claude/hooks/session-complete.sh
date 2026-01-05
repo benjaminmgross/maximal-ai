@@ -1,6 +1,11 @@
 #!/bin/bash
 
-LOG_FILE="/tmp/claude-session-summary.log"
+# Session completion hook
+# Logs session summary with uncommitted changes
+# Uses TMPDIR if available, falls back to /tmp
+
+LOG_DIR="${TMPDIR:-/tmp}"
+LOG_FILE="${LOG_DIR}/claude-session-summary.log"
 
 echo "" >> "$LOG_FILE"
 echo "========================================" >> "$LOG_FILE"

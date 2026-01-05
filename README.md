@@ -42,6 +42,24 @@ graph TB
     C -.->|Uses| F
 ```
 
+## 📋 Prerequisites
+
+Before installing, ensure you have the following:
+
+| Requirement | Version | Check Command |
+|-------------|---------|---------------|
+| **Git** | 2.0+ | `git --version` |
+| **Bash** | 4.0+ | `bash --version` |
+| **Python** | 3.10+ | `python --version` |
+| **jq** | 1.5+ | `jq --version` |
+
+**Optional tools** (for enhanced functionality):
+- **Node.js/npm** - For JavaScript/TypeScript formatting (prettier)
+- **Ruff** - For Python formatting and linting (`pip install ruff`)
+- **pytest** - For Python test running (`pip install pytest`)
+
+**Note:** If optional tools are not installed, the hooks will gracefully skip those features without errors.
+
 ## 🚀 Quick Start
 
 ### One-Time Setup

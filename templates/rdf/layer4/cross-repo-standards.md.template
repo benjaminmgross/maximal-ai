@@ -1,7 +1,7 @@
 # Cross-Repository Standards
 
 > **Purpose:** Shared coding standards applied across all repositories.
-> **Location:** `$MINTY_DOCS_PATH/cross-cutting/coding-standards/`
+> **Location:** `$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/`
 > **Update Process:** Changes require team review before propagation.
 > **Update Trigger:** Modify when standards, tools, or conventions change.
 

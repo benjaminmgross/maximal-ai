@@ -36,15 +36,15 @@ Files will be named: `YYYY.MM.DD-{username}-description.md`
 The RPI workflow automatically loads coding standards from multiple sources:
 
 ### Priority Order:
-1. **Environment**: `$MINTY_DOCS_PATH/cross-cutting/coding-standards/`
+1. **Environment**: `$EXTERNAL_DOCS_PATH/cross-cutting/coding-standards/`
 2. **Local**: `docs/coding-standards/` in the current repository
 
 ### Configuration:
 
 **Option 1: Use external standards via environment variable**
 ```bash
-# Set MINTY_DOCS_PATH to your external standards repository
-export MINTY_DOCS_PATH="/path/to/your/standards-repo"
+# Set EXTERNAL_DOCS_PATH to your external standards repository
+export EXTERNAL_DOCS_PATH="/path/to/your/standards-repo"
 ```
 
 **Option 2: Use local standards (project-specific rules)**
@@ -72,7 +72,7 @@ The RPI workflow supports automatic documentation updates after implementation. 
 
 | Type | Path | When to Use |
 |------|------|-------------|
-| Cross-cutting | `$MINTY_DOCS_PATH/cross-cutting/` | Patterns, standards, or behaviors affecting multiple repos |
+| Cross-cutting | `$EXTERNAL_DOCS_PATH/cross-cutting/` | Patterns, standards, or behaviors affecting multiple repos |
 | Repo-specific | `docs/` | Features, APIs, or behaviors specific to this repository |
 
 ### Workflow
@@ -81,7 +81,7 @@ After implementation completes, the `/implement` command will:
 
 1. **Check** if documentation updates are warranted (new feature, changed behavior, new pattern)
 2. **Determine** the appropriate destination based on scope:
-   - Cross-cutting → `$MINTY_DOCS_PATH`
+   - Cross-cutting → `$EXTERNAL_DOCS_PATH`
    - Repo-specific → `docs/`
 3. **Prompt** for documentation if a destination exists
 4. **Skip silently** if no documentation destination is configured
@@ -91,7 +91,7 @@ After implementation completes, the `/implement` command will:
 **For cross-cutting documentation:**
 ```bash
 # Set in ~/.zshrc or ~/.bashrc
-export MINTY_DOCS_PATH="/path/to/minty-docs"
+export EXTERNAL_DOCS_PATH="/path/to/external-docs"
 ```
 
 **For repo-specific documentation:**
@@ -102,7 +102,7 @@ mkdir -p docs/
 
 ### Graceful Degradation
 
-If neither `$MINTY_DOCS_PATH` is configured nor the `docs/` folder is populated:
+If neither `$EXTERNAL_DOCS_PATH` is configured nor the `docs/` folder is populated:
 - No errors or warnings are shown
 - The workflow continues normally
 - Users can add documentation manually later
