@@ -199,6 +199,48 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 - **Mental alignment** - Plans are easier to review than PRs
 - **Measurable success** - Clear verification criteria
 
+## Automated Hooks
+
+This framework includes Claude Code hooks that automate verification and formatting.
+
+### Hook Behavior
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| **auto-format** | After Edit/Write | Runs Prettier (JS/TS) or Ruff (Python) |
+| **post-edit** | After Edit/Write | Runs tests in background, logs to `/tmp/claude-test-results.log` |
+| **pre-commit-check** | Before `git commit` | Blocks commit if tests fail (exit 2) |
+| **session-complete** | On Stop | Logs session summary to `/tmp/claude-session-summary.log` |
+
+### Verification Philosophy
+
+> "Give Claude a way to verify its work. If Claude has that feedback loop, it will 2-3x the quality of the final result." — Boris Cherny
+
+The hooks create automatic feedback loops:
+- **Formatting** happens instantly after every edit
+- **Tests** run in background to catch regressions early
+- **Commits** are blocked if tests fail
+- **Sessions** end with a summary of uncommitted work
+
+### Checking Hook Logs
+
+```bash
+# View test results from background runs
+tail -f /tmp/claude-test-results.log
+
+# View session summaries
+cat /tmp/claude-session-summary.log
+```
+
+### Customizing Hooks
+
+Hook scripts are in `.claude/hooks/`. Modify them for project-specific needs:
+- Add additional formatters
+- Change test commands
+- Adjust timeout thresholds
+
+Configuration is in `.claude/settings.json`.
+
 ## File Organization
 
 ```
@@ -213,14 +255,21 @@ project-root/
 │   │   ├── blocked.md
 │   │   ├── create_handoff.md
 │   │   └── resume_handoff.md
-│   └── agents/         # Specialized sub-agents
-│       ├── codebase-locator.md
-│       ├── codebase-analyzer.md
-│       ├── codebase-pattern-finder.md
-│       ├── web-search-researcher.md
-│       ├── file-analyzer.md
-│       ├── bug-hunter.md
-│       └── test-runner.md
+│   ├── agents/         # Specialized sub-agents
+│   │   ├── codebase-locator.md
+│   │   ├── codebase-analyzer.md
+│   │   ├── codebase-pattern-finder.md
+│   │   ├── web-search-researcher.md
+│   │   ├── file-analyzer.md
+│   │   ├── bug-hunter.md
+│   │   ├── test-runner.md
+│   │   └── code-simplifier.md
+│   ├── hooks/          # Automation hooks
+│   │   ├── auto-format.sh
+│   │   ├── post-edit.sh
+│   │   ├── pre-commit-check.sh
+│   │   └── session-complete.sh
+│   └── settings.json   # Hooks configuration
 ├── thoughts/           # RPI artifacts (symlinked to minty-thoughts)
 │   ├── research/       # Research documents (OUTPUT from phase 1)
 │   │   └── YYYY.MM.DD-username-description.md
@@ -285,6 +334,9 @@ The bug-hunter agent provides elite-level bug detection, identifying security vu
 
 ### Test Execution
 The test-runner agent executes tests in an isolated context, preventing test output from polluting your main conversation while still providing actionable results.
+
+### Code Simplification
+The code-simplifier agent cleans up code after implementation, reducing complexity and nesting without changing functionality. Invoke with: "Use the code-simplifier agent to clean up the files I just modified."
 
 ### Project Management
 - **Epic Oneshot**: Chain all three phases for quick feature implementation

@@ -1,0 +1,127 @@
+# AGENTS.md
+
+> This file provides AI coding agents with context for working in this repository.
+> Keep this file under 150 lines. See docs/ for detailed guides.
+> **Update Trigger:** Modify when commands, patterns, or boundaries change.
+
+## Commands
+
+```bash
+# Development
+uv sync                              # Install dependencies
+uv run uvicorn app.main:app --reload # Start dev server
+uv run pytest                        # Run tests
+uv run pytest --cov=app              # Run with coverage
+uv run ruff check .                  # Lint code
+uv run ruff format .                 # Format code
+uv run mypy src/                     # Type checking
+
+# Database
+uv run alembic upgrade head          # Apply migrations
+uv run alembic revision --autogenerate -m "description"  # Create migration
+
+# Build
+docker compose up -d                 # Start services
+docker compose logs -f app           # View logs
+```
+
+## Tech Stack
+
+- **Language**: Python 3.12+
+- **Package Manager**: uv
+- **Framework**: FastAPI 0.115+
+- **ORM**: SQLAlchemy 2.0+ with async
+- **Database**: PostgreSQL 16, Redis 7 (cache/sessions)
+- **Testing**: pytest, pytest-asyncio, pytest-cov
+- **Linting**: ruff (replaces black, isort, flake8)
+- **Type Checking**: mypy with strict mode
+
+## Project Structure
+
+```
+├── src/app/
+│   ├── api/routes/      # FastAPI route handlers
+│   ├── core/            # Config, deps, security
+│   ├── models/          # SQLAlchemy ORM models
+│   ├── schemas/         # Pydantic request/response models
+│   └── services/        # Business logic layer
+├── tests/
+│   ├── unit/            # Fast, isolated tests
+│   ├── integration/     # Database/API tests
+│   └── conftest.py      # Shared fixtures
+├── alembic/             # Database migrations
+└── docs/                # Extended documentation
+```
+
+## Code Style
+
+### Good Example
+```python
+from typing import Annotated
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+async def get_user_by_id(
+    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> User:
+    """Fetch user by ID or raise 404.
+
+    Args:
+        user_id: The user's database ID.
+        db: Database session dependency.
+
+    Returns:
+        User model instance.
+
+    Raises:
+        HTTPException: If user not found.
+    """
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User {user_id} not found",
+        )
+    return user
+```
+
+## Testing
+
+- **Unit tests**: Mock external dependencies, test business logic
+- **Integration tests**: Use test database, test full request cycle
+- **Coverage target**: 80% minimum
+- **Run specific test**: `uv run pytest tests/unit/test_users.py -v`
+
+## Boundaries
+
+### Always Do
+- [ ] Run `uv run pytest` before committing
+- [ ] Run `uv run ruff check . && uv run ruff format .` before committing
+- [ ] Update tests when changing behavior
+- [ ] Use type hints for all function signatures
+
+### Ask First
+- [ ] Database schema changes (migrations required)
+- [ ] Adding new dependencies to pyproject.toml
+- [ ] Modifying authentication/authorization logic
+- [ ] Changing API response formats (breaking changes)
+
+### Never Do
+- [ ] Commit .env files or secrets
+- [ ] Remove failing tests without explanation
+- [ ] Modify `alembic/versions/` directly (use CLI)
+- [ ] Skip type hints on public functions
+- [ ] Use `# type: ignore` without comment explaining why
+
+## Git Workflow
+
+- **Branch naming**: `feature/`, `fix/`, `refactor/`, `docs/`
+- **Commit format**: `type(scope): description` (conventional commits)
+- **PR requirements**: Tests pass, coverage maintained, 1+ reviewer
+
+## Additional Context
+
+- See `docs/ai/protocols/` for workflow protocols
+- See `docs/ai/guides/` for detailed implementation guides
+- See `.folder.md` files in each directory for local context

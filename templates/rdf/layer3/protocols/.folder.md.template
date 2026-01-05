@@ -1,0 +1,28 @@
+# Folder: protocols/
+
+> **Update Trigger:** Add new protocol when complex workflow needs documentation.
+> Update existing protocols when process changes.
+
+## Purpose
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+Contains step-by-step protocols for AI agents handling complex workflows.
+Protocols document decision trees, edge cases, and recovery procedures.
+
+## Invariants
+
+<!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
+- Each protocol must include: trigger conditions, steps, success criteria
+- Protocols should be actionable, not aspirational
+- Include examples of edge cases and how to handle them
+
+---
+
+<!-- AUTO-GENERATED BELOW - DO NOT EDIT MANUALLY -->
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `code-review.md` | Code review checklist and process |
+| `error-handling.md` | How to handle and recover from errors |

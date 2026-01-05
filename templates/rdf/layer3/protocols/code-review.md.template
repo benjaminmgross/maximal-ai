@@ -1,0 +1,168 @@
+# Protocol: Code Review
+
+> **Trigger Conditions:** When reviewing a PR, completing a feature, or before merging.
+> **Success Criteria:** All checklist items verified, no blocking issues identified.
+> **Update Trigger:** Modify when review process or criteria change.
+
+## Overview
+
+This protocol guides AI agents through a systematic code review process.
+Follow these steps in order. Do not skip steps.
+
+## Pre-Review Setup
+
+### Step 1: Understand the Context
+
+```bash
+# View the PR diff
+gh pr view <PR_NUMBER> --json title,body,files
+
+# Check changed files
+gh pr diff <PR_NUMBER>
+
+# View related issues
+gh pr view <PR_NUMBER> --json linkedIssues
+```
+
+**Questions to answer:**
+- [ ] What is this PR trying to accomplish?
+- [ ] What files are changed?
+- [ ] Are there any related issues or PRs?
+
+### Step 2: Check CI Status
+
+```bash
+gh pr checks <PR_NUMBER>
+```
+
+**Required:**
+- [ ] All CI checks passing
+- [ ] Coverage threshold met
+- [ ] No security vulnerabilities flagged
+
+---
+
+## Review Checklist
+
+### Code Quality
+
+#### Correctness
+- [ ] Logic correctly implements the requirements
+- [ ] Edge cases are handled
+- [ ] Error handling is appropriate
+- [ ] No obvious bugs or logic errors
+
+#### Design
+- [ ] Changes follow existing patterns in the codebase
+- [ ] No unnecessary complexity introduced
+- [ ] Single Responsibility Principle respected
+- [ ] Dependencies flow in the correct direction (routes -> services -> models)
+
+#### Testing
+- [ ] New functionality has tests
+- [ ] Tests cover happy path and error cases
+- [ ] Tests are readable and maintainable
+- [ ] No flaky tests introduced
+
+#### Security
+- [ ] No secrets or credentials in code
+- [ ] Input validation on all user data
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (output encoding)
+- [ ] Authentication/authorization checks present
+
+### Style & Conventions
+
+- [ ] Type hints on all public functions
+- [ ] Docstrings on public APIs
+- [ ] Consistent naming (snake_case functions, PascalCase classes)
+- [ ] No commented-out code
+- [ ] Linting passes (`ruff check .`)
+
+---
+
+## Review Actions
+
+### Approve
+Use when:
+- All checklist items pass
+- No blocking issues
+- Minor suggestions are optional
+
+```
+LGTM! Approving this PR.
+
+**What I reviewed:**
+- [List key areas reviewed]
+
+**Minor suggestions (optional):**
+- [Any non-blocking improvements]
+```
+
+### Request Changes
+Use when:
+- Blocking issues found
+- Tests missing for new functionality
+- Security concerns
+
+```
+Requesting changes.
+
+**Blocking issues:**
+1. [Issue description with file:line reference]
+   - Why it's a problem
+   - Suggested fix
+
+**Must address before merge:**
+- [ ] Issue 1
+- [ ] Issue 2
+```
+
+### Comment
+Use when:
+- Need clarification
+- Suggesting improvements that aren't blocking
+- Asking questions about design decisions
+
+---
+
+## Edge Cases
+
+### Large PRs (>500 lines)
+1. Ask if PR can be split into smaller PRs
+2. Review in logical chunks (by feature or layer)
+3. Focus on highest-risk areas first
+
+### Refactoring PRs
+1. Verify behavior is unchanged (tests pass without modification)
+2. Check for accidental behavior changes
+3. Confirm refactoring improves maintainability
+
+### Dependency Updates
+1. Check changelog for breaking changes
+2. Verify tests pass
+3. Review security advisories
+
+---
+
+## Recovery Procedures
+
+### If CI is failing
+1. Check which step is failing
+2. Review logs for error details
+3. Comment with specific failure information
+
+### If unsure about changes
+1. Ask the author for clarification
+2. Reference relevant documentation
+3. Suggest a sync discussion for complex topics
+
+---
+
+## Post-Review
+
+After review is complete:
+- [ ] All comments addressed or acknowledged
+- [ ] CI passing
+- [ ] Approvals obtained (per CODEOWNERS)
+- [ ] Ready for merge
