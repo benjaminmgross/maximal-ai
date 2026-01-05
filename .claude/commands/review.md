@@ -10,7 +10,7 @@ Review the current branch's changes against the base branch.
 
 ### Branch Information
 !`echo "Current branch: $(git branch --show-current 2>/dev/null || echo 'detached HEAD')"`
-!`echo "Base branch: $(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo 'main')"`
+!`BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@'); if [ -z "$BASE" ]; then BASE=$(git branch -r 2>/dev/null | grep -E 'origin/(main|master)$' | head -1 | sed 's@.*origin/@@'); fi; echo "Base branch: ${BASE:-main}"`
 !`echo "Commits ahead: $(git rev-list --count $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~10)..HEAD 2>/dev/null || echo 'unknown')"`
 
 ### Files Changed
