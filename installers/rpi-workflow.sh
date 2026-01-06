@@ -61,14 +61,27 @@ echo ""
 
 # Copy command files
 echo "Installing commands..."
+
+# Core RPI workflow commands
 cp "$INSTALL_DIR/.claude/commands/research.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/plan.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/implement.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/epic-oneshot.md" "$PROJECT_ROOT/.claude/commands/"
+
+# Session management commands
 cp "$INSTALL_DIR/.claude/commands/standup.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/blocked.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/create_handoff.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/resume_handoff.md" "$PROJECT_ROOT/.claude/commands/"
+
+# Inner-loop commands (pre-computed context)
+cp "$INSTALL_DIR/.claude/commands/commit-push-pr.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/review.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/test-and-fix.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/verify.md" "$PROJECT_ROOT/.claude/commands/"
+
+# Automation commands
+cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."
@@ -132,9 +145,26 @@ echo ""
 info "RPI Workflow installation complete!"
 echo ""
 echo "Installed:"
-echo "   - 8 commands: research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff"
-echo "   - 8 agents: locator, analyzer, pattern-finder, researcher, file-analyzer, bug-hunter, test-runner, code-simplifier"
-echo "   - 4 hooks: auto-format, post-edit (background tests), pre-commit-check, session-complete"
+echo ""
+echo "   📋 Core RPI Commands (4):"
+echo "      research, plan, implement, epic-oneshot"
+echo ""
+echo "   🔄 Inner-Loop Commands (4) - Pre-computed context for speed:"
+echo "      commit-push-pr, review, test-and-fix, verify"
+echo ""
+echo "   📊 Session Management (4):"
+echo "      standup, blocked, create_handoff, resume_handoff"
+echo ""
+echo "   🤖 Automation Commands (1):"
+echo "      observe-docstrings"
+echo ""
+echo "   🔍 Sub-Agents (8) - Spawned automatically by Claude:"
+echo "      locator, analyzer, pattern-finder, researcher,"
+echo "      file-analyzer, bug-hunter, test-runner, code-simplifier"
+echo ""
+echo "   ⚡ Hooks (4):"
+echo "      auto-format, post-edit (background tests),"
+echo "      pre-commit-check, session-complete"
 echo ""
 echo "Documentation destinations:"
 if [ -n "$EXTERNAL_DOCS_PATH" ]; then
