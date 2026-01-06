@@ -30,6 +30,12 @@ $ARGUMENTS
 ### Changed Files in PR
 !`gh pr diff --name-only 2>/dev/null | head -30 || echo "No diff"`
 
+### Available Plan Files
+!`ls -t thoughts/plans/*.md 2>/dev/null | head -5 || echo "No plan files found"`
+
+### Available Review Files
+!`ls -t thoughts/reviews/*.md 2>/dev/null | head -5 || echo "No review files found"`
+
 ## Process
 
 ### Step 1: Parse Arguments
@@ -38,16 +44,12 @@ Extract from the arguments provided:
 1. **Plan file path** - The implementation plan
 2. **Review file path** - The review from Session 2
 
-If arguments are missing, prompt:
+If arguments are missing, prompt the user with the available files shown in "Available Plan Files" and "Available Review Files" sections above:
 ```
 Please provide both files:
 /address-review [plan-file] [review-file]
 
-Recent plan files:
-$(ls -t thoughts/plans/*.md 2>/dev/null | head -5)
-
-Recent review files:
-$(ls -t thoughts/reviews/*.md 2>/dev/null | head -5)
+See "Available Plan Files" and "Available Review Files" above for options.
 ```
 
 ### Step 2: Read Context Files
@@ -179,8 +181,14 @@ Review feedback addressed!
 
 Response file: thoughts/reviews/[DATE]-pr-[NUMBER]-response-[ROUND].md
 
+Statistics:
+- Critical issues:  [N] fixed, [N] won't fix, [N] deferred
+- Suggestions:      [N] fixed, [N] won't fix, [N] deferred
+- Questions:        [N] answered
+- Fix rate:         [X]% of critical issues addressed
+
 Commits pushed:
-- [list of commits]
+- [list of commits with issue references]
 
 PR updated: [PR URL]
 

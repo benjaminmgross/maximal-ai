@@ -10,6 +10,10 @@ You are a code reviewer in a fresh session. Your job is to review this PR with f
 $ARGUMENTS
 </pr_identifier>
 
+**Usage:** `/review-pr [PR_NUMBER]` or `/review-pr [PR_NUMBER] --round [N]`
+
+If `--round` is not specified, the round number will be auto-detected based on existing review files.
+
 ## Pre-computed PR Context
 
 ### PR Metadata
@@ -27,6 +31,9 @@ $ARGUMENTS
 ### Full Diff (first 600 lines)
 !`gh pr diff $ARGUMENTS 2>/dev/null | head -600 || echo "No diff"`
 
+### Diff Truncation Warning
+!`TOTAL=$(gh pr diff $ARGUMENTS 2>/dev/null | wc -l); if [ "$TOTAL" -gt 600 ]; then echo "⚠️  TRUNCATED: Showing 600 of $TOTAL lines. Use 'gh pr diff $ARGUMENTS -- path/to/file' for full file diffs."; else echo "✓ Complete diff shown ($TOTAL lines)"; fi`
+
 ### Linked Plan File (from PR body)
 !`gh pr view $ARGUMENTS --json body --jq '.body' 2>/dev/null | grep -oE 'thoughts/plans/[^)>\s]+\.md' | head -1 || echo "No plan file linked"`
 
@@ -35,6 +42,12 @@ $ARGUMENTS
 
 ### Today's Date
 !`date +%Y.%m.%d`
+
+### Existing Reviews for This PR
+!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); ls -t thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null || echo "No existing reviews"`
+
+### Auto-detected Round Number
+!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); EXISTING=$(ls thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null | wc -l); echo "Round: $((EXISTING + 1))"`
 
 ## Review Process
 
@@ -171,6 +184,8 @@ Clarifications needed about design decisions.
 1. Ensure `thoughts/reviews/` directory exists
 2. Write the review file with the structured format above
 3. Confirm the file path to the user
+
+**Note:** Review files in `thoughts/reviews/` are gitignored by default (the entire `thoughts/` directory is excluded). This keeps review artifacts local to your machine. If you want to share reviews, post summaries to GitHub using Step 5.
 
 ### Step 5: Optionally Post to GitHub
 

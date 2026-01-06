@@ -26,7 +26,7 @@ description: Commit changes, push to remote, and create PR with pre-computed con
 
 ### Commits Not Yet in PR (if PR exists)
 !`gh pr view --json commits --jq '.commits | length' 2>/dev/null || echo "0"` commits in PR
-!`git rev-list --count $(git merge-base HEAD origin/main 2>/dev/null || echo HEAD~10)..HEAD 2>/dev/null || echo "?"` commits on branch
+!`BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || git branch -r | grep -E 'origin/(main|master|develop|dev)$' | head -1 | sed 's@.*origin/@@' || echo "main"); git rev-list --count $(git merge-base HEAD origin/$BASE 2>/dev/null || echo HEAD~10)..HEAD 2>/dev/null || echo "?"` commits on branch
 
 ### Staged Changes
 !`git diff --cached --stat 2>/dev/null || echo "Nothing staged"`
