@@ -174,6 +174,11 @@ These commands use inline bash to pre-compute context, eliminating tool call rou
 - `/verify` - Quick health check (tests, types, lint, build) pre-computed
 - `/review` - Code review with diff context pre-loaded
 
+### Multi-Session PR Review Commands
+These commands enable adversarial code review across separate Claude sessions:
+- `/review-pr [PR#]` - Review a GitHub PR with structured output (Session 2)
+- `/address-review [plan-file] [review-file]` - Address review feedback systematically (Session 1)
+
 ### Usage Examples
 ```bash
 # Research how authentication works
@@ -202,6 +207,20 @@ These commands use inline bash to pre-compute context, eliminating tool call rou
 
 # Review current branch changes
 /review
+
+# Multi-session PR review workflow
+# Session 1: After implementation
+/implement thoughts/plans/2025.01.08-username-oauth.md
+/commit-push-pr  # Creates PR #123
+
+# Session 2: Fresh review (new terminal)
+/review-pr 123  # Creates thoughts/reviews/2025.01.08-pr-123-review-1.md
+
+# Session 1: After /clear, address feedback
+/address-review thoughts/plans/2025.01.08-username-oauth.md thoughts/reviews/2025.01.08-pr-123-review-1.md
+
+# Session 2: Re-review and approve
+/review-pr 123  # APPROVED → merge in GitHub
 ```
 
 ## Slash Command Quick Reference
@@ -210,11 +229,13 @@ When performing these workflows, use the corresponding command to leverage pre-c
 
 | Workflow | Command | What it Pre-computes |
 |----------|---------|---------------------|
-| Committing code | `/commit-push-pr` | git status, branch, diff, recent commits |
+| Committing code | `/commit-push-pr` | git status, branch, diff, recent commits, existing PR |
 | Running/fixing tests | `/test-and-fix` | test output, type errors, lint errors |
 | Quick verification | `/verify` | tests, types, lint, build results |
 | Code review | `/review` | branch diff, changed files, commits |
 | Progress report | `/standup` | git activity, RPI artifacts, TODOs |
+| PR review (Session 2) | `/review-pr` | PR metadata, diff, commits, linked plan |
+| Address feedback (Session 1) | `/address-review` | branch status, PR state, recent commits |
 
 **Why use these commands?** They use inline bash (`!` backtick syntax) to pre-compute context before Claude sees the prompt. This eliminates multiple tool call round-trips:
 
@@ -290,6 +311,89 @@ Hook scripts are in `.claude/hooks/`. Modify them for project-specific needs:
 
 Configuration is in `.claude/settings.json`.
 
+## Multi-Session PR Review Workflow
+
+The most powerful quality improvement comes from adversarial code review across separate Claude sessions. This ensures fresh perspective without cognitive bias.
+
+### Why It Works
+
+1. **Fresh Perspective** - Session 2 has no memory of writing the code
+2. **Context Separation** - Each session is focused on its role
+3. **Structured Feedback** - Review artifacts are machine-parseable
+4. **Auditability** - Every review round is documented
+
+### The Workflow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ SESSION 1 (Implementation)                                   │
+├─────────────────────────────────────────────────────────────┤
+│ /implement thoughts/plans/yyyy.mm.dd-user-feature.md        │
+│ /commit-push-pr                                             │
+│ → Creates PR #123                                           │
+│ → Context nearly exhausted, pause or /clear                 │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ SESSION 2 (Fresh Review - new terminal)                      │
+├─────────────────────────────────────────────────────────────┤
+│ /review-pr 123                                              │
+│ → Fetches PR diff via gh                                    │
+│ → Reviews with fresh eyes                                   │
+│ → Creates thoughts/reviews/yyyy.mm.dd-pr-123-review-1.md    │
+│ → Verdict: REQUEST_CHANGES                                  │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ SESSION 1 (After /clear)                                     │
+├─────────────────────────────────────────────────────────────┤
+│ /address-review [plan-file] [review-file]                   │
+│ → Reads plan for original intent                            │
+│ → Parses review feedback                                    │
+│ → Creates todo for each issue                               │
+│ → Fixes issues systematically                               │
+│ → Commits with references: "fix: address review C1 - ..."   │
+│ → Pushes (PR auto-updates)                                  │
+│ → Creates thoughts/reviews/yyyy.mm.dd-pr-123-response-1.md  │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ SESSION 2 (Re-review)                                        │
+├─────────────────────────────────────────────────────────────┤
+│ /review-pr 123                                              │
+│ → Verifies issues were addressed                            │
+│ → Creates thoughts/reviews/yyyy.mm.dd-pr-123-review-2.md    │
+│ → Verdict: APPROVED                                         │
+│ → Merge in GitHub                                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Review Artifacts
+
+Reviews are stored in `thoughts/reviews/` with structured format:
+
+```yaml
+---
+pr_number: 123
+round: 1
+verdict: REQUEST_CHANGES
+reviewer: username
+---
+
+## Critical Issues (Must Fix)
+### C1: Missing null check
+- **File:** src/auth.ts:42
+- **Issue:** ...
+- **Suggestion:** ...
+
+## Suggestions (Nice to Have)
+### S1: Rename variable
+- **File:** src/auth.ts:100
+- **Issue:** ...
+```
+
+This format allows `/address-review` to parse and create actionable todos.
+
 ## File Organization
 
 ```
@@ -303,7 +407,14 @@ project-root/
 │   │   ├── standup.md
 │   │   ├── blocked.md
 │   │   ├── create_handoff.md
-│   │   └── resume_handoff.md
+│   │   ├── resume_handoff.md
+│   │   ├── commit-push-pr.md
+│   │   ├── review.md
+│   │   ├── review-pr.md
+│   │   ├── address-review.md
+│   │   ├── test-and-fix.md
+│   │   ├── verify.md
+│   │   └── observe-docstrings.md
 │   ├── agents/         # Specialized sub-agents
 │   │   ├── codebase-locator.md
 │   │   ├── codebase-analyzer.md
@@ -324,8 +435,11 @@ project-root/
 │   │   └── YYYY.MM.DD-username-description.md
 │   ├── plans/          # Implementation plans (OUTPUT from phase 2)
 │   │   └── YYYY.MM.DD-username-description.md
-│   └── handoffs/       # Session handoff documents
-│       └── YYYY.MM.DD-username-description.md
+│   ├── handoffs/       # Session handoff documents
+│   │   └── YYYY.MM.DD-username-description.md
+│   └── reviews/        # PR review artifacts (multi-session workflow)
+│       ├── YYYY.MM.DD-pr-N-review-R.md     # Review from Session 2
+│       └── YYYY.MM.DD-pr-N-response-R.md   # Response from Session 1
 └── CLAUDE.md           # This file
 ```
 
