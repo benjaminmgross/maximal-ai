@@ -43,11 +43,14 @@ If `--round` is not specified, the round number will be auto-detected based on e
 ### Today's Date
 !`date +%Y.%m.%d`
 
-### Existing Reviews for This PR
-!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); ls -t thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null || echo "No existing reviews"`
+### Existing Review Files
+!`ls -t thoughts/reviews/*-review-*.md 2>/dev/null | head -10 || echo "No existing reviews"`
 
-### Auto-detected Round Number
-!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); EXISTING=$(ls thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null | wc -l); echo "Round: $((EXISTING + 1))"`
+### Review Round Detection
+Determine the round number by:
+1. Look at the PR number from "PR Metadata" section above
+2. Count matching files in "Existing Review Files" that contain that PR number
+3. Round = count + 1 (if no previous reviews, this is round 1)
 
 ## Review Process
 

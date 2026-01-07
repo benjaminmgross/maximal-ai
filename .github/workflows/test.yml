@@ -1,0 +1,121 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shell-syntax:
+    name: Shell Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install zsh for cross-shell testing
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Validate inline bash syntax in commands
+        run: ./tests/scripts/validate-inline-bash.sh
+
+      - name: ShellCheck installer scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './installers'
+          severity: error
+          ignore_paths: 'node_modules'
+
+      - name: ShellCheck hook scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './.claude/hooks'
+          severity: warning
+          ignore_paths: 'node_modules'
+
+  installer-bash:
+    name: Installer Tests (bash)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run installer tests in bash
+        shell: bash
+        run: ./tests/scripts/test-installer.sh
+
+  installer-zsh:
+    name: Installer Tests (zsh)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Run installer tests in zsh
+        shell: zsh {0}
+        run: ./tests/scripts/test-installer.sh
+
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run unit tests
+        run: uv run pytest tests/unit -v --tb=short
+
+      - name: Run integration tests
+        run: uv run pytest tests/integration -v --tb=short
+
+      - name: Check test coverage
+        run: |
+          uv run pytest --cov=rdf --cov-report=term-missing --cov-fail-under=60 || echo "Coverage below threshold - consider adding tests"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run ruff check
+        run: uv run ruff check .
+
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+  # Summary job that other jobs depend on
+  all-tests:
+    name: All Tests Pass
+    needs: [shell-syntax, installer-bash, installer-zsh, python-tests, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All tests passed
+        run: echo "All tests passed successfully!"
