@@ -168,25 +168,166 @@ install_layer1() {
 install_layer2() {
     info "Installing Layer 2: Code Docs..."
 
-    # Create .folder.md template at src/ root if exists
-    if [ -d "$PROJECT_ROOT/src" ] && [ ! -f "$PROJECT_ROOT/src/.folder.md" ]; then
-        if [ -f "$INSTALL_DIR/templates/rdf/layer2/.folder.md.template" ]; then
-            cp "$INSTALL_DIR/templates/rdf/layer2/.folder.md.template" "$PROJECT_ROOT/src/.folder.md"
-            echo "  Created src/.folder.md template"
-        fi
+    # Discover source directories by looking for code files
+    echo ""
+    echo "Discovering source directories..."
+    echo ""
+
+    # Find all directories containing source files, excluding common non-source dirs
+    DISCOVERED_DIRS=$(find "$PROJECT_ROOT" -type f \( \
+        -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
+        -o -name "*.go" -o -name "*.rs" -o -name "*.rb" -o -name "*.java" \
+    \) 2>/dev/null | \
+        grep -v -E "(node_modules|\.git|__pycache__|\.venv|venv|\.tox|build|dist|\.egg-info|\.mypy_cache|\.pytest_cache|\.ruff_cache)" | \
+        xargs -I {} dirname {} 2>/dev/null | \
+        sort -u | \
+        sed "s|^$PROJECT_ROOT/||" | \
+        cut -d'/' -f1 | \
+        sort -u | \
+        grep -v -E "^(\.|node_modules|docs|tests?|spec|fixtures|coverage|htmlcov)$" || true)
+
+    if [ -z "$DISCOVERED_DIRS" ]; then
+        warn "No source directories found with code files."
+        echo ""
+        echo "You can manually specify directories later with:"
+        echo "  rdf scaffold-folders <directory>"
+        return 0
     fi
 
-    # Prompt for scaffolding
+    # Count files and subdirs for each discovered directory
+    echo "Found the following source directories:"
     echo ""
-    echo "Would you like to scaffold .folder.md files in all source directories?"
-    read -p "(y/N): " scaffold
-    if [ "$scaffold" = "y" ] || [ "$scaffold" = "Y" ]; then
-        if command -v rdf &> /dev/null; then
-            rdf scaffold-folders src/
-        else
-            warn "  (rdf command not available - install Layer 5 first, then run: rdf scaffold-folders src/)"
+    echo "┌─────────────────────────────────────────────────────────────────┐"
+    printf "│ %-3s %-25s %10s %10s │\n" "#" "Directory" "Files" "Subdirs"
+    echo "├─────────────────────────────────────────────────────────────────┤"
+
+    COUNTER=1
+    DIR_ARRAY=()
+    for dir in $DISCOVERED_DIRS; do
+        if [ -d "$PROJECT_ROOT/$dir" ]; then
+            FILE_COUNT=$(find "$PROJECT_ROOT/$dir" -type f \( \
+                -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
+                -o -name "*.go" -o -name "*.rs" -o -name "*.rb" -o -name "*.java" \
+            \) 2>/dev/null | wc -l)
+
+            SUBDIR_COUNT=$(find "$PROJECT_ROOT/$dir" -type d 2>/dev/null | \
+                grep -v -E "(__pycache__|\.)" | wc -l)
+            SUBDIR_COUNT=$((SUBDIR_COUNT - 1))
+
+            printf "│ %-3s %-25s %10s %10s │\n" "$COUNTER" "$dir/" "$FILE_COUNT" "$SUBDIR_COUNT"
+            DIR_ARRAY+=("$dir")
+            COUNTER=$((COUNTER + 1))
         fi
+    done
+
+    echo "└─────────────────────────────────────────────────────────────────┘"
+    echo ""
+
+    # Selection prompt
+    echo "Select directories to add .folder.md files (including all subdirectories):"
+    echo ""
+    echo "  a) All listed directories"
+    echo "  n) None (skip for now)"
+    echo "  1,2,3) Specific numbers (comma-separated)"
+    echo "  custom) Enter custom directory path"
+    echo ""
+    read -p "Your choice [a/n/numbers/custom]: " choice
+
+    SELECTED_DIRS=()
+
+    case "$choice" in
+        a|A)
+            SELECTED_DIRS=("${DIR_ARRAY[@]}")
+            ;;
+        n|N|"")
+            echo "  Skipping .folder.md creation."
+            echo "  Run later with: rdf scaffold-folders <directory>"
+            return 0
+            ;;
+        custom)
+            echo ""
+            read -p "Enter directory path (relative to project root): " custom_dir
+            if [ -d "$PROJECT_ROOT/$custom_dir" ]; then
+                SELECTED_DIRS=("$custom_dir")
+            else
+                error "Directory not found: $custom_dir"
+                return 1
+            fi
+            ;;
+        *)
+            IFS=',' read -ra NUMS <<< "$choice"
+            for num in "${NUMS[@]}"; do
+                num=$(echo "$num" | tr -d ' ')
+                if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le "${#DIR_ARRAY[@]}" ]; then
+                    SELECTED_DIRS+=("${DIR_ARRAY[$((num-1))]}")
+                else
+                    warn "Invalid selection: $num (skipping)"
+                fi
+            done
+            ;;
+    esac
+
+    if [ ${#SELECTED_DIRS[@]} -eq 0 ]; then
+        echo "  No valid directories selected."
+        return 0
     fi
+
+    # Create .folder.md files
+    echo ""
+    info "Creating .folder.md files..."
+
+    TEMPLATE="$INSTALL_DIR/templates/rdf/layer2/.folder.md.template"
+    CREATED=0
+    SKIPPED=0
+
+    for dir in "${SELECTED_DIRS[@]}"; do
+        while IFS= read -r subdir; do
+            [ -z "$subdir" ] && continue
+            rel_path="${subdir#$PROJECT_ROOT/}"
+
+            if [ -f "$subdir/.folder.md" ]; then
+                SKIPPED=$((SKIPPED + 1))
+            else
+                if [ -f "$TEMPLATE" ]; then
+                    dir_name=$(basename "$subdir")
+                    sed "s/{{FOLDER_NAME}}/$dir_name/g" "$TEMPLATE" > "$subdir/.folder.md" 2>/dev/null || \
+                        cp "$TEMPLATE" "$subdir/.folder.md"
+                    echo "  ✓ $rel_path/.folder.md"
+                    CREATED=$((CREATED + 1))
+                else
+                    dir_name=$(basename "$subdir")
+                    cat > "$subdir/.folder.md" << EOFMD
+# $dir_name/
+
+> **Purpose:** TODO: Describe the purpose of this directory
+> **Owner:** TODO: Team or individual responsible
+
+## Contents
+
+TODO: List key files and their purposes
+
+## Dependencies
+
+TODO: What this directory depends on
+
+## Dependents
+
+TODO: What depends on this directory
+EOFMD
+                    echo "  ✓ $rel_path/.folder.md (minimal template)"
+                    CREATED=$((CREATED + 1))
+                fi
+            fi
+        done < <(find "$PROJECT_ROOT/$dir" -type d 2>/dev/null | \
+            grep -v -E "(__pycache__|\.git|node_modules|\.venv|venv|\.tox|\.egg-info|\.mypy_cache)")
+    done
+
+    echo ""
+    echo "  Created: $CREATED .folder.md files"
+    [ $SKIPPED -gt 0 ] && echo "  Skipped: $SKIPPED (already exist)"
+    echo ""
+    echo "  Next: Edit the .folder.md files to describe each directory's purpose."
+    echo "  Tip: Use 'rdf validate' to check for missing documentation."
 }
 
 install_layer3() {

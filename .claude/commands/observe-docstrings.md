@@ -1,3 +1,7 @@
+---
+description: /observe-docstrings
+---
+
 # /observe-docstrings
 
 Observe function behavior at runtime and interactively generate complete docstrings.

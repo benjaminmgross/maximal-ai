@@ -31,23 +31,33 @@ If `--round` is not specified, the round number will be auto-detected based on e
 ### Full Diff (first 600 lines)
 !`gh pr diff $ARGUMENTS 2>/dev/null | head -600 || echo "No diff"`
 
-### Diff Truncation Warning
-!`TOTAL=$(gh pr diff $ARGUMENTS 2>/dev/null | wc -l); if [ "$TOTAL" -gt 600 ]; then echo "⚠️  TRUNCATED: Showing 600 of $TOTAL lines. Use 'gh pr diff $ARGUMENTS -- path/to/file' for full file diffs."; else echo "✓ Complete diff shown ($TOTAL lines)"; fi`
+### Total Diff Lines
+!`gh pr diff $ARGUMENTS 2>/dev/null | wc -l | tr -d ' '`
+
+**Note:** If total lines > 600, the diff above is truncated. Use `gh pr diff [PR] -- path/to/file` for full file diffs.
 
 ### Linked Plan File (from PR body)
 !`gh pr view $ARGUMENTS --json body --jq '.body' 2>/dev/null | grep -oE 'thoughts/plans/[^)>\s]+\.md' | head -1 || echo "No plan file linked"`
 
 ### Username for Review File
-!`if [ -f ".claude/config.yaml" ]; then grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' '; else echo "${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}"; fi`
+!`grep "^username:" .claude/config.yaml 2>/dev/null | cut -d: -f2 | tr -d ' ' || echo "${RPI_USERNAME:-user}"`
+
+### Git Username (fallback)
+!`git config user.name 2>/dev/null | tr ' ' '-' | tr '[:upper:]' '[:lower:]' || echo "user"`
 
 ### Today's Date
 !`date +%Y.%m.%d`
 
-### Existing Reviews for This PR
-!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); ls -t thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null || echo "No existing reviews"`
+### PR Number Extracted
+!`echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1`
 
-### Auto-detected Round Number
-!`PR_NUM=$(echo "$ARGUMENTS" | grep -oE '[0-9]+' | head -1); EXISTING=$(ls thoughts/reviews/*-pr-${PR_NUM}-review-*.md 2>/dev/null | wc -l); echo "Round: $((EXISTING + 1))"`
+### Existing Reviews (filter by PR number above)
+!`ls -t thoughts/reviews/*-review-*.md 2>/dev/null | head -10 || echo "No existing reviews"`
+
+### Review Count (use to compute round number)
+!`ls thoughts/reviews/*-review-*.md 2>/dev/null | wc -l | tr -d ' ' || echo "0"`
+
+**Note:** Use the PR number above to filter the review list. The round number is: (count of reviews matching this PR) + 1.
 
 ## Review Process
 

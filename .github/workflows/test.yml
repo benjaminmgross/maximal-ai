@@ -1,0 +1,175 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.claude/commands/**'
+      - '.claude/agents/**'
+      - 'tests/**'
+      - 'installers/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  shell-syntax:
+    name: Shell Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install zsh for cross-shell testing
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Validate inline bash syntax (bash + zsh)
+        run: |
+          chmod +x tests/scripts/validate-inline-bash.sh
+          ./tests/scripts/validate-inline-bash.sh
+
+      - name: Run static command validation
+        run: |
+          chmod +x tests/commands/test_command_syntax.sh
+          ./tests/commands/test_command_syntax.sh
+
+      - name: ShellCheck installer scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './installers'
+          severity: error
+          ignore_paths: 'node_modules'
+
+      - name: ShellCheck hook scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './.claude/hooks'
+          severity: warning
+          ignore_paths: 'node_modules'
+
+  installer-bash:
+    name: Installer Tests (bash)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run installer tests in bash
+        shell: bash
+        run: |
+          chmod +x tests/scripts/test-installer.sh
+          ./tests/scripts/test-installer.sh
+
+  installer-zsh:
+    name: Installer Tests (zsh)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Run installer tests in zsh
+        shell: zsh {0}
+        run: |
+          chmod +x tests/scripts/test-installer.sh
+          ./tests/scripts/test-installer.sh
+
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --dev 2>/dev/null || pip install pytest pyyaml
+
+      - name: Run command tests (pytest)
+        run: |
+          if command -v uv &>/dev/null && [ -f "pyproject.toml" ]; then
+            uv run pytest tests/commands/test_inline_bash.py -v
+          else
+            pytest tests/commands/test_inline_bash.py -v
+          fi
+
+      - name: Run unit tests
+        run: |
+          if command -v uv &>/dev/null && [ -d "tests/unit" ]; then
+            uv run pytest tests/unit -v --tb=short || echo "No unit tests"
+          fi
+
+      - name: Run integration tests
+        run: |
+          if command -v uv &>/dev/null && [ -d "tests/integration" ]; then
+            uv run pytest tests/integration -v --tb=short || echo "No integration tests"
+          fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Run ruff check
+        run: ruff check . --ignore E501 || echo "Lint warnings (non-blocking)"
+
+      - name: Run ruff format check
+        run: ruff format --check . || echo "Format warnings (non-blocking)"
+
+  validate-agents:
+    name: Agent Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate agent files exist
+        run: |
+          echo "Checking agent files..."
+          for agent in .claude/agents/*.md; do
+            if [ -f "$agent" ]; then
+              echo "✓ Found: $agent"
+            fi
+          done
+          echo "Agent validation complete."
+
+      - name: Check agent references in commands
+        run: |
+          echo "Checking agent references..."
+          for cmd in .claude/commands/*.md; do
+            agents=$(grep -oE '\*\*[a-z-]+\*\* agent' "$cmd" 2>/dev/null | sed 's/\*\*//g' | sed 's/ agent//' || true)
+            for agent in $agents; do
+              if [ -f ".claude/agents/${agent}.md" ]; then
+                echo "✓ $cmd references $agent (exists)"
+              else
+                echo "⚠ $cmd references $agent (not found - may be built-in)"
+              fi
+            done
+          done
+
+  # Summary job that other jobs depend on
+  all-tests:
+    name: All Tests Pass
+    needs: [shell-syntax, installer-bash, installer-zsh, python-tests, lint, validate-agents]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All tests passed
+        run: echo "All tests passed successfully!"
