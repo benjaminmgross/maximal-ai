@@ -8,22 +8,26 @@ Review the current branch's changes against the base branch.
 
 ## Pre-computed Review Context
 
-### Branch Information
-!`echo "Current branch: $(git branch --show-current 2>/dev/null || echo 'detached HEAD')"`
-!`BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@'); if [ -z "$BASE" ]; then BASE=$(git branch -r 2>/dev/null | grep -E 'origin/(main|master)$' | head -1 | sed 's@.*origin/@@'); fi; echo "Base branch: ${BASE:-main}"`
-!`echo "Commits ahead: $(git rev-list --count $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~10)..HEAD 2>/dev/null || echo 'unknown')"`
+### Current Branch
+!`git branch --show-current 2>/dev/null || echo "detached HEAD"`
 
-### Files Changed
-!`git diff --name-only $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~5) HEAD 2>/dev/null | head -30 || echo "No changes detected"`
+### Base Branch
+!`git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main"`
+
+### Commits Ahead of origin/main
+!`git rev-list --count origin/main..HEAD 2>/dev/null || git rev-list --count origin/master..HEAD 2>/dev/null || echo "unknown"`
+
+### Files Changed (vs origin/main)
+!`git diff --name-only origin/main...HEAD 2>/dev/null | head -30 || git diff --name-only HEAD~10 HEAD 2>/dev/null | head -30 || echo "No changes detected"`
 
 ### Diff Statistics
-!`git diff --stat $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~5) HEAD 2>/dev/null | tail -15 || echo "No diff stats"`
+!`git diff --stat origin/main...HEAD 2>/dev/null | tail -15 || git diff --stat HEAD~10 HEAD 2>/dev/null | tail -15 || echo "No diff stats"`
 
 ### Commits to Review
-!`git log --oneline $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~5)..HEAD 2>/dev/null | head -20 || echo "No commits"`
+!`git log --oneline origin/main..HEAD 2>/dev/null | head -20 || git log --oneline -10 2>/dev/null || echo "No commits"`
 
 ### Full Diff (first 300 lines)
-!`git diff $(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD origin/master 2>/dev/null || echo HEAD~5) HEAD 2>/dev/null | head -300 || echo "No diff"`
+!`git diff origin/main...HEAD 2>/dev/null | head -300 || git diff HEAD~10 HEAD 2>/dev/null | head -300 || echo "No diff"`
 
 ## Review Checklist
 
