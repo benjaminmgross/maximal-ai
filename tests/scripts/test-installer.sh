@@ -183,6 +183,48 @@ fi
 echo ""
 
 # ============================================
+# Test 6: RDF Layer 2 discovers custom directories
+# ============================================
+log_info "RDF Layer 2 directory discovery"
+
+mkdir -p "$TEST_DIR/custom-project/ml_stack/models"
+mkdir -p "$TEST_DIR/custom-project/ml_stack/utils"
+mkdir -p "$TEST_DIR/custom-project/scripts"
+cd "$TEST_DIR/custom-project"
+git init -q
+git config user.email "test@example.com"
+git config user.name "Test User"
+
+# Create some Python files to trigger discovery
+echo "# model code" > ml_stack/models/base.py
+echo "# utils" > ml_stack/utils/helpers.py
+echo "# script" > scripts/run.py
+
+# Test the discovery logic (non-interactive check)
+# We just verify the find command works
+FOUND=$(find . -type f -name "*.py" 2>/dev/null | \
+    grep -v -E "(node_modules|\.git|__pycache__)" | \
+    xargs -I {} dirname {} 2>/dev/null | \
+    sort -u | \
+    sed 's|^\./||' | \
+    cut -d'/' -f1 | \
+    sort -u)
+
+if echo "$FOUND" | grep -q "ml_stack"; then
+    log_pass "Discovery finds custom directory (ml_stack)"
+else
+    log_fail "Discovery should find ml_stack/"
+fi
+
+if echo "$FOUND" | grep -q "scripts"; then
+    log_pass "Discovery finds scripts directory"
+else
+    log_fail "Discovery should find scripts/"
+fi
+
+echo ""
+
+# ============================================
 # Summary
 # ============================================
 echo "============================"
