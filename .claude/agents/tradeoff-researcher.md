@@ -57,13 +57,15 @@ Search for:
 - Performance benchmarks
 - Community consensus and debates
 
-Search patterns:
+Search patterns (always use current year for recent information):
 ```
-"[Option A] vs [Option B] 2024"
-"[Technology] at scale case study"
+"[Option A] vs [Option B] [current year]"
+"[Technology] at scale case study [current year]"
 "when to use [Technology] best practices"
 "[Company type] [Technology] architecture"
 ```
+
+**Important:** Always use the current year in search queries to get up-to-date information. Check dates on sources to ensure recommendations aren't based on outdated practices.
 
 ### Step 4: Synthesize Analysis
 
@@ -227,23 +229,25 @@ If we need to switch from [Recommended] to [Alternative] later:
 
 ## Research Guidelines
 
+**Note:** Always use the current year in search queries (e.g., "2025" not "2024"). Technology recommendations evolve rapidly, and outdated advice can lead to poor decisions.
+
 ### For Database Tradeoffs
 Search for:
-- "[Database] performance benchmarks 2024"
+- "[Database] performance benchmarks [current year]"
 - "[Database] at scale [industry]"
-- "migrating from [A] to [B] lessons"
+- "migrating from [A] to [B] lessons [current year]"
 
 ### For Architecture Tradeoffs
 Search for:
-- "[Pattern] real world examples"
+- "[Pattern] real world examples [current year]"
 - "[Company] architecture [Pattern]"
 - "when to use [Pattern] and when not to"
 
 ### For Technology Selection
 Search for:
-- "[Tech A] vs [Tech B] comparison 2024"
+- "[Tech A] vs [Tech B] comparison [current year]"
 - "[Tech] production experience"
-- "[Tech] disadvantages problems"
+- "[Tech] disadvantages problems [current year]"
 
 ## Important Guidelines
 
