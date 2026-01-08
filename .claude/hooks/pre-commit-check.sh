@@ -9,6 +9,24 @@ if [[ ! "$COMMAND" =~ ^git\ commit ]]; then
   exit 0
 fi
 
+# Check if on a protected branch
+CURRENT_BRANCH=$(cd "$CLAUDE_PROJECT_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
+PROTECTED_BRANCHES="^(main|master|dev|develop|production|staging)$"
+
+if [[ "$CURRENT_BRANCH" =~ $PROTECTED_BRANCHES ]]; then
+  echo "ERROR: Direct commits to '$CURRENT_BRANCH' are not allowed." >&2
+  echo "" >&2
+  echo "Please create a feature branch first:" >&2
+  echo "  git checkout -b feature/your-feature-name" >&2
+  echo "" >&2
+  echo "Or for hotfixes:" >&2
+  echo "  git checkout -b hotfix/issue-description" >&2
+  echo "" >&2
+  echo "Or for bug fixes:" >&2
+  echo "  git checkout -b bugfix/issue-description" >&2
+  exit 2  # Block the commit
+fi
+
 echo "Running pre-commit verification..." >&2
 
 # Detect project type and run tests

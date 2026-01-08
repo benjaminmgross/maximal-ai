@@ -16,6 +16,22 @@ When given a plan path:
 - Read the plan completely and check for any existing checkmarks (- [x])
 - Read any original research documents mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
+- **Verify branch before implementation**:
+  - Check current branch:
+    ```bash
+    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    echo "Current branch: $CURRENT_BRANCH"
+    ```
+  - If on a protected branch (`main`, `master`, `dev`, `develop`, `production`, `staging`):
+    1. Extract feature name from plan file path (e.g., `2026.01.08-bmg-oauth-support.md` → `oauth-support`)
+    2. Suggest branch name: `feature/{extracted-name}`
+    3. Use AskUserQuestion to let user choose:
+       - **Create suggested branch** (recommended): `git checkout -b feature/{name}`
+       - **Specify different branch name**: User provides custom name
+       - **Continue on current branch**: Warn strongly but proceed (hook will block commits anyway)
+       - **Abort implementation**: Exit so user can create branch manually
+    4. If creating branch, execute: `git checkout -b {branch-name}`
+  - If already on a feature/hotfix/bugfix branch, proceed normally
 - **Load coding standards if present**:
   - Check for standards using this priority order:
     ```bash
