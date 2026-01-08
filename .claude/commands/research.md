@@ -118,6 +118,66 @@ Before decomposing the research query, check for repository coding standards:
 
 **IMPORTANT**: Standards loading should happen BEFORE decomposing the research query, so architectural patterns can inform which components to investigate.
 
+### Step 1.75: Detect Architecture-Relevant Queries
+
+Before decomposing the query, determine if the research involves architectural analysis. This enables specialized system-design agents to be spawned alongside standard research agents.
+
+**Detection Triggers** - Check if the query contains any of these signals:
+
+**Keywords** (case-insensitive):
+- "architecture", "architectural", "design", "system design"
+- "scalability", "scalable", "scale", "scaling"
+- "bottleneck", "performance", "latency"
+- "pattern", "anti-pattern", "best practice"
+- "tradeoff", "trade-off", "decision"
+- "microservices", "monolith", "event-driven"
+- "coupling", "cohesion", "dependency"
+
+**Question Types**:
+- Questions about system structure: "How is X organized?"
+- Questions about component interactions: "How do X and Y communicate?"
+- Questions about data flow: "How does data flow from X to Y?"
+- Scaling questions: "How would we scale X?"
+- Review requests: "Review the architecture of X"
+- Decision questions: "Should we use X or Y?"
+
+**Examples**:
+```
+"How does the authentication system work?"
+    → Standard research (no architecture focus)
+
+"What are the scalability concerns in our payment system?"
+    → Architecture-relevant (spawn scalability-assessor)
+
+"Should we use SQL or NoSQL for the new feature?"
+    → Architecture-relevant (spawn tradeoff-researcher)
+
+"Review the architecture of the API layer"
+    → Architecture-relevant (spawn architecture-pattern-detector)
+
+"What patterns are used in the codebase?"
+    → Architecture-relevant (spawn architecture-pattern-detector)
+```
+
+**If Architecture-Relevant**:
+1. Set `ARCHITECTURE_RESEARCH=true` for later reference
+2. Load system design reference materials:
+   ```
+   Read: .claude/docs/system-design/patterns-catalog.md
+   Read: .claude/docs/system-design/anti-patterns-catalog.md
+   Read: .claude/docs/system-design/scalability-checklist.md
+   ```
+3. Note which specialized agents to spawn in Step 3 based on query type:
+   - **Pattern/structure questions** → `architecture-pattern-detector`
+   - **Scalability/bottleneck questions** → `scalability-assessor`
+   - **Decision/tradeoff questions** → `tradeoff-researcher`
+
+**If NOT Architecture-Relevant**:
+- Continue with standard research flow
+- No additional agents needed
+
+**IMPORTANT**: Architecture detection should be quick - don't over-analyze. When in doubt, default to standard research.
+
 ### Step 2: Analyze and Decompose
 - Break down the user's query into composable research areas
 - Take time to think deeply about the underlying patterns, connections, and architectural implications
@@ -133,6 +193,46 @@ Create multiple Task agents to research different aspects concurrently:
 - Use the **codebase-analyzer** agent to understand HOW specific code works
 - Use the **codebase-pattern-finder** agent if you need examples of similar implementations
 
+**For architecture-relevant research** (if `ARCHITECTURE_RESEARCH=true` from Step 1.75):
+- Use the **architecture-pattern-detector** agent to identify patterns and anti-patterns
+- Use the **scalability-assessor** agent for bottleneck and capacity analysis
+- Use the **tradeoff-researcher** agent for decision evaluation (if tradeoff question)
+
+**Architecture Agent Prompts:**
+
+For pattern detection:
+```
+Analyze the codebase [scope if specified] to identify:
+1. Primary architectural pattern(s) in use
+2. Anti-patterns and code smells
+3. Layer violations or inconsistencies
+
+Reference patterns from .claude/docs/system-design/patterns-catalog.md
+Provide file:line evidence for all findings.
+Focus on: [specific area from user query]
+```
+
+For scalability assessment:
+```
+Analyze the codebase [scope if specified] for scalability:
+1. Database patterns and potential bottlenecks
+2. Connection pool and resource configurations
+3. Single points of failure
+4. Horizontal scaling blockers
+
+Reference .claude/docs/system-design/scalability-checklist.md
+Provide file:line evidence for all findings.
+Focus on: [specific concern from user query]
+```
+
+For tradeoff research:
+```
+Research the tradeoff between [Option A] and [Option B] for [context from query].
+Load and apply decision framework from .claude/docs/system-design/tradeoff-decision-trees.md
+Include external best practices if relevant.
+Return: Recommendation with clear rationale.
+```
+
 **For web research (only if user explicitly asks):**
 - Use the **web-search-researcher** agent for external documentation and resources
 - IF you use web-research agents, instruct them to return LINKS with their findings
@@ -143,6 +243,7 @@ The key is to use these agents intelligently:
 - Run multiple agents in parallel when they're searching for different things
 - Each agent knows its job - just tell it what you're looking for
 - Don't write detailed prompts about HOW to search - the agents already know
+- **For architecture queries**: Spawn system-design agents IN PARALLEL with standard agents
 
 ### Step 4: Wait and Synthesize
 - **IMPORTANT**: Wait for ALL sub-agent tasks to complete before proceeding
@@ -152,6 +253,12 @@ The key is to use these agents intelligently:
   - Note where current implementation follows standards
   - Highlight any deviations from documented patterns
   - Reference specific standards when applicable (e.g., "Uses async pattern contrary to docs/coding-standards/repo-standards.md:240")
+- **If architecture agents were spawned** (`ARCHITECTURE_RESEARCH=true`):
+  - Synthesize pattern detection findings into "Architecture Insights" section
+  - Include scalability assessment results with severity ratings
+  - Present tradeoff analysis with clear recommendation (if applicable)
+  - Cross-reference findings with system design reference materials
+  - Prioritize issues by impact (Critical > High > Medium > Low)
 - Include specific file paths and line numbers for reference
 - Highlight patterns, connections, and architectural decisions
 - Answer the user's specific questions with concrete evidence
@@ -248,6 +355,42 @@ last_updated_by: [Your name]
 
 ## Architecture Insights
 [Patterns, conventions, and design decisions discovered]
+
+## Architecture Assessment
+[**Only include this section if architecture agents were spawned (ARCHITECTURE_RESEARCH=true)**]
+
+### Architectural Patterns Detected
+| Pattern | Location | Confidence | Notes |
+|---------|----------|------------|-------|
+| [Pattern name] | `path/to/dir/` | High/Med/Low | [Brief description] |
+
+### Anti-Patterns Identified
+| Anti-Pattern | Severity | Location | Impact |
+|--------------|----------|----------|--------|
+| [Anti-pattern] | Critical/High/Med/Low | `file:line` | [Impact description] |
+
+### Scalability Concerns
+| Concern | Severity | Component | Recommendation |
+|---------|----------|-----------|----------------|
+| [Issue] | Critical/High/Med/Low | [Component] | [Fix suggestion] |
+
+### Single Points of Failure
+- [ ] [SPOF 1]: `location` - [impact if fails]
+- [ ] [SPOF 2]: `location` - [impact if fails]
+
+### Tradeoff Analysis
+[**Only include if tradeoff question was asked**]
+
+**Decision:** [What needs to be decided]
+**Recommendation:** [Recommended option]
+**Rationale:** [Why this option]
+**Reversibility:** [How hard to change later]
+
+### Architecture Recommendations
+| Priority | Issue | Solution | Effort |
+|----------|-------|----------|--------|
+| 1 | [Issue] | [Solution] | Low/Med/High |
+| 2 | [Issue] | [Solution] | Low/Med/High |
 
 ## Integration Points
 
