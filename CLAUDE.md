@@ -167,6 +167,11 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 - `/create_handoff` - Create handoff documentation for session transfer
 - `/resume_handoff [handoff-file]` - Resume work from handoff document
 
+### System Design Commands
+- `/architecture-review [scope]` - Comprehensive architecture analysis with pattern/anti-pattern detection
+- `/design-system [request]` - Interactive system design session with requirements gathering
+- `/tradeoff-analysis [question]` - Deep analysis of specific technical decisions and tradeoffs
+
 ### Inner Loop Commands (with Pre-computed Context)
 These commands use inline bash to pre-compute context, eliminating tool call round-trips:
 - `/commit-push-pr` - Commit, push, and create PR with git context pre-loaded
@@ -236,6 +241,9 @@ When performing these workflows, use the corresponding command to leverage pre-c
 | Progress report | `/standup` | git activity, RPI artifacts, TODOs |
 | PR review (Session 2) | `/review-pr` | PR metadata, diff, commits, linked plan |
 | Address feedback (Session 1) | `/address-review` | branch status, PR state, recent commits |
+| Architecture review | `/architecture-review` | spawns pattern-detector, scalability-assessor agents |
+| System design | `/design-system` | loads patterns, decision trees, NFR guides |
+| Technical tradeoffs | `/tradeoff-analysis` | spawns tradeoff-researcher agent, loads decision trees |
 
 **Why use these commands?** They use inline bash (`!` backtick syntax) to pre-compute context before Claude sees the prompt. This eliminates multiple tool call round-trips:
 
@@ -414,7 +422,10 @@ project-root/
 │   │   ├── address-review.md
 │   │   ├── test-and-fix.md
 │   │   ├── verify.md
-│   │   └── observe-docstrings.md
+│   │   ├── observe-docstrings.md
+│   │   ├── architecture-review.md    # System design command
+│   │   ├── design-system.md          # System design command
+│   │   └── tradeoff-analysis.md      # System design command
 │   ├── agents/         # Specialized sub-agents
 │   │   ├── codebase-locator.md
 │   │   ├── codebase-analyzer.md
@@ -423,12 +434,23 @@ project-root/
 │   │   ├── file-analyzer.md
 │   │   ├── bug-hunter.md
 │   │   ├── test-runner.md
-│   │   └── code-simplifier.md
+│   │   ├── code-simplifier.md
+│   │   ├── architecture-pattern-detector.md  # System design agent
+│   │   ├── scalability-assessor.md           # System design agent
+│   │   └── tradeoff-researcher.md            # System design agent
+│   ├── docs/           # Reference documentation
+│   │   └── system-design/
+│   │       ├── patterns-catalog.md
+│   │       ├── anti-patterns-catalog.md
+│   │       ├── scalability-checklist.md
+│   │       ├── tradeoff-decision-trees.md
+│   │       └── non-functional-requirements.md
 │   ├── hooks/          # Automation hooks
 │   │   ├── auto-format.sh
 │   │   ├── post-edit.sh
 │   │   ├── pre-commit-check.sh
-│   │   └── session-complete.sh
+│   │   ├── session-complete.sh
+│   │   └── detect-username.sh        # Shared username detection
 │   └── settings.json   # Hooks configuration
 ├── thoughts/           # RPI artifacts (symlinked to minty-thoughts)
 │   ├── research/       # Research documents (OUTPUT from phase 1)
