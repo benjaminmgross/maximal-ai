@@ -4,6 +4,21 @@ Elicitation guide for gathering non-functional requirements (NFRs) during system
 
 ---
 
+## Stakeholder Questions Quick Reference
+
+Before diving into categories, ask these key questions to understand priorities:
+
+| Priority | Question | Why It Matters |
+|----------|----------|----------------|
+| 1 | "What happens if the system is down for an hour?" | Reveals availability requirements |
+| 2 | "How many users do you expect in Year 1? Year 3?" | Reveals scalability requirements |
+| 3 | "What's the slowest acceptable response time?" | Reveals performance requirements |
+| 4 | "What data is sensitive? Who should access what?" | Reveals security requirements |
+| 5 | "How often will you deploy changes?" | Reveals maintainability requirements |
+| 6 | "What regulations apply to this system?" | Reveals compliance requirements |
+
+---
+
 ## Quick NFR Categories
 
 | Category | Key Questions | Units |
