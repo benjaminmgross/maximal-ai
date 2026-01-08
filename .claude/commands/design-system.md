@@ -152,14 +152,10 @@ Does this align with your priorities?
 
 ### Step 6: Generate Design Document
 
-Detect username for file naming:
+Detect username for file naming (uses shared script for consistency):
 ```bash
-if [ -f ".claude/config.yaml" ]; then
-    CONFIG_USERNAME=$(grep "^username:" .claude/config.yaml | cut -d: -f2 | tr -d ' ' | tr '[:upper:]' '[:lower:]')
-fi
-RPI_USERNAME="${CONFIG_USERNAME:-${RPI_USERNAME:-$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')}}"
-RPI_USERNAME="${RPI_USERNAME:-user}"
-CURRENT_DATE=$(date +%Y.%m.%d)
+source .claude/hooks/detect-username.sh
+# Now RPI_USERNAME and CURRENT_DATE are available
 ```
 
 Create document at `thoughts/research/YYYY.MM.DD-{username}-{system-name}-design.md`:
