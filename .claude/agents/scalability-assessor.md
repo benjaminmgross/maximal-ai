@@ -141,6 +141,41 @@ Structure your analysis like this:
 ### Executive Summary
 [2-3 sentences on overall scalability posture and key concerns]
 
+### Current Architecture Overview
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'primaryColor': '#EAEAEC', 'secondaryColor': '#9ED6CA', 'tertiaryColor': '#DD8C77'}}}%%
+flowchart TD
+    subgraph clients[Clients]
+        Web[Web App]
+        Mobile[Mobile App]
+        API[API Consumers]
+    end
+
+    subgraph infra[Infrastructure]
+        LB[Load Balancer]
+        App[Application Servers]
+        Cache[(Cache)]
+        DB[(Database)]
+        Queue[Message Queue]
+        Worker[Background Workers]
+    end
+
+    clients --> LB
+    LB --> App
+    App --> Cache
+    App --> DB
+    App --> Queue
+    Queue --> Worker
+    Worker --> DB
+
+    style LB fill:#9ED6CA
+    style DB fill:#DD8C77
+    style Cache fill:#EAEAEC
+```
+
+*Adapt this diagram based on actual discovered architecture. Highlight SPOFs in red/orange.*
+
 ### Current Configuration
 
 | Component | Configuration | Limit | Concern Level |
