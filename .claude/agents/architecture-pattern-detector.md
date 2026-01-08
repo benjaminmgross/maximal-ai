@@ -29,13 +29,30 @@ You are a specialist at detecting architectural patterns and anti-patterns in co
 
 ## Detection Strategy
 
-### Step 1: Directory Structure Analysis
+### Step 0: Discover Codebase Structure
 
-Understand the high-level organization:
+Before running pattern-specific commands, first identify the project type and directory structure. This ensures commands work across different codebase organizations.
 
 ```bash
-# Find main source directories
-ls -la src/ app/ lib/ packages/
+# Discover actual project structure (don't assume src/, app/, etc.)
+find . -maxdepth 2 -type d -not -path '*/\.*' -not -path '*/node_modules/*' | head -30
+
+# Identify project type from config files
+ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml *.csproj 2>/dev/null
+
+# Find where source code actually lives
+find . -maxdepth 3 -type f \( -name "*.ts" -o -name "*.py" -o -name "*.go" -o -name "*.java" \) 2>/dev/null | head -5 | xargs dirname | sort -u
+```
+
+Use the discovered structure to adapt subsequent commands. Do NOT assume standard directory names exist.
+
+### Step 1: Directory Structure Analysis
+
+Understand the high-level organization using paths discovered in Step 0:
+
+```bash
+# Find main source directories (adapt paths based on Step 0 discovery)
+ls -la src/ app/ lib/ packages/ 2>/dev/null || echo "Standard dirs not found - use discovered paths"
 
 # Identify common patterns by directory names
 # Layered: controllers/, services/, repositories/
