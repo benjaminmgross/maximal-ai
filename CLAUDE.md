@@ -287,7 +287,7 @@ This framework includes Claude Code hooks that automate verification and formatt
 |------|---------|--------|
 | **auto-format** | After Edit/Write | Runs Prettier (JS/TS) or Ruff (Python) |
 | **post-edit** | After Edit/Write | Runs tests in background, logs to `/tmp/claude-test-results.log` |
-| **pre-commit-check** | Before `git commit` | Blocks commit if tests fail (exit 2) |
+| **pre-commit-check** | Before `git commit` | Blocks commit if on protected branch, in detached HEAD, or tests fail (exit 2) |
 | **session-complete** | On Stop | Logs session summary to `/tmp/claude-session-summary.log` |
 
 ### Verification Philosophy
