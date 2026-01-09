@@ -9,9 +9,37 @@ if [[ ! "$COMMAND" =~ ^git\ commit ]]; then
   exit 0
 fi
 
+# Validate CLAUDE_PROJECT_DIR is set (C4 fix)
+if [ -z "$CLAUDE_PROJECT_DIR" ]; then
+  echo "ERROR: CLAUDE_PROJECT_DIR is not set" >&2
+  exit 2  # Block commit to be safe
+fi
+
 # Check if on a protected branch
 CURRENT_BRANCH=$(cd "$CLAUDE_PROJECT_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
-PROTECTED_BRANCHES="^(main|master|dev|develop|production|staging)$"
+
+# Fail safely if we can't determine the branch (C3 fix)
+if [ -z "$CURRENT_BRANCH" ]; then
+  echo "WARNING: Could not determine current branch. Blocking commit to be safe." >&2
+  echo "" >&2
+  echo "Ensure you are in a valid git repository with at least one commit." >&2
+  exit 2
+fi
+
+# Check for detached HEAD state (C1 fix)
+if [[ "$CURRENT_BRANCH" == "HEAD" ]]; then
+  echo "ERROR: You're in detached HEAD state (possibly mid-rebase or bisect)." >&2
+  echo "" >&2
+  echo "Commits in this state may be orphaned or disrupt git operations." >&2
+  echo "Consider:" >&2
+  echo "  git checkout -b temp-branch    # Save work to a new branch" >&2
+  echo "  git rebase --abort             # Abort if mid-rebase" >&2
+  echo "  git bisect reset               # Exit if mid-bisect" >&2
+  exit 2  # Block the commit
+fi
+
+# Allow override via environment variable (S1 fix)
+PROTECTED_BRANCHES="${CLAUDE_PROTECTED_BRANCHES:-^(main|master|dev|develop|production|staging)$}"
 
 if [[ "$CURRENT_BRANCH" =~ $PROTECTED_BRANCHES ]]; then
   echo "ERROR: Direct commits to '$CURRENT_BRANCH' are not allowed." >&2
