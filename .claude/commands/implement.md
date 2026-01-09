@@ -19,9 +19,27 @@ When given a plan path:
 - **Verify branch before implementation**:
   - Check current branch:
     ```bash
-    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    # Use git rev-parse for consistency with pre-commit-check.sh hook (S2 fix)
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+    # Handle detached HEAD and empty states (C2 fix)
+    if [ -z "$CURRENT_BRANCH" ]; then
+      # Check if in a git repo at all
+      if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        CURRENT_BRANCH="(unknown)"
+      else
+        echo "WARNING: Not inside a git repository"
+        CURRENT_BRANCH="(not a git repo)"
+      fi
+    elif [ "$CURRENT_BRANCH" = "HEAD" ]; then
+      echo "WARNING: You are in detached HEAD state (possibly mid-rebase or bisect)"
+      CURRENT_BRANCH="(detached HEAD)"
+    fi
     echo "Current branch: $CURRENT_BRANCH"
     ```
+  - If in detached HEAD state, prompt user to resolve before proceeding:
+    - Suggest: `git checkout -b temp-branch` to save work
+    - Or: `git checkout <branch-name>` to return to a branch
   - If on a protected branch (`main`, `master`, `dev`, `develop`, `production`, `staging`):
     1. Extract feature name from plan file path (e.g., `2026.01.08-bmg-oauth-support.md` → `oauth-support`)
     2. Suggest branch name: `feature/{extracted-name}`
