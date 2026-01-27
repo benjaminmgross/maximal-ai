@@ -13,9 +13,9 @@ model: sonnet
 
 !`if [ -n "$THOUGHTS_PATH" ] && [ -d "$THOUGHTS_PATH/searchable" ]; then echo "$(ls "$THOUGHTS_PATH/searchable/"*.md 2>/dev/null | wc -l | tr -d ' ') files in searchable index"; else echo "No searchable index available"; fi`
 
-## Available Scopes
+## Available Scopes (with file counts)
 
-!`if [ -d "$THOUGHTS_PATH/searchable" ]; then ls "$THOUGHTS_PATH/searchable/"*.md 2>/dev/null | sed 's/.*\///' | cut -d'-' -f1-2 | sort -u | head -20; fi`
+!`if [ -d "$THOUGHTS_PATH/searchable" ]; then ls "$THOUGHTS_PATH/searchable/"*.md 2>/dev/null | sed 's/.*\///' | cut -d'-' -f1-2 | sort | uniq -c | sort -rn | head -20; fi`
 
 ---
 
