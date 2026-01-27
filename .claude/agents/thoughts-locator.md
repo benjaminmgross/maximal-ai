@@ -7,7 +7,7 @@ model: sonnet
 
 ## Pre-computed Index Update
 
-!`if [ -n "$THOUGHTS_PATH" ] && [ -d "$THOUGHTS_PATH" ]; then cd "$THOUGHTS_PATH" && uv run thoughts-index-update --quiet 2>/dev/null && echo "Index updated successfully"; else echo "THOUGHTS_PATH not set or directory not found"; fi`
+!`if [ -n "$THOUGHTS_PATH" ] && [ -d "$THOUGHTS_PATH" ]; then cd "$THOUGHTS_PATH" && (uv run thoughts-index-update --quiet 2>/dev/null && echo "Index updated successfully" || echo "Index update skipped (uv not available or thoughts-index-update failed)"); else echo "THOUGHTS_PATH not set or directory not found"; fi`
 
 ## Searchable Index Stats
 
