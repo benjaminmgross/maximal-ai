@@ -77,6 +77,7 @@ Create specialized agents in `.claude/agents/`:
 name: [domain]-[specialist]
 description: [What this agent specializes in]
 tools: [Relevant tools]
+model: sonnet
 ---
 
 You are a specialist at [specific domain task].
@@ -91,6 +92,8 @@ You are a specialist at [specific domain task].
 ## Output Format
 [How to structure findings]
 ```
+
+**Model Selection:** Use `model: sonnet` (recommended default) for most agents. The model field is optional but recommended. Available options: `sonnet` (balanced speed/capability), `opus` (maximum capability), `haiku` (fastest, for simple tasks).
 
 ### Step 4: Define Document Templates
 
