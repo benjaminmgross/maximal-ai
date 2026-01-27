@@ -434,6 +434,7 @@ project-root/
 │   │   ├── file-analyzer.md
 │   │   ├── bug-hunter.md
 │   │   ├── test-runner.md
+│   │   ├── thoughts-locator.md              # Searches prior research/plans/handoffs
 │   │   ├── code-simplifier.md
 │   │   ├── architecture-pattern-detector.md  # System design agent
 │   │   ├── scalability-assessor.md           # System design agent

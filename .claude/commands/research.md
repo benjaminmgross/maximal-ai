@@ -192,6 +192,7 @@ Create multiple Task agents to research different aspects concurrently:
 - Use the **codebase-locator** agent to find WHERE files and components live
 - Use the **codebase-analyzer** agent to understand HOW specific code works
 - Use the **codebase-pattern-finder** agent if you need examples of similar implementations
+- Use the **thoughts-locator** agent to search prior research, plans, and handoffs (requires $THOUGHTS_PATH)
 
 **For architecture-relevant research** (if `ARCHITECTURE_RESEARCH=true` from Step 1.75):
 - Use the **architecture-pattern-detector** agent to identify patterns and anti-patterns

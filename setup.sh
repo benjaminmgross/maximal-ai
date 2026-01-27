@@ -52,6 +52,7 @@ cp "$SCRIPT_DIR/.claude/agents/web-search-researcher.md" "$PROJECT_ROOT/.claude/
 cp "$SCRIPT_DIR/.claude/agents/file-analyzer.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/bug-hunter.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/test-runner.md" "$PROJECT_ROOT/.claude/agents/"
+cp "$SCRIPT_DIR/.claude/agents/thoughts-locator.md" "$PROJECT_ROOT/.claude/agents/"
 
 # Copy or merge CLAUDE.md
 if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then
