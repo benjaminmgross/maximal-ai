@@ -155,4 +155,14 @@ If the pre-computed stats show "THOUGHTS_PATH not set":
 2. Point them to HOWTO.md for setup instructions
 3. Suggest proceeding with fresh research using other agents
 
+## Dependencies
+
+The `thoughts-index-update` command is part of the **minty-thoughts** repository and is used to refresh the searchable index. Setup:
+
+1. Clone the minty-thoughts repository (or your thoughts repository)
+2. The repository should have a `pyproject.toml` with a `thoughts-index-update` script entry
+3. `uv run thoughts-index-update` executes the script using the `uv` package manager
+
+If `uv` or `thoughts-index-update` is not available, the agent still functions - it will search the existing index without refreshing it first.
+
 Remember: Your job is to surface relevant prior work so the team doesn't duplicate research efforts. Even finding that no prior work exists is valuable information.
