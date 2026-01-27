@@ -52,6 +52,7 @@ cp "$SCRIPT_DIR/.claude/agents/web-search-researcher.md" "$PROJECT_ROOT/.claude/
 cp "$SCRIPT_DIR/.claude/agents/file-analyzer.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/bug-hunter.md" "$PROJECT_ROOT/.claude/agents/"
 cp "$SCRIPT_DIR/.claude/agents/test-runner.md" "$PROJECT_ROOT/.claude/agents/"
+cp "$SCRIPT_DIR/.claude/agents/thoughts-locator.md" "$PROJECT_ROOT/.claude/agents/"
 
 # Copy or merge CLAUDE.md
 if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then
@@ -64,6 +65,10 @@ else
     echo "Installing CLAUDE.md configuration..."
     cp "$SCRIPT_DIR/CLAUDE.md" "$PROJECT_ROOT/"
 fi
+
+# Copy HOWTO.md (quick reference guide)
+echo "Installing HOWTO.md..."
+cp "$SCRIPT_DIR/HOWTO.md" "$PROJECT_ROOT/"
 
 # Create .gitignore entries if needed
 if [ -f "$PROJECT_ROOT/.gitignore" ]; then
