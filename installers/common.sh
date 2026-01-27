@@ -63,8 +63,7 @@ get_username() {
 
     echo ""
     echo "Detected username: $detected"
-    echo -n "Press Enter to use this username, or type a different one: "
-    read user_input
+    read -p "Press Enter to use this username, or type a different one: " user_input
 
     if [ -n "$user_input" ]; then
         echo "$user_input" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'

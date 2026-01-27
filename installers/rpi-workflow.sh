@@ -29,8 +29,7 @@ if [ ! -d "$PROJECT_ROOT/docs" ]; then
     echo ""
     echo "Would you like to create a docs/ directory for repo-specific documentation?"
     echo "This enables the RPI workflow to suggest documentation updates after implementation."
-    echo -n "(y/N): "
-    read create_docs
+    read -p "(y/N): " create_docs
     if [ "$create_docs" = "y" ] || [ "$create_docs" = "Y" ]; then
         mkdir -p "$PROJECT_ROOT/docs"
         echo "Created docs/ directory"
