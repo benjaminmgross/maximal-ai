@@ -1,3 +1,9 @@
+<!--
+  WARNING: This file is managed by maximal-ai and will be overwritten
+  when running setup.sh. Do not customize this file in target projects.
+  For project-specific guidance, add to CLAUDE.md instead.
+-->
+
 # How to Use maximal-ai Effectively
 
 > Quick tips and gotchas for the Research-Plan-Implement workflow.
