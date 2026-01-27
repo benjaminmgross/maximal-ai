@@ -11,7 +11,7 @@ Stay under 40% context usage. Start fresh context windows for each RPI phase. Se
 </important>
 
 <important if="you are starting a new task">
-Always start with `/research` before writing code. Understanding the codebase prevents thousands of bad lines. See README.md § "The Three Phases" for the full workflow.
+Always start with `/research` before writing code. Understanding the codebase prevents thousands of bad lines. See README.md § "Why Three Phases?" for the full workflow.
 </important>
 
 <important if="context feels cluttered">
