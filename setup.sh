@@ -65,6 +65,10 @@ else
     cp "$SCRIPT_DIR/CLAUDE.md" "$PROJECT_ROOT/"
 fi
 
+# Copy HOWTO.md (quick reference guide)
+echo "Installing HOWTO.md..."
+cp "$SCRIPT_DIR/HOWTO.md" "$PROJECT_ROOT/"
+
 # Create .gitignore entries if needed
 if [ -f "$PROJECT_ROOT/.gitignore" ]; then
     # Check if research/ and plans/ are already in gitignore

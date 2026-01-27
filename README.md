@@ -430,6 +430,7 @@ graph TD
 ### Layer 1: Entry Points (Minimal)
 - `docs/AGENTS.md` - AI agent registry and capabilities
 - `CLAUDE.md` - Project-specific Claude instructions
+- `HOWTO.md` - Quick tips and gotchas for effective usage
 - `.repomap.yaml` - Quick project overview for AI
 
 ### Layer 2: Folder Documentation

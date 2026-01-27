@@ -462,6 +462,7 @@ project-root/
 │   └── reviews/        # PR review artifacts (multi-session workflow)
 │       ├── YYYY.MM.DD-pr-N-review-R.md     # Review from Session 2
 │       └── YYYY.MM.DD-pr-N-response-R.md   # Response from Session 1
+├── HOWTO.md            # Quick tips and conditional guidance
 └── CLAUDE.md           # This file
 ```
 
