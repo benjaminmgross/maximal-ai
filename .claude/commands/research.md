@@ -527,7 +527,7 @@ After the research document is finalized (either initial creation or after follo
 3. **If user selects "Yes"**:
    - Execute the commit script:
      ```bash
-     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" research "thoughts/research/{filename}"
+     "$MAXIMAL_AI_HOME/.claude/hooks/commit-thoughts.sh" research "thoughts/research/{filename}"
      ```
    - Parse the output:
      - If exit code 0: Report full success with discussion URL
@@ -537,7 +537,7 @@ After the research document is finalized (either initial creation or after follo
 4. **If user selects "Commit only"**:
    - Execute the commit script with --no-discussion flag:
      ```bash
-     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" --no-discussion research "thoughts/research/{filename}"
+     "$MAXIMAL_AI_HOME/.claude/hooks/commit-thoughts.sh" --no-discussion research "thoughts/research/{filename}"
      ```
    - Report commit success (discussion is intentionally skipped)
 

@@ -489,7 +489,7 @@ After the plan document is finalized and user has approved it:
 3. **If user selects "Yes"**:
    - Execute the commit script:
      ```bash
-     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" plan "thoughts/plans/{filename}"
+     "$MAXIMAL_AI_HOME/.claude/hooks/commit-thoughts.sh" plan "thoughts/plans/{filename}"
      ```
    - Parse the output:
      - If exit code 0: Report full success with discussion URL
@@ -499,7 +499,7 @@ After the plan document is finalized and user has approved it:
 4. **If user selects "Commit only"**:
    - Execute the commit script with --no-discussion flag:
      ```bash
-     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" --no-discussion plan "thoughts/plans/{filename}"
+     "$MAXIMAL_AI_HOME/.claude/hooks/commit-thoughts.sh" --no-discussion plan "thoughts/plans/{filename}"
      ```
    - Report commit success (discussion is intentionally skipped)
 
