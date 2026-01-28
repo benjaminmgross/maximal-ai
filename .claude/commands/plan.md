@@ -463,6 +463,70 @@ def test_phase_2_acceptance():
 
 3. **Continue refining** until the user is satisfied
 
+### Step 6: Offer to Commit Document
+
+After the plan document is finalized and user has approved it:
+
+1. **Check if THOUGHTS_PATH is configured**:
+   ```bash
+   if [ -z "$THOUGHTS_PATH" ]; then
+       # Silently skip - user hasn't set up thoughts repo
+       exit 0
+   fi
+   ```
+
+2. **Prompt user for approval** using AskUserQuestion:
+   ```
+   Use AskUserQuestion with:
+   - question: "Commit this plan to GitHub?"
+   - header: "Commit"
+   - options:
+     - label: "Yes", description: "Commit to minty-thoughts and create discussion"
+     - label: "Commit only", description: "Commit to minty-thoughts without creating discussion"
+     - label: "No", description: "Keep document local only"
+   ```
+
+3. **If user selects "Yes"**:
+   - Execute the commit script:
+     ```bash
+     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" plan "thoughts/plans/{filename}"
+     ```
+   - Parse the output:
+     - If exit code 0: Report full success with discussion URL
+     - If exit code 1: Report partial success (committed but discussion failed)
+     - If exit code 2: Report failure
+
+4. **If user selects "Commit only"**:
+   - Execute the commit script with --no-discussion flag:
+     ```bash
+     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" --no-discussion plan "thoughts/plans/{filename}"
+     ```
+   - Report commit success (discussion is intentionally skipped)
+
+5. **If user selects "No"**:
+   - Respond: "Document saved locally at `thoughts/plans/{filename}`"
+
+6. **Output format for full success** (commit + discussion):
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: {url}
+   ```
+
+7. **Output format for commit only**:
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: Skipped
+   ```
+
+8. **Output format for partial success** (discussion failed):
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: Failed to create (commit still succeeded)
+   ```
+
 ## Important Guidelines
 
 1. **Be Skeptical**:
