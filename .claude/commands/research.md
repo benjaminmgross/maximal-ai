@@ -501,6 +501,70 @@ last_updated_by: [Your name]
 - Add a new section: `## Follow-up Research [timestamp]`
 - Spawn new sub-agents as needed for additional investigation
 
+### Step 8: Offer to Commit Document
+
+After the research document is finalized (either initial creation or after follow-ups):
+
+1. **Check if THOUGHTS_PATH is configured**:
+   ```bash
+   if [ -z "$THOUGHTS_PATH" ]; then
+       # Silently skip - user hasn't set up thoughts repo
+       exit 0
+   fi
+   ```
+
+2. **Prompt user for approval** using AskUserQuestion:
+   ```
+   Use AskUserQuestion with:
+   - question: "Commit this research to GitHub?"
+   - header: "Commit"
+   - options:
+     - label: "Yes", description: "Commit to minty-thoughts and create discussion"
+     - label: "Commit only", description: "Commit to minty-thoughts without creating discussion"
+     - label: "No", description: "Keep document local only"
+   ```
+
+3. **If user selects "Yes"**:
+   - Execute the commit script:
+     ```bash
+     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" research "thoughts/research/{filename}"
+     ```
+   - Parse the output:
+     - If exit code 0: Report full success with discussion URL
+     - If exit code 1: Report partial success (committed but discussion failed)
+     - If exit code 2: Report failure
+
+4. **If user selects "Commit only"**:
+   - Execute the commit script with --no-discussion flag:
+     ```bash
+     "$CLAUDE_PROJECT_DIR/.claude/hooks/commit-thoughts.sh" --no-discussion research "thoughts/research/{filename}"
+     ```
+   - Report commit success (discussion is intentionally skipped)
+
+5. **If user selects "No"**:
+   - Respond: "Document saved locally at `thoughts/research/{filename}`"
+
+6. **Output format for full success** (commit + discussion):
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: {url}
+   ```
+
+7. **Output format for commit only**:
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: Skipped
+   ```
+
+8. **Output format for partial success** (discussion failed):
+   ```
+   Committed to minty-thoughts!
+   - Commit: {commit_sha}
+   - Discussion: Failed to create (commit still succeeded)
+   ```
+
 ## Important Notes
 
 - Always use parallel Task agents to maximize efficiency and minimize context usage
