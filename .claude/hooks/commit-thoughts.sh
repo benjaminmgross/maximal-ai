@@ -10,7 +10,7 @@ set -e
 #
 # Environment variables required:
 #   THOUGHTS_PATH: Path to minty-thoughts repo
-#   CLAUDE_PROJECT_DIR: Path to the consumer repo (set by Claude Code)
+#   MAXIMAL_AI_HOME: Path to maximal-ai repo (for config cache and script location)
 #
 # Exit codes:
 #   0: Full success (commit + discussion, or commit only if --no-discussion)
@@ -50,13 +50,8 @@ if [ ! -d "$THOUGHTS_PATH" ]; then
     exit 2
 fi
 
-if [ -z "$CLAUDE_PROJECT_DIR" ]; then
-    echo "ERROR: CLAUDE_PROJECT_DIR not set (should be set by Claude Code)" >&2
-    exit 2
-fi
-
-# Extract repo name from CLAUDE_PROJECT_DIR
-REPO_NAME=$(basename "$CLAUDE_PROJECT_DIR")
+# Extract repo name from the consumer repo's working directory
+REPO_NAME=$(basename "$(pwd)")
 REPO_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/-/g')
 
 # Extract filename from path
@@ -139,8 +134,12 @@ else
     GH_REPO=$(echo "$REMOTE_URL" | sed -E 's#.*[:/]([^/]+)/([^/]+)(\.git)?$#\2#' | sed 's/\.git$//')
 fi
 
-# Check for cached IDs in consumer repo's config.yaml
-CONFIG_FILE="$CLAUDE_PROJECT_DIR/.claude/config.yaml"
+# Check for cached IDs in maximal-ai config.yaml
+if [ -n "$MAXIMAL_AI_HOME" ] && [ -f "$MAXIMAL_AI_HOME/.claude/config.yaml" ]; then
+    CONFIG_FILE="$MAXIMAL_AI_HOME/.claude/config.yaml"
+else
+    CONFIG_FILE=""
+fi
 CACHE_HIT=false
 REPO_ID=""
 RESEARCH_CATEGORY_ID=""
@@ -187,8 +186,8 @@ if [ "$CACHE_HIT" = false ] && [ -n "$REMOTE_URL" ]; then
         RESEARCH_CATEGORY_ID=$(echo "$CATEGORIES" | jq -r '.data.repository.discussionCategories.nodes[] | select(.name=="Research") | .id' 2>/dev/null || echo "")
         PLANS_CATEGORY_ID=$(echo "$CATEGORIES" | jq -r '.data.repository.discussionCategories.nodes[] | select(.name=="Plans") | .id' 2>/dev/null || echo "")
 
-        # Cache the IDs if we got them all
-        if [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ]; then
+        # Cache the IDs if we got them all and have a config file to write to
+        if [ -n "$CONFIG_FILE" ] && [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ]; then
             # Remove old cache section if exists
             if grep -q '^thoughts_cache:' "$CONFIG_FILE" 2>/dev/null; then
                 # Remove existing cache section (from thoughts_cache: to next non-indented line or EOF)
