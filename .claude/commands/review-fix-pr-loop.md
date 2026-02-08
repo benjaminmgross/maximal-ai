@@ -108,10 +108,11 @@ Run these commands to get the PR information:
 1. Get PR metadata:
    `gh pr view [PR_NUMBER] --json number,title,body,author,headRefName,baseRefName,additions,deletions,changedFiles,state,url`
 
-2. Get the diff (truncate to avoid context overflow on large PRs):
-   `gh pr diff [PR_NUMBER] | head -600`
+2. Get the LOCAL diff against the PR base branch (this includes all local commits, even unpushed fixer commits):
+   `git diff $(gh pr view [PR_NUMBER] --json baseRefName --jq '.baseRefName')...HEAD | head -600`
    If the diff is truncated, use file-specific diffs for files you need to review in full:
-   `gh pr diff [PR_NUMBER] -- path/to/specific/file`
+   `git diff $(gh pr view [PR_NUMBER] --json baseRefName --jq '.baseRefName')...HEAD -- path/to/specific/file`
+   Note: Do NOT use `gh pr diff` as the primary diff source — it fetches the remote state and will miss local fixer commits from prior rounds.
 
 3. Get diff stats (file list and change counts):
    `gh pr view [PR_NUMBER] --json additions,deletions,changedFiles`
