@@ -11,10 +11,10 @@ $ARGUMENTS
 </pr_identifier>
 
 **Usage:**
-- `/review-fix-pr 42`
-- `/review-fix-pr 42 --max-rounds 5`
-- `/review-fix-pr https://github.com/user/repo/pull/42`
-- `/review-fix-pr [this pr](https://github.com/user/repo/pull/42)`
+- `/review-fix-pr-loop 42`
+- `/review-fix-pr-loop 42 --max-rounds 5`
+- `/review-fix-pr-loop https://github.com/user/repo/pull/42`
+- `/review-fix-pr-loop [this pr](https://github.com/user/repo/pull/42)`
 
 ## Pre-computed Context
 
