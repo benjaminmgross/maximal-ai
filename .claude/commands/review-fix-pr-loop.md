@@ -111,8 +111,8 @@ Run these commands to get the PR information:
 2. Get the full diff:
    `gh pr diff [PR_NUMBER]`
 
-3. Get diff stats:
-   `gh pr diff [PR_NUMBER] --stat`
+3. Get diff stats (file list and change counts):
+   `gh pr view [PR_NUMBER] --json additions,deletions,changedFiles`
 
 4. Get commit history:
    `gh pr view [PR_NUMBER] --json commits --jq '.commits[] | "- \(.oid[0:7]) \(.messageHeadline)"'`
