@@ -39,7 +39,7 @@ $ARGUMENTS
 ### Current Branch
 !`git branch --show-current 2>/dev/null || echo "unknown"`
 
-### Existing Reviews for This PR
+### Existing Reviews (all PRs — coordinator should filter by target PR number)
 !`ls -t thoughts/reviews/*-review-*.md 2>/dev/null | head -10 || echo "No existing reviews"`
 
 ### Linked Plan File (from PR body)
