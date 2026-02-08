@@ -183,6 +183,7 @@ These commands use inline bash to pre-compute context, eliminating tool call rou
 These commands enable adversarial code review across separate Claude sessions:
 - `/review-pr [PR#]` - Review a GitHub PR with structured output (Session 2)
 - `/address-review [plan-file] [review-file]` - Address review feedback systematically (Session 1)
+- `/review-fix-pr-loop [PR#] [--max-rounds N]` - Automated adversarial review-fix loop using sub-agents (single session)
 
 ### Usage Examples
 ```bash
@@ -226,6 +227,10 @@ These commands enable adversarial code review across separate Claude sessions:
 
 # Session 2: Re-review and approve
 /review-pr 123  # APPROVED → merge in GitHub
+
+# Automated review-fix loop (single session, uses sub-agents)
+/review-fix-pr-loop 123                # Default 3 rounds
+/review-fix-pr-loop 123 --max-rounds 5 # Custom max rounds
 ```
 
 ## Slash Command Quick Reference
@@ -241,6 +246,7 @@ When performing these workflows, use the corresponding command to leverage pre-c
 | Progress report | `/standup` | git activity, RPI artifacts, TODOs |
 | PR review (Session 2) | `/review-pr` | PR metadata, diff, commits, linked plan |
 | Address feedback (Session 1) | `/address-review` | branch status, PR state, recent commits |
+| Automated review-fix loop | `/review-fix-pr-loop` | PR metadata, diff, branch, existing reviews |
 | Architecture review | `/architecture-review` | spawns pattern-detector, scalability-assessor agents |
 | System design | `/design-system` | loads patterns, decision trees, NFR guides |
 | Technical tradeoffs | `/tradeoff-analysis` | spawns tradeoff-researcher agent, loads decision trees |
@@ -402,6 +408,10 @@ reviewer: username
 
 This format allows `/address-review` to parse and create actionable todos.
 
+### Automated Alternative: `/review-fix-pr-loop`
+
+For a fully automated version of the multi-session workflow above, use `/review-fix-pr-loop [PR#]`. This command runs the entire review-fix cycle in a single session by spawning reviewer and fixer sub-agents in alternating rounds. It supports `--max-rounds N` (default: 3) and produces the same review/response artifacts in `thoughts/reviews/`.
+
 ## File Organization
 
 ```
@@ -420,6 +430,7 @@ project-root/
 │   │   ├── review.md
 │   │   ├── review-pr.md
 │   │   ├── address-review.md
+│   │   ├── review-fix-pr-loop.md
 │   │   ├── test-and-fix.md
 │   │   ├── verify.md
 │   │   ├── observe-docstrings.md
