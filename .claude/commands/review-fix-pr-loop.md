@@ -108,8 +108,10 @@ Run these commands to get the PR information:
 1. Get PR metadata:
    `gh pr view [PR_NUMBER] --json number,title,body,author,headRefName,baseRefName,additions,deletions,changedFiles,state,url`
 
-2. Get the full diff:
-   `gh pr diff [PR_NUMBER]`
+2. Get the diff (truncate to avoid context overflow on large PRs):
+   `gh pr diff [PR_NUMBER] | head -600`
+   If the diff is truncated, use file-specific diffs for files you need to review in full:
+   `gh pr diff [PR_NUMBER] -- path/to/specific/file`
 
 3. Get diff stats (file list and change counts):
    `gh pr view [PR_NUMBER] --json additions,deletions,changedFiles`
