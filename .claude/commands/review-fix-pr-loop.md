@@ -302,12 +302,13 @@ For EACH issue listed above:
 3. Make the fix — follow the reviewer's suggestion when it makes sense, use your judgment otherwise
 4. Stage and commit immediately with this format:
    ```
+   git add [files-you-changed]
    git commit -m "$(cat <<'EOF'
    fix: address review [ISSUE_ID] - [brief description]
-   
+
    Issue: [what the reviewer found]
    Fix: [what you changed]
-   
+
    Review: [REVIEW_FILE_PATH]
    EOF
    )"
