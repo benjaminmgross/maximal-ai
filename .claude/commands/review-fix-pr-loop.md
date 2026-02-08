@@ -90,7 +90,7 @@ Repeat until `approved == true` OR `round > max_rounds`:
 
 #### 3a. Spawn Reviewer Sub-Agent
 
-Use the Task tool with `subagent_type: "general-purpose"` to spawn a reviewer. The reviewer gets fresh context and fetches its own diff.
+Use the Task tool to spawn a general-purpose reviewer sub-agent. The reviewer gets fresh context and fetches its own diff.
 
 **Reviewer prompt template** (fill in variables before sending):
 
@@ -277,7 +277,7 @@ Before spawning the fixer, verify you are on the correct branch:
 
 #### 3e. Spawn Fixer Sub-Agent
 
-If verdict is `REQUEST_CHANGES` or `NEEDS_DISCUSSION`, spawn a fixer using the Task tool with `subagent_type: "general-purpose"`.
+If verdict is `REQUEST_CHANGES` or `NEEDS_DISCUSSION`, use the Task tool to spawn a general-purpose fixer sub-agent.
 
 First, read the review file yourself to extract the list of issues. Then construct the fixer prompt with the specific issues.
 
