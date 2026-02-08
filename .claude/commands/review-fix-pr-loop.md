@@ -264,7 +264,14 @@ If verdict is `APPROVED`:
 - Skip the fixer step
 - Break out of the loop
 
-#### 3d. Spawn Fixer Sub-Agent
+#### 3d. Validate Branch Before Fixing
+
+Before spawning the fixer, verify you are on the correct branch:
+1. Compare the "Current Branch" pre-computed value against `headRefName` from the PR metadata
+2. If they do NOT match, run `git checkout [headRefName]` to switch to the PR's branch
+3. If checkout fails, stop and warn the user: "Cannot fix: not on PR branch [headRefName], currently on [current branch]"
+
+#### 3e. Spawn Fixer Sub-Agent
 
 If verdict is `REQUEST_CHANGES` or `NEEDS_DISCUSSION`, spawn a fixer using the Task tool with `subagent_type: "general-purpose"`.
 
@@ -371,7 +378,7 @@ COMMITS: [comma-separated hashes]
 ```
 ```
 
-#### 3e. Validate Fixes
+#### 3f. Validate Fixes
 
 After the fixer sub-agent returns:
 1. Read the response file
@@ -387,7 +394,7 @@ Tests: [PASS/FAIL/SKIPPED]
 
 If tests fail, note the failure but continue to next round (the re-reviewer will catch regressions).
 
-#### 3f. Increment Round
+#### 3g. Increment Round
 
 Set `round = round + 1` and continue the loop.
 
