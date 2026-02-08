@@ -238,7 +238,10 @@ REVIEW_FILE: thoughts/reviews/[filename].md
 
 A previous review was conducted and issues were addressed. You are doing a fresh re-review.
 The previous review file is at: [previous_review_file_path]
-You may read it for context on what was previously found, but form your own independent assessment.
+The response file (documenting how each issue was addressed) is at: [previous_response_file_path]
+Read the response file to understand which issues were fixed, which were declined (WONT_FIX), and why.
+Do not re-raise WONT_FIX items unless you have new evidence they should be reconsidered.
+You may read the review file for context on what was previously found, but form your own independent assessment.
 Focus especially on whether previously-identified critical issues have been properly fixed,
 and whether the fixes introduced any new issues.
 ```
