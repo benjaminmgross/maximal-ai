@@ -64,7 +64,7 @@ The "Clean PR Identifier" pre-computed value strips markdown link syntax and giv
 If no PR number is found, stop and ask the user:
 ```
 No PR number found.
-Usage: /review-fix-pr [PR_NUMBER|PR_URL|[text](PR_URL)] [--max-rounds N]
+Usage: /review-fix-pr-loop [PR_NUMBER|PR_URL|[text](PR_URL)] [--max-rounds N]
 ```
 
 ### Step 2: Initialize Loop State
