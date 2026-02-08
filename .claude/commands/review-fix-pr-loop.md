@@ -86,7 +86,20 @@ Branch: [branch]
 
 ### Step 3: Run the Review-Fix Loop
 
-Repeat until `approved == true` OR `round > max_rounds`:
+**Loop Control Flow (pseudocode — follow this exactly):**
+
+```python
+round = 1
+
+while True:                           # always enter the loop body
+    verdict = run_reviewer(round)     # Steps 3a–3b
+    run_fixer(round)                  # Steps 3c–3f — ALWAYS runs, even if APPROVED
+    round += 1                        # Step 3g
+    if round > max_rounds or verdict == "APPROVED":
+        break                         # exit: either approved or max rounds completed
+```
+
+Execute steps 3a through 3g below. The fixer **always** runs — APPROVED means no blocking issues, but suggestions still get implemented. The **only** exit point is after step 3g.
 
 #### 3a. Spawn Reviewer Sub-Agent
 
@@ -261,12 +274,14 @@ Critical: [count] | Suggestions: [count] | Questions: [count]
 Review: thoughts/reviews/[filename].md
 ```
 
-#### 3c. Check for Approval
+#### 3c. Note the Verdict
 
-If verdict is `APPROVED`:
-- Set `approved = true`
-- Skip the fixer step
-- Break out of the loop
+Record the verdict (`APPROVED`, `REQUEST_CHANGES`, or `NEEDS_DISCUSSION`). Do NOT exit the loop here — the fixer always runs next, regardless of verdict. APPROVED means no blocking issues, but suggestions still get implemented.
+
+> **CRITICAL — THE FIXER ALWAYS RUNS.**
+> Do not skip the fixer for any reason — not for APPROVED verdicts, not on the last round.
+> APPROVED reviews can still contain suggestions worth implementing.
+> The only exit point is after step 3g.
 
 #### 3d. Validate Branch Before Fixing
 
@@ -401,7 +416,10 @@ If tests fail, note the failure but continue to next round (the re-reviewer will
 
 #### 3g. Increment Round
 
-Set `round = round + 1` and continue the loop.
+Set `round = round + 1`.
+
+**Exit check:** If `round > max_rounds`, exit the loop and proceed to Step 4 (Final Summary).
+Otherwise, continue from step 3a with the next round.
 
 ### Step 4: Final Summary
 
@@ -440,3 +458,4 @@ After the loop ends (approved or max rounds reached), report:
 6. **Keep your own context lean** — delegate all code reading to sub-agents
 7. **Track state explicitly** — round number, verdict, issue counts
 8. **Run sequentially** — reviewer must finish before fixer starts; fixer must finish before next reviewer
+9. **The fixer always runs** — Every round is a complete review→fix cycle. The fixer runs after every review, regardless of verdict or round number. APPROVED reviews can still contain suggestions. The only exit point is after step 3g.
