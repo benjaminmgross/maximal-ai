@@ -189,7 +189,14 @@ plan_file: [path if found, or "none"]
 
 Issues that MUST be addressed before merging. Use these classification rules:
 
-**Always Critical:** Security vulnerabilities, hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys), breaking API contracts, missing auth on external calls, missing error handling that would crash in production, missing timeouts on external HTTP/API calls, data loss risks.
+**Always Critical:**
+- Security vulnerabilities (injection, auth bypass, credential exposure)
+- Hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys)
+- Breaking API contracts (response shape changes, removed fields)
+- Missing authentication or authorization on external calls
+- Missing error handling that would crash the service in production
+- Missing timeouts on external HTTP/API calls (can hang indefinitely)
+- Data loss or corruption risks
 
 **Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
 
