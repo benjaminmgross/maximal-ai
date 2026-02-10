@@ -84,6 +84,8 @@ Based on the diff context above, analyze the changes:
 - [ ] All `datetime.now()` without timezone identified
 - [ ] All hardcoded URLs, IDs, ARNs, or resource identifiers identified
 - [ ] All exception handlers without `exc_info=True` identified
+- [ ] All `os.environ.get()` with defaults that make subsequent None-checks dead code identified
+- [ ] Report ALL instances, not just the first one found
 
 ## Review Output Format
 
@@ -101,7 +103,14 @@ Provide feedback in this structure:
 
 ### Critical (Must Fix)
 
-**Always Critical:** Security vulnerabilities, hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys), breaking API contracts, missing auth on external calls, missing error handling that crashes in production, missing timeouts on external HTTP/API calls, data loss risks.
+**Always Critical:**
+- Security vulnerabilities (injection, auth bypass, credential exposure)
+- Hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys)
+- Breaking API contracts (response shape changes, removed fields)
+- Missing authentication or authorization on external calls
+- Missing error handling that would crash the service in production
+- Missing timeouts on external HTTP/API calls (can hang indefinitely)
+- Data loss or corruption risks
 
 1. **[Issue]** - `file.ts:42`
    - Problem: [description]
@@ -109,7 +118,12 @@ Provide feedback in this structure:
 
 ### Suggestions (Nice to Have)
 
-**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
+**Always Suggestion:**
+- Code style, naming, readability improvements
+- Minor inconsistencies that don't affect production behavior
+- Dead code that doesn't cause runtime issues
+- Missing documentation or type hints
+- Performance optimizations without immediate production impact
 
 1. **[Suggestion]** - `file.ts:100`
    - [description and recommendation]
@@ -117,9 +131,9 @@ Provide feedback in this structure:
 ### Questions
 1. [Clarifying question about design decision]
 
-## Detailed File Reviews
+## File-by-File Notes
 
-**IMPORTANT:** Every actionable observation below MUST also appear in Critical or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. File-by-File Notes provide context for already-classified issues — they are NOT a place for unclassified findings. Before finalizing, re-read these notes and promote any observation with a recommendation ("consider...", "should...", "could...") to the formal issues list.
 
 ### `path/to/file.ts`
 - Line 42: [specific feedback]

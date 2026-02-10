@@ -146,7 +146,7 @@ For each file in the diff, analyze:
 **Performance** - N+1 queries, unnecessary loops, memory leaks
 **Operational Resilience** - HTTP timeouts, retry logic, error boundaries around external calls, graceful degradation, `exc_info=True` in exception handlers
 
-**Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs. Report ALL instances, not just the first.
+**Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs, `os.environ.get()` with defaults that make subsequent None-checks dead code. Report ALL instances, not just the first.
 
 Be genuinely adversarial. Your job is to find real issues, not rubber-stamp.
 
@@ -189,9 +189,21 @@ plan_file: [path if found, or "none"]
 
 Issues that MUST be addressed before merging. Use these classification rules:
 
-**Always Critical:** Security vulnerabilities, hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys), breaking API contracts, missing auth on external calls, missing error handling that would crash in production, missing timeouts on external HTTP/API calls, data loss risks.
+**Always Critical:**
+- Security vulnerabilities (injection, auth bypass, credential exposure)
+- Hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys)
+- Breaking API contracts (response shape changes, removed fields)
+- Missing authentication or authorization on external calls
+- Missing error handling that would crash the service in production
+- Missing timeouts on external HTTP/API calls (can hang indefinitely)
+- Data loss or corruption risks
 
-**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
+**Always Suggestion:**
+- Code style, naming, readability improvements
+- Minor inconsistencies that don't affect production behavior
+- Dead code that doesn't cause runtime issues
+- Missing documentation or type hints
+- Performance optimizations without immediate production impact
 
 ### C1: [Issue Title]
 - **File:** `path/to/file:line`
@@ -221,7 +233,7 @@ Issues that MUST be addressed before merging. Use these classification rules:
 
 ## File-by-File Notes
 
-**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. File-by-File Notes provide context for already-classified issues — they are NOT a place for unclassified findings. Before finalizing, re-read these notes and promote any observation with a recommendation ("consider...", "should...", "could...") to the formal issues list.
 
 ### `path/to/file1`
 - Line N: [Specific feedback]
