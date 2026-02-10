@@ -118,7 +118,12 @@ Provide feedback in this structure:
 
 ### Suggestions (Nice to Have)
 
-**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
+**Always Suggestion:**
+- Code style, naming, readability improvements
+- Minor inconsistencies that don't affect production behavior
+- Dead code that doesn't cause runtime issues
+- Missing documentation or type hints
+- Performance optimizations without immediate production impact
 
 1. **[Suggestion]** - `file.ts:100`
    - [description and recommendation]

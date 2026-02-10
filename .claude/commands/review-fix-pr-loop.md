@@ -198,7 +198,12 @@ Issues that MUST be addressed before merging. Use these classification rules:
 - Missing timeouts on external HTTP/API calls (can hang indefinitely)
 - Data loss or corruption risks
 
-**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
+**Always Suggestion:**
+- Code style, naming, readability improvements
+- Minor inconsistencies that don't affect production behavior
+- Dead code that doesn't cause runtime issues
+- Missing documentation or type hints
+- Performance optimizations without immediate production impact
 
 ### C1: [Issue Title]
 - **File:** `path/to/file:line`
