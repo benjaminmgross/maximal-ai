@@ -144,6 +144,9 @@ For each file in the diff, analyze:
 **Quality** - Readability, follows existing patterns, unnecessary complexity
 **Testing** - Tests for new functionality, edge case coverage
 **Performance** - N+1 queries, unnecessary loops, memory leaks
+**Operational Resilience** - HTTP timeouts, retry logic, error boundaries around external calls, graceful degradation, `exc_info=True` in exception handlers
+
+**Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs. Report ALL instances, not just the first.
 
 Be genuinely adversarial. Your job is to find real issues, not rubber-stamp.
 
@@ -184,7 +187,11 @@ plan_file: [path if found, or "none"]
 
 ## Critical Issues (Must Fix)
 
-Issues that MUST be addressed before merging.
+Issues that MUST be addressed before merging. Use these classification rules:
+
+**Always Critical:** Security vulnerabilities, hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys), breaking API contracts, missing auth on external calls, missing error handling that would crash in production, missing timeouts on external HTTP/API calls, data loss risks.
+
+**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
 
 ### C1: [Issue Title]
 - **File:** `path/to/file:line`
@@ -213,6 +220,8 @@ Issues that MUST be addressed before merging.
 (If none, write "No questions.")
 
 ## File-by-File Notes
+
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
 
 ### `path/to/file1`
 - Line N: [Specific feedback]
