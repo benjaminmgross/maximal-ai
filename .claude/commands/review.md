@@ -124,9 +124,9 @@ Provide feedback in this structure:
 ### Questions
 1. [Clarifying question about design decision]
 
-## Detailed File Reviews
+## File-by-File Notes
 
-**IMPORTANT:** Every actionable observation below MUST also appear in Critical or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. File-by-File Notes provide context for already-classified issues — they are NOT a place for unclassified findings. Before finalizing, re-read these notes and promote any observation with a recommendation ("consider...", "should...", "could...") to the formal issues list.
 
 ### `path/to/file.ts`
 - Line 42: [specific feedback]

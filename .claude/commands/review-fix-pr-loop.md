@@ -228,7 +228,7 @@ Issues that MUST be addressed before merging. Use these classification rules:
 
 ## File-by-File Notes
 
-**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. File-by-File Notes provide context for already-classified issues — they are NOT a place for unclassified findings. Before finalizing, re-read these notes and promote any observation with a recommendation ("consider...", "should...", "could...") to the formal issues list.
 
 ### `path/to/file1`
 - Line N: [Specific feedback]
