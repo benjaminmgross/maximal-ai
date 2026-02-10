@@ -70,6 +70,21 @@ Based on the diff context above, analyze the changes:
 - [ ] Are there any memory leaks?
 - [ ] Is caching used appropriately?
 
+### 7. Operational Resilience
+- [ ] All external HTTP/API calls have explicit `timeout` parameters
+- [ ] External service calls wrapped in try/except with specific exception types
+- [ ] Retry logic for idempotent operations to transient-failure-prone services
+- [ ] No unbounded loops or polls without timeout caps
+- [ ] Exception handlers include `exc_info=True` (or use `logger.exception()`)
+- [ ] Graceful degradation when external dependencies are unavailable
+
+### 8. Cross-File Pattern Tracing
+- [ ] When an issue is found in one file, search the entire diff for the same pattern
+- [ ] All `requests.*` calls without `timeout=` identified
+- [ ] All `datetime.now()` without timezone identified
+- [ ] All hardcoded URLs, IDs, ARNs, or resource identifiers identified
+- [ ] All exception handlers without `exc_info=True` identified
+
 ## Review Output Format
 
 Provide feedback in this structure:
@@ -85,11 +100,17 @@ Provide feedback in this structure:
 **Issues Found**:
 
 ### Critical (Must Fix)
+
+**Always Critical:** Security vulnerabilities, hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys), breaking API contracts, missing auth on external calls, missing error handling that crashes in production, missing timeouts on external HTTP/API calls, data loss risks.
+
 1. **[Issue]** - `file.ts:42`
    - Problem: [description]
    - Suggestion: [how to fix]
 
 ### Suggestions (Nice to Have)
+
+**Always Suggestion:** Code style/naming, minor inconsistencies, dead code, missing docs/type hints, performance optimizations without immediate impact.
+
 1. **[Suggestion]** - `file.ts:100`
    - [description and recommendation]
 
@@ -97,6 +118,8 @@ Provide feedback in this structure:
 1. [Clarifying question about design decision]
 
 ## Detailed File Reviews
+
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical or Suggestions above. Before finalizing, re-read these notes and promote any observation with a recommendation to the formal issues list.
 
 ### `path/to/file.ts`
 - Line 42: [specific feedback]

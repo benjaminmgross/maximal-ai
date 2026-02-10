@@ -93,6 +93,25 @@ For each file in the diff, analyze:
 - Any obvious performance issues?
 - N+1 queries, unnecessary loops, memory leaks?
 
+**Operational Resilience**
+- Do all external HTTP/API calls have explicit `timeout` parameters?
+- Are external service calls wrapped in try/except with specific exception types?
+- Is there retry logic for idempotent operations to transient-failure-prone services?
+- Are there unbounded loops or polls without timeout caps?
+- Do exception handlers include `exc_info=True` (or use `logger.exception()`) for debugging?
+- What is the failure mode when each external dependency is unavailable?
+
+**Cross-File Pattern Tracing**
+
+When you find an issue in one file, search the ENTIRE diff for the same pattern in other files before moving on. Common cross-cutting patterns:
+- `requests.` calls without `timeout=` — find ALL of them
+- `datetime.now()` without timezone — find ALL of them
+- Exception handlers without `exc_info=True` — find ALL of them
+- Hardcoded URLs, IDs, ARNs, or resource identifiers — find ALL of them
+- `os.environ.get()` with defaults that make subsequent None-checks dead code
+
+Report ALL instances, not just the first one found.
+
 ### Step 3: Create Structured Review Output
 
 **IMPORTANT:** Create the review file at:
@@ -133,7 +152,23 @@ plan_file: [path if found, or "none"]
 
 ## Critical Issues (Must Fix)
 
-Issues that MUST be addressed before merging.
+Issues that MUST be addressed before merging. Use these classification rules:
+
+**Always Critical:**
+- Security vulnerabilities (injection, auth bypass, credential exposure)
+- Hardcoded infrastructure identifiers (AWS account IDs, resource ARNs, API keys)
+- Breaking API contracts (response shape changes, removed fields)
+- Missing authentication or authorization on external calls
+- Missing error handling that would crash the service in production
+- Missing timeouts on external HTTP/API calls (can hang indefinitely)
+- Data loss or corruption risks
+
+**Always Suggestion:**
+- Code style, naming, readability improvements
+- Minor inconsistencies that don't affect production behavior
+- Dead code that doesn't cause runtime issues
+- Missing documentation or type hints
+- Performance optimizations without immediate production impact
 
 ### C1: [Issue Title]
 - **File:** `path/to/file.ts:42`
@@ -175,6 +210,8 @@ Clarifications needed about design decisions.
 - **Context:** [Why you're asking]
 
 ## File-by-File Notes
+
+**IMPORTANT:** Every actionable observation below MUST also appear in Critical Issues or Suggestions above. File-by-File Notes provide context for already-classified issues — they are NOT a place for unclassified findings. Before finalizing, re-read these notes and promote any observation with a recommendation ("consider...", "should...", "could...") to the formal issues list.
 
 ### `path/to/file1.ts`
 - Line 42: [Specific feedback]
