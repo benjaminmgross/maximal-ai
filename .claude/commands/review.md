@@ -84,6 +84,8 @@ Based on the diff context above, analyze the changes:
 - [ ] All `datetime.now()` without timezone identified
 - [ ] All hardcoded URLs, IDs, ARNs, or resource identifiers identified
 - [ ] All exception handlers without `exc_info=True` identified
+- [ ] All `os.environ.get()` with defaults that make subsequent None-checks dead code identified
+- [ ] Report ALL instances, not just the first one found
 
 ## Review Output Format
 

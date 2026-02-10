@@ -146,7 +146,7 @@ For each file in the diff, analyze:
 **Performance** - N+1 queries, unnecessary loops, memory leaks
 **Operational Resilience** - HTTP timeouts, retry logic, error boundaries around external calls, graceful degradation, `exc_info=True` in exception handlers
 
-**Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs. Report ALL instances, not just the first.
+**Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs, `os.environ.get()` with defaults that make subsequent None-checks dead code. Report ALL instances, not just the first.
 
 Be genuinely adversarial. Your job is to find real issues, not rubber-stamp.
 
