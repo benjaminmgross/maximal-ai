@@ -408,6 +408,15 @@ reviewer: username
 
 This format allows `/address-review` to parse and create actionable todos.
 
+### Review Dimensions
+
+All review commands (`/review`, `/review-pr`, `/review-fix-pr-loop`) evaluate code across four enhanced dimensions beyond standard correctness/security/quality checks:
+
+- **Operational Resilience** -- timeouts on external calls, retry logic, graceful degradation, `exc_info=True` in exception handlers
+- **Severity Calibration** -- "Always Critical" and "Always Suggestion" classification rules to ensure consistent issue categorization
+- **Cross-File Pattern Tracing** -- when an issue is found in one file, the entire diff is searched for the same pattern (e.g., missing timeouts, hardcoded IDs, dead-code `os.environ.get()` defaults)
+- **Observation Promotion** -- file-by-file notes are audited to ensure every actionable observation is promoted to the formal Critical/Suggestion issue list
+
 ### Automated Alternative: `/review-fix-pr-loop`
 
 For a fully automated version of the multi-session workflow above, use `/review-fix-pr-loop [PR#]`. This command runs the entire review-fix cycle in a single session by spawning reviewer and fixer sub-agents in alternating rounds. It supports `--max-rounds N` (default: 3) and produces the same review/response artifacts in `thoughts/reviews/`.
