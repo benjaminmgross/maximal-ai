@@ -69,7 +69,7 @@ Use AskUserQuestion to fill in any gaps. Ask up to 3 questions, adapting based o
      - label: "Debugging", description: "Bug fixes, error resolution, root cause analysis"
      - label: "Pattern", description: "Code patterns, design approaches, best practices"
      - label: "Architecture", description: "System design, infrastructure, scaling decisions"
-     - label: "Tooling", description: "Developer tools, CI/CD, build systems, IDE config"
+     - label: "Tooling", description: "Developer tools, CI/CD, build systems, IDE config (also: workflow, performance, testing, integration via Other)"
    ```
 
 2. **Severity** (if not obvious):
