@@ -90,14 +90,14 @@ Structure your findings like this:
 
 ### Highly Relevant
 1. **[filename]**
-   - **Type**: Research/Plan/Handoff
+   - **Type**: Research/Plan/Handoff/Learning
    - **Date**: YYYY-MM-DD
    - **Key Finding**: [1-2 sentence summary]
    - **Relevance**: [Why this matters for current task]
 
 ### Partially Relevant
 2. **[filename]**
-   - **Type**: Research/Plan/Handoff
+   - **Type**: Research/Plan/Handoff/Learning
    - **Key Finding**: [1-2 sentence summary]
    - **Note**: [What's applicable vs what's outdated]
 
