@@ -58,7 +58,9 @@ REPO_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/
 FILENAME=$(basename "$FILE_PATH")
 
 # Determine directory name based on doc type
-# "research" stays singular, "plan" becomes "plans"
+# Convention: input type is singular ("research", "plan", "learning") but the
+# target directory uses the plural form used in the thoughts repo structure:
+#   "research" -> "research" (already plural-ish), "plan" -> "plans", "learning" -> "learnings"
 if [ "$DOC_TYPE" = "research" ]; then
     DIR_NAME="research"
 elif [ "$DOC_TYPE" = "learning" ]; then
