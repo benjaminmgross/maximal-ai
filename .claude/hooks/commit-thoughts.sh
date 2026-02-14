@@ -5,7 +5,7 @@ set -e
 #
 # Usage: commit-thoughts.sh [--no-discussion] <type> <file_path>
 #   --no-discussion: Skip GitHub Discussion creation (commit only)
-#   type: "research" or "plan"
+#   type: "research", "plan", or "learning"
 #   file_path: Path to the document (relative to consumer repo, e.g., "thoughts/research/2026.01.27-bmg-topic.md")
 #
 # Environment variables required:
@@ -33,8 +33,8 @@ if [ -z "$DOC_TYPE" ] || [ -z "$FILE_PATH" ]; then
     exit 2
 fi
 
-if [ "$DOC_TYPE" != "research" ] && [ "$DOC_TYPE" != "plan" ]; then
-    echo "ERROR: type must be 'research' or 'plan', got: $DOC_TYPE" >&2
+if [ "$DOC_TYPE" != "research" ] && [ "$DOC_TYPE" != "plan" ] && [ "$DOC_TYPE" != "learning" ]; then
+    echo "ERROR: type must be 'research', 'plan', or 'learning', got: $DOC_TYPE" >&2
     exit 2
 fi
 
@@ -61,6 +61,8 @@ FILENAME=$(basename "$FILE_PATH")
 # "research" stays singular, "plan" becomes "plans"
 if [ "$DOC_TYPE" = "research" ]; then
     DIR_NAME="research"
+elif [ "$DOC_TYPE" = "learning" ]; then
+    DIR_NAME="learnings"
 else
     DIR_NAME="plans"
 fi
@@ -144,6 +146,7 @@ CACHE_HIT=false
 REPO_ID=""
 RESEARCH_CATEGORY_ID=""
 PLANS_CATEGORY_ID=""
+LEARNINGS_CATEGORY_ID=""
 
 if [ -f "$CONFIG_FILE" ] && [ -n "$REMOTE_URL" ]; then
     # Check if cache exists and matches current remote
@@ -152,6 +155,7 @@ if [ -f "$CONFIG_FILE" ] && [ -n "$REMOTE_URL" ]; then
         REPO_ID=$(grep '^  repo_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         RESEARCH_CATEGORY_ID=$(grep '^  research_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         PLANS_CATEGORY_ID=$(grep '^  plans_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
+        LEARNINGS_CATEGORY_ID=$(grep '^  learnings_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         if [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ]; then
             CACHE_HIT=true
             echo "Using cached GitHub IDs from config.yaml"
@@ -185,6 +189,7 @@ if [ "$CACHE_HIT" = false ] && [ -n "$REMOTE_URL" ]; then
 
         RESEARCH_CATEGORY_ID=$(echo "$CATEGORIES" | jq -r '.data.repository.discussionCategories.nodes[] | select(.name=="Research") | .id' 2>/dev/null || echo "")
         PLANS_CATEGORY_ID=$(echo "$CATEGORIES" | jq -r '.data.repository.discussionCategories.nodes[] | select(.name=="Plans") | .id' 2>/dev/null || echo "")
+        LEARNINGS_CATEGORY_ID=$(echo "$CATEGORIES" | jq -r '.data.repository.discussionCategories.nodes[] | select(.name=="Learnings") | .id' 2>/dev/null || echo "")
 
         # Cache the IDs if we got them all and have a config file to write to
         if [ -n "$CONFIG_FILE" ] && [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ]; then
@@ -204,6 +209,7 @@ thoughts_cache:
   repo_id: $REPO_ID
   research_category_id: $RESEARCH_CATEGORY_ID
   plans_category_id: $PLANS_CATEGORY_ID
+  learnings_category_id: $LEARNINGS_CATEGORY_ID
 EOF
             echo "Cached GitHub IDs to config.yaml"
         fi
@@ -219,6 +225,9 @@ else
     if [ "$DOC_TYPE" = "research" ]; then
         CATEGORY_NAME="Research"
         CATEGORY_ID="$RESEARCH_CATEGORY_ID"
+    elif [ "$DOC_TYPE" = "learning" ]; then
+        CATEGORY_NAME="Learnings"
+        CATEGORY_ID="$LEARNINGS_CATEGORY_ID"
     else
         CATEGORY_NAME="Plans"
         CATEGORY_ID="$PLANS_CATEGORY_ID"

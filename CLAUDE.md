@@ -153,6 +153,11 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
    - Maintain context efficiency
    - Verify at each step
 
+4. **Compound Phase** (`/compound`)
+   - Document solved problems and patterns
+   - Make learnings searchable for future sessions
+   - Close the feedback loop
+
 ## Commands Available
 
 ### Primary Commands
@@ -166,6 +171,7 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 - `/blocked` - Identify and analyze implementation blockers
 - `/create_handoff` - Create handoff documentation for session transfer
 - `/resume_handoff [handoff-file]` - Resume work from handoff document
+- `/compound [context]` - Document solved problems to compound team knowledge
 
 ### System Design Commands
 - `/architecture-review [scope]` - Comprehensive architecture analysis with pattern/anti-pattern detection
@@ -231,6 +237,12 @@ These commands enable adversarial code review across separate Claude sessions:
 # Automated review-fix loop (single session, uses sub-agents)
 /review-fix-pr-loop 123                # Default 3 rounds
 /review-fix-pr-loop 123 --max-rounds 5 # Custom max rounds
+
+# Document what you learned after solving a problem
+/compound Fixed the race condition in async job processing
+
+# Compound without context (interactive mode)
+/compound
 ```
 
 ## Slash Command Quick Reference
@@ -250,6 +262,7 @@ When performing these workflows, use the corresponding command to leverage pre-c
 | Architecture review | `/architecture-review` | spawns pattern-detector, scalability-assessor agents |
 | System design | `/design-system` | loads patterns, decision trees, NFR guides |
 | Technical tradeoffs | `/tradeoff-analysis` | spawns tradeoff-researcher agent, loads decision trees |
+| Compound learnings | `/compound` | recent session context, prior learnings |
 
 **Why use these commands?** They use inline bash (`!` backtick syntax) to pre-compute context before Claude sees the prompt. This eliminates multiple tool call round-trips:
 
@@ -445,7 +458,8 @@ project-root/
 │   │   ├── observe-docstrings.md
 │   │   ├── architecture-review.md    # System design command
 │   │   ├── design-system.md          # System design command
-│   │   └── tradeoff-analysis.md      # System design command
+│   │   ├── tradeoff-analysis.md      # System design command
+│   │   └── compound.md              # Knowledge compounding command
 │   ├── agents/         # Specialized sub-agents
 │   │   ├── codebase-locator.md
 │   │   ├── codebase-analyzer.md
@@ -454,7 +468,7 @@ project-root/
 │   │   ├── file-analyzer.md
 │   │   ├── bug-hunter.md
 │   │   ├── test-runner.md
-│   │   ├── thoughts-locator.md              # Searches prior research/plans/handoffs
+│   │   ├── thoughts-locator.md              # Searches prior research/plans/handoffs/learnings
 │   │   ├── code-simplifier.md
 │   │   ├── architecture-pattern-detector.md  # System design agent
 │   │   ├── scalability-assessor.md           # System design agent
@@ -479,6 +493,8 @@ project-root/
 │   ├── plans/          # Implementation plans (OUTPUT from phase 2)
 │   │   └── YYYY.MM.DD-username-description.md
 │   ├── handoffs/       # Session handoff documents
+│   │   └── YYYY.MM.DD-username-description.md
+│   ├── learnings/      # Compounded learnings (OUTPUT from /compound)
 │   │   └── YYYY.MM.DD-username-description.md
 │   └── reviews/        # PR review artifacts (multi-session workflow)
 │       ├── YYYY.MM.DD-pr-N-review-R.md     # Review from Session 2
@@ -530,6 +546,13 @@ This intentional context reset prevents overflow and ensures each phase starts w
 - Named: `YYYY.MM.DD-username-description.md`
 - Include task status, learnings, recent changes, and action items
 - Enable context transfer between sessions
+
+### Learning Documents
+- Located in `thoughts/learnings/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/learnings/`
+- Named: `YYYY.MM.DD-username-description.md`
+- Include problem, root cause, solution, and prevention
+- Categorized with tags for searchability by future sessions
 
 ## Enhanced Capabilities
 
@@ -616,5 +639,6 @@ You know the workflow is working when:
 2. Use `/plan` to create a detailed implementation plan
 3. Execute with `/implement` following the plan
 4. Iterate based on verification results
+5. After solving problems, use `/compound` to document learnings
 
 Remember: The goal is not just to write code, but to write the RIGHT code efficiently with minimal context usage and maximum correctness.
