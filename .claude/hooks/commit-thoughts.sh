@@ -156,7 +156,7 @@ if [ -f "$CONFIG_FILE" ] && [ -n "$REMOTE_URL" ]; then
         RESEARCH_CATEGORY_ID=$(grep '^  research_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         PLANS_CATEGORY_ID=$(grep '^  plans_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         LEARNINGS_CATEGORY_ID=$(grep '^  learnings_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
-        if [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ]; then
+        if [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ] && [ -n "$LEARNINGS_CATEGORY_ID" ]; then
             CACHE_HIT=true
             echo "Using cached GitHub IDs from config.yaml"
         fi
