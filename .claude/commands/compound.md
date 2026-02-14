@@ -149,7 +149,7 @@ Check if THOUGHTS_PATH is configured:
 
 ```bash
 if [ -z "$THOUGHTS_PATH" ]; then
-    exit 0
+    echo "THOUGHTS_PATH not configured, skipping commit step"
 fi
 ```
 
