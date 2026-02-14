@@ -158,6 +158,12 @@ if [ -f "$CONFIG_FILE" ] && [ -n "$REMOTE_URL" ]; then
         RESEARCH_CATEGORY_ID=$(grep '^  research_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         PLANS_CATEGORY_ID=$(grep '^  plans_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
         LEARNINGS_CATEGORY_ID=$(grep '^  learnings_category_id:' "$CONFIG_FILE" 2>/dev/null | sed 's/.*: *//' || echo "")
+        # NOTE: All three category IDs must be non-empty for a cache hit. If the
+        # "Learnings" discussion category does not yet exist on GitHub, LEARNINGS_CATEGORY_ID
+        # will be empty and cache validation will fail on every invocation (even for
+        # research/plan types), forcing a fresh GraphQL call. This is an acceptable
+        # tradeoff -- the cost is one extra API call per run, and it self-heals once
+        # the Learnings category is created on the GitHub repo.
         if [ -n "$REPO_ID" ] && [ -n "$RESEARCH_CATEGORY_ID" ] && [ -n "$PLANS_CATEGORY_ID" ] && [ -n "$LEARNINGS_CATEGORY_ID" ]; then
             CACHE_HIT=true
             echo "Using cached GitHub IDs from config.yaml"
