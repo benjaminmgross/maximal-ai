@@ -57,6 +57,7 @@ show_help() {
     echo "  /blocked         - Analyze blockers"
     echo "  /create_handoff  - Create handoff documentation"
     echo "  /resume_handoff  - Resume work from handoff document"
+    echo "  /compound        - Document solved problems for future sessions"
     echo ""
     echo "RDF CLI (if Layer 5 installed):"
     echo "  rdf --help       - Show RDF CLI commands"

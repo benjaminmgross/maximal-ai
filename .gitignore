@@ -7,6 +7,9 @@ handoffs/
 # THOUGHTS system - working notes (stored in ~/dev/minty-thoughts)
 thoughts/
 
+# Personal deploy config (machine-specific repo list)
+deploy.yaml
+
 # Python
 __pycache__/
 *.py[cod]
