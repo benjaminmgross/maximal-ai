@@ -55,6 +55,7 @@ The searchable index uses this naming convention:
 - `repos-{repo-name}-research-YYYY.MM.DD-username-description.md` - Repo-specific research
 - `repos-{repo-name}-plans-YYYY.MM.DD-username-description.md` - Repo-specific plans
 - `repos-{repo-name}-learnings-YYYY.MM.DD-username-description.md` - Repo-specific learnings
+  - Note: Learnings are intentionally repo-scoped only (no `global-learnings-` convention) because learnings are tied to specific codebases, dependencies, and patterns.
 
 ### Step 1: Keyword Search
 ```bash
