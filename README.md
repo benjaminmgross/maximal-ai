@@ -153,18 +153,60 @@ username: yourname
 
 ### Updating
 
-To update all projects after pulling new changes:
+To update a single project after pulling new changes:
 
 ```bash
 cd /path/to/maximal-ai
 git pull
 ./install.sh  # Updates the maximal-ai command
+
+cd /path/to/your/project
+maximal-ai rpi-workflow
 ```
 
-Then re-run in each project to get latest commands/agents:
+### Multi-Repo Deployment
+
+If you use maximal-ai across many repositories, `deploy-all.sh` automates the entire update cycle.
+
+**1. Create a `deploy.yaml` config** (in the maximal-ai repo root):
+
+```yaml
+# deploy.yaml — Target repos for maximal-ai deployment
+base_dir: ~/dev
+command: rpi-workflow
+repos:
+  - my-project-1
+  - my-project-2
+  - my-project-3
+```
+
+> **Note:** `deploy.yaml` is gitignored since the repo list is personal/machine-specific.
+
+**2. Run the deploy script:**
+
 ```bash
-cd /path/to/your/project
-maximal-ai
+# Full workflow: git pull + install.sh + deploy to all repos
+./deploy-all.sh
+
+# Skip self-update, just deploy to repos
+./deploy-all.sh --skip-update
+```
+
+**What it does:**
+1. Pulls the latest maximal-ai `dev` branch
+2. Runs `source install.sh` to update the `maximal-ai` command
+3. Runs `maximal-ai <command>` in each repo listed in `deploy.yaml`
+4. Prints a summary with success/fail/skip counts
+
+```
+  Deploying to my-project-1... ✓
+  Deploying to my-project-2... ✓
+  Deploying to my-project-3... ✓
+
+  ==============================
+  Deploy Complete
+
+    Succeeded: 3
 ```
 
 ### Testing

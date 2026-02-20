@@ -23,6 +23,7 @@ mkdir -p "$PROJECT_ROOT/thoughts/research"
 mkdir -p "$PROJECT_ROOT/thoughts/plans"
 mkdir -p "$PROJECT_ROOT/thoughts/handoffs"
 mkdir -p "$PROJECT_ROOT/thoughts/reviews"
+mkdir -p "$PROJECT_ROOT/thoughts/learnings"
 
 # Optional: Create docs directory
 if [ ! -d "$PROJECT_ROOT/docs" ]; then
@@ -87,6 +88,9 @@ cp "$INSTALL_DIR/.claude/commands/review-fix-pr-loop.md" "$PROJECT_ROOT/.claude/
 
 # Automation commands
 cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
+
+# Knowledge compounding command
+cp "$INSTALL_DIR/.claude/commands/compound.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."
@@ -162,6 +166,9 @@ echo "      review-pr, address-review, review-fix-pr-loop"
 echo ""
 echo "   📊 Session Management (4):"
 echo "      standup, blocked, create_handoff, resume_handoff"
+echo ""
+echo "   🧠 Knowledge Compounding (1):"
+echo "      compound"
 echo ""
 echo "   🤖 Automation Commands (1):"
 echo "      observe-docstrings"
