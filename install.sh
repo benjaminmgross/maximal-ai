@@ -3,6 +3,14 @@
 # Install/Update the maximal-ai command
 # Run this after pulling changes to update the installed binary
 
+# Prevent running via 'source' — set -e and exit will kill the terminal
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    echo "Error: Do not run this script with 'source'. Use one of:"
+    echo "  ./install.sh"
+    echo "  bash install.sh"
+    return 1 2>/dev/null || true
+fi
+
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

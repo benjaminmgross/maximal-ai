@@ -6,6 +6,14 @@
 #   ./deploy-all.sh               # Full workflow: pull + install + deploy
 #   ./deploy-all.sh --skip-update # Skip git pull + install.sh, just deploy
 
+# Prevent running via 'source' — set -e and exit will kill the terminal
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    echo "Error: Do not run this script with 'source'. Use one of:"
+    echo "  ./deploy-all.sh"
+    echo "  bash deploy-all.sh"
+    return 1 2>/dev/null || true
+fi
+
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -105,7 +113,7 @@ if [ "$SKIP_UPDATE" = false ]; then
     echo ""
 
     echo "Running install.sh..."
-    source "$SCRIPT_DIR/install.sh"
+    bash "$SCRIPT_DIR/install.sh"
     echo ""
 else
     info "Step 1: Skipped (--skip-update)"

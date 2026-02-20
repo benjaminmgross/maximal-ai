@@ -71,7 +71,7 @@ git clone https://github.com/YOUR_USERNAME/maximal-ai.git /path/to/maximal-ai
 
 2. **Add to your shell configuration** (`~/.zshrc` or `~/.bashrc`):
 ```bash
-export MAXIMAL_AI_HOME="$HOME/dev/maximal-ai"
+export MAXIMAL_AI_HOME="$HOME/path-to-maximal-ai/maximal-ai"
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
@@ -172,7 +172,7 @@ If you use maximal-ai across many repositories, `deploy-all.sh` automates the en
 
 ```yaml
 # deploy.yaml — Target repos for maximal-ai deployment
-base_dir: ~/dev
+base_dir: /path-to-maximal-ai/
 command: rpi-workflow
 repos:
   - my-project-1
