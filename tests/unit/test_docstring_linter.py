@@ -173,6 +173,136 @@ def process():
         module_violations = [v for v in result.violations if v.code == "RDF001"]
         assert len(module_violations) == 1
 
+    def test_strict_mode_warns_missing_raises(self, temp_dir: Path) -> None:
+        """Test that STRICT mode warns about missing Raises section."""
+        file_path = temp_dir / "no_raises.py"
+        file_path.write_text('''"""Module docstring."""
+
+def risky_operation(*, data: dict) -> str:
+    """Process data with potential failures.
+
+    Position
+    --------
+    Utility function.
+
+    Invariants
+    ----------
+    - data must not be empty
+
+    Parameters
+    ----------
+    data : dict
+        Input data.
+
+    Returns
+    -------
+    str
+        Processed result.
+    """
+    if not data:
+        raise ValueError("empty data")
+    return str(data)
+''')
+
+        linter = DocstringLinter(Strictness.STRICT)
+        result = linter.lint_file(file_path)
+
+        warnings = [v for v in result.violations if v.code == "RDF006"]
+        assert len(warnings) == 1
+        assert "Raises" in warnings[0].message
+
+    def test_silences_section_parsed_correctly(self, temp_dir: Path) -> None:
+        """Test that a docstring with Raises and Silences passes in STRICT mode."""
+        file_path = temp_dir / "with_silences.py"
+        file_path.write_text('''"""Module docstring."""
+
+def safe_fetch(*, url: str) -> str | None:
+    """Fetch URL with error suppression.
+
+    Position
+    --------
+    Utility function for resilient HTTP calls.
+
+    Invariants
+    ----------
+    - Returns None on any HTTP error
+
+    Raises
+    ------
+    ValueError
+        If url is empty.
+
+    Silences
+    --------
+    ConnectionError
+        Caught and logged; returns None instead of propagating.
+
+    Parameters
+    ----------
+    url : str
+        The URL to fetch.
+
+    Returns
+    -------
+    str | None
+        Response body or None on failure.
+    """
+    if not url:
+        raise ValueError("empty url")
+    try:
+        return url
+    except ConnectionError:
+        return None
+''')
+
+        linter = DocstringLinter(Strictness.STRICT)
+        result = linter.lint_file(file_path)
+
+        # No RDF006 or RDF007 violations
+        raises_violations = [v for v in result.violations if v.code == "RDF006"]
+        silences_violations = [v for v in result.violations if v.code == "RDF007"]
+        assert len(raises_violations) == 0
+        assert len(silences_violations) == 0
+
+    def test_strict_mode_warns_missing_silences_for_except(self, temp_dir: Path) -> None:
+        """Test STRICT mode warns when function catches exceptions but has no Silences."""
+        file_path = temp_dir / "no_silences.py"
+        file_path.write_text('''"""Module docstring."""
+
+def quiet_fetch(*, url: str) -> str | None:
+    """Fetch URL quietly.
+
+    Position
+    --------
+    Utility function.
+
+    Invariants
+    ----------
+    - Never raises
+
+    Parameters
+    ----------
+    url : str
+        The URL to fetch.
+
+    Returns
+    -------
+    str | None
+        Response body or None.
+    """
+    try:
+        return url
+    except Exception:
+        return None
+''')
+
+        linter = DocstringLinter(Strictness.STRICT)
+        result = linter.lint_file(file_path)
+
+        warnings = [v for v in result.violations if v.code == "RDF007"]
+        assert len(warnings) == 1
+        assert "Silences" in warnings[0].message
+
     def test_lint_result_passed_property(self) -> None:
         """Test LintResult.passed property."""
         from rdf.linters.docstring import LintResult, LintViolation

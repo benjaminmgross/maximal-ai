@@ -184,7 +184,8 @@ class DocstringLinter:
                     elif self.strictness in (Strictness.STANDARD, Strictness.STRICT):
                         docstring = ast.get_docstring(node) or ""
                         self._check_numpy_format(
-                            path, node.lineno, node.name, docstring, violations
+                            path, node.lineno, node.name, docstring, violations,
+                            func_node=node,
                         )
 
             elif isinstance(node, ast.ClassDef):
@@ -209,6 +210,8 @@ class DocstringLinter:
         name: str,
         docstring: str,
         violations: list[LintViolation],
+        *,
+        func_node: ast.FunctionDef | ast.AsyncFunctionDef | None = None,
     ) -> None:
         """Check docstring follows NumPy format."""
         # Check for Returns section
@@ -237,6 +240,51 @@ class DocstringLinter:
                         severity=Severity.WARNING,
                     )
                 )
+
+            # Check for Raises section when function body contains raise statements
+            if func_node is not None:
+                has_raise = any(
+                    isinstance(child, ast.Raise)
+                    for child in ast.walk(func_node)
+                )
+                if has_raise and "Raises" not in docstring:
+                    violations.append(
+                        LintViolation(
+                            path=str(path),
+                            line=line,
+                            column=0,
+                            code="RDF006",
+                            message=f"Docstring for '{name}' missing Raises section (function contains raise statements)",
+                            severity=Severity.WARNING,
+                        )
+                    )
+
+                # Check for Silences section when function catches exceptions without re-raising
+                has_silent_except = self._has_silent_except(func_node)
+                if has_silent_except and "Silences" not in docstring:
+                    violations.append(
+                        LintViolation(
+                            path=str(path),
+                            line=line,
+                            column=0,
+                            code="RDF007",
+                            message=f"Docstring for '{name}' missing Silences section (function catches exceptions without re-raising)",
+                            severity=Severity.WARNING,
+                        )
+                    )
+
+    @staticmethod
+    def _has_silent_except(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+        """Check if function has except blocks that don't re-raise."""
+        for child in ast.walk(node):
+            if isinstance(child, ast.ExceptHandler):
+                # Check if the handler body contains a raise statement
+                has_reraise = any(
+                    isinstance(stmt, ast.Raise) for stmt in ast.walk(child)
+                )
+                if not has_reraise:
+                    return True
+        return False
 
     def lint_directory(self, path: Path) -> LintResult:
         """
