@@ -21,7 +21,6 @@ from pathlib import Path
 
 from rdf.linters.docstring import LintResult, LintViolation, Severity
 
-
 REQUIRED_FILES = ["substrate.md", "ai-rules.md"]
 RECOMMENDED_FILES = ["glossary.md", "anti-patterns.md", "testing.md"]
 EXPECTED_DIRS = ["architecture", "decisions", "prompts"]
@@ -81,7 +80,11 @@ class ContextValidator:
                         line=0,
                         column=0,
                         code="CTX001",
-                        message=f"Missing required .context/{filename} — run `rdf scaffold-context {filename.replace('.md', '')}`",
+                        message=(
+                            f"Missing required .context/{filename}"
+                            f" — run `rdf scaffold-context"
+                            f" {filename.replace('.md', '')}`"
+                        ),
                         severity=Severity.ERROR,
                     )
                 )
@@ -97,7 +100,11 @@ class ContextValidator:
                         line=0,
                         column=0,
                         code="CTX002",
-                        message=f"Missing recommended .context/{filename} — run `rdf scaffold-context {filename.replace('.md', '')}`",
+                        message=(
+                            f"Missing recommended .context/{filename}"
+                            f" — run `rdf scaffold-context"
+                            f" {filename.replace('.md', '')}`"
+                        ),
                         severity=Severity.WARNING,
                     )
                 )
@@ -115,7 +122,11 @@ class ContextValidator:
                         line=0,
                         column=0,
                         code="CTX003",
-                        message="Malformed .context/glossary.md — expected table structure (| Term | Definition | Where Used |)",
+                        message=(
+                            "Malformed .context/glossary.md"
+                            " — expected table structure"
+                            " (| Term | Definition | Where Used |)"
+                        ),
                         severity=Severity.WARNING,
                     )
                 )
@@ -133,7 +144,10 @@ class ContextValidator:
                         line=0,
                         column=0,
                         code="CTX003",
-                        message="Malformed .context/anti-patterns.md — expected Wrong/Right pattern format",
+                        message=(
+                            "Malformed .context/anti-patterns.md"
+                            " — expected Wrong/Right pattern format"
+                        ),
                         severity=Severity.WARNING,
                     )
                 )
@@ -149,7 +163,10 @@ class ContextValidator:
                         line=0,
                         column=0,
                         code="CTX003",
-                        message="Malformed .context/substrate.md — expected Reading Paths section",
+                        message=(
+                            "Malformed .context/substrate.md"
+                            " — expected Reading Paths section"
+                        ),
                         severity=Severity.WARNING,
                     )
                 )
@@ -168,7 +185,10 @@ class ContextValidator:
                             line=0,
                             column=0,
                             code="CTX004",
-                            message=f"Empty .context/{dirname}/ directory — consider adding content or removing",
+                            message=(
+                                f"Empty .context/{dirname}/ directory"
+                                " — consider adding content or removing"
+                            ),
                             severity=Severity.INFO,
                         )
                     )

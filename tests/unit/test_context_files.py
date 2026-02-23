@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from rdf.generators.context_file import ContextFileGenerator, ContextFileSections
 
 

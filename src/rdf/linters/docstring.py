@@ -254,7 +254,10 @@ class DocstringLinter:
                             line=line,
                             column=0,
                             code="RDF006",
-                            message=f"Docstring for '{name}' missing Raises section (function contains raise statements)",
+                            message=(
+                                f"Docstring for '{name}' missing Raises section"
+                                " (function contains raise statements)"
+                            ),
                             severity=Severity.WARNING,
                         )
                     )
@@ -268,7 +271,10 @@ class DocstringLinter:
                             line=line,
                             column=0,
                             code="RDF007",
-                            message=f"Docstring for '{name}' missing Silences section (function catches exceptions without re-raising)",
+                            message=(
+                                f"Docstring for '{name}' missing Silences section"
+                                " (function catches exceptions without re-raising)"
+                            ),
                             severity=Severity.WARNING,
                         )
                     )

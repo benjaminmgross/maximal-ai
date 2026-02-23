@@ -15,7 +15,6 @@ Invariants
 
 from __future__ import annotations
 
-import importlib.resources
 import sys
 from pathlib import Path
 
@@ -75,7 +74,7 @@ def _scaffold_context_dir(
     context_dir.mkdir(exist_ok=True)
 
     # Create top-level files
-    for file_type, (template_path, filename) in _CONTEXT_FILE_MAP.items():
+    for _type, (template_path, filename) in _CONTEXT_FILE_MAP.items():
         filepath = context_dir / filename
         if not filepath.exists() or force:
             filepath.write_text(_load_template(template_path))
@@ -301,7 +300,11 @@ def generate_repomap(source: str, output: str) -> None:
         sys.exit(2)
 
     generator = RepomapGenerator(source_path)
-    result = generator.generate(output_path)
+    context_dir = Path(".context")
+    result = generator.generate(
+        output_path,
+        context_dir=context_dir if context_dir.exists() else None,
+    )
 
     console.print(f"  Source: {source}")
     console.print(f"  Output: {output}")

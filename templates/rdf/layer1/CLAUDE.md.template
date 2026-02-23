@@ -42,8 +42,17 @@ For extended documentation, see:
 - @docs/ai/protocols/code-review.md - PR review checklist
 - @docs/ai/protocols/deployment.md - Deployment procedures
 
+## Project Context
+
+See `.context/substrate.md` for comprehensive project documentation including:
+- Architecture overview
+- AI rules and constraints
+- Anti-patterns catalog
+- Domain glossary
+- Testing standards
+
 ## Getting Help
 
 - See `AGENTS.md` for detailed AI guidance and boundaries
 - See `REPOMAP.yaml` for codebase structure
-- See `.folder.md` files in directories for local context
+- See `.context.md` files in directories for local context

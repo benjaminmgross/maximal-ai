@@ -1,7 +1,5 @@
 """Integration tests for RDF CLI."""
 
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest
@@ -23,7 +21,7 @@ class TestCLI:
         """Test --version flag."""
         result = runner.invoke(main, ["--version"])
         assert result.exit_code == 0
-        assert "0.1.0" in result.output
+        assert "3.0.0" in result.output
 
     def test_help(self, runner: CliRunner) -> None:
         """Test --help flag."""

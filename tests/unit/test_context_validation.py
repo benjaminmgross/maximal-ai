@@ -2,9 +2,21 @@
 
 from pathlib import Path
 
-import pytest
-
 from rdf.validators.context import ContextValidator
+
+# Reusable valid content strings
+_SUBSTRATE = (
+    "# Substrate\n\n## Reading Paths\n\n"
+    "| Audience | Path |\n|---|---|\n"
+)
+_ANTI_PATTERNS = (
+    "# Anti-Patterns\n\n## Pattern 1\n\n"
+    "### Wrong\n\n### Right\n"
+)
+_GLOSSARY = (
+    "# Glossary\n\n"
+    "| Term | Definition | Where Used |\n|---|---|---|\n"
+)
 
 
 class TestContextValidator:
@@ -37,10 +49,10 @@ class TestContextValidator:
         assert len(warnings) == 3
 
     def test_validates_glossary_format(self, temp_dir: Path) -> None:
-        """Test that glossary without table structure produces CTX003 warning."""
+        """Test that glossary without table produces CTX003 warning."""
         context = temp_dir / ".context"
         context.mkdir()
-        (context / "substrate.md").write_text("# Substrate\n\n## Reading Paths\n\n| Audience | Path |\n|---|---|\n")
+        (context / "substrate.md").write_text(_SUBSTRATE)
         (context / "ai-rules.md").write_text("# Rules\n")
         (context / "glossary.md").write_text("# Glossary\n\nSome terms.\n")
 
@@ -51,12 +63,14 @@ class TestContextValidator:
         assert len(warnings) >= 1
 
     def test_validates_anti_patterns_format(self, temp_dir: Path) -> None:
-        """Test that anti-patterns without wrong/right markers produces CTX003."""
+        """Test that anti-patterns without wrong/right produces CTX003."""
         context = temp_dir / ".context"
         context.mkdir()
-        (context / "substrate.md").write_text("# Substrate\n\n## Reading Paths\n\n| Audience | Path |\n|---|---|\n")
+        (context / "substrate.md").write_text(_SUBSTRATE)
         (context / "ai-rules.md").write_text("# Rules\n")
-        (context / "anti-patterns.md").write_text("# Anti-Patterns\n\nSome patterns.\n")
+        (context / "anti-patterns.md").write_text(
+            "# Anti-Patterns\n\nSome patterns.\n"
+        )
 
         validator = ContextValidator(root=temp_dir)
         result = validator.validate()
@@ -68,10 +82,10 @@ class TestContextValidator:
         """Test that a fully populated .context/ passes validation."""
         context = temp_dir / ".context"
         context.mkdir()
-        (context / "substrate.md").write_text("# Substrate\n\n## Reading Paths\n\n| Audience | Path |\n|---|---|\n")
+        (context / "substrate.md").write_text(_SUBSTRATE)
         (context / "ai-rules.md").write_text("# AI Rules\n\n## Constraints\n")
-        (context / "anti-patterns.md").write_text("# Anti-Patterns\n\n## Pattern 1\n\n### Wrong\n\n### Right\n")
-        (context / "glossary.md").write_text("# Glossary\n\n| Term | Definition | Where Used |\n|---|---|---|\n")
+        (context / "anti-patterns.md").write_text(_ANTI_PATTERNS)
+        (context / "glossary.md").write_text(_GLOSSARY)
         (context / "testing.md").write_text("# Testing\n\n## Framework\n")
         (context / "architecture").mkdir()
         (context / "decisions").mkdir()
@@ -93,7 +107,7 @@ class TestContextValidator:
         """Test that empty subdirectories produce CTX004 info."""
         context = temp_dir / ".context"
         context.mkdir()
-        (context / "substrate.md").write_text("# Substrate\n\n## Reading Paths\n\n| Audience | Path |\n|---|---|\n")
+        (context / "substrate.md").write_text(_SUBSTRATE)
         (context / "ai-rules.md").write_text("# Rules\n")
         (context / "architecture").mkdir()
         (context / "decisions").mkdir()
