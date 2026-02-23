@@ -27,6 +27,7 @@ from rdf import __version__
 from rdf.generators.context_file import ContextFileGenerator
 from rdf.generators.repomap import RepomapGenerator
 from rdf.linters.docstring import DocstringLinter, Severity, Strictness
+from rdf.validators.context import ContextValidator
 
 console = Console()
 
@@ -320,11 +321,17 @@ def generate_repomap(source: str, output: str) -> None:
     default="src",
     help="Path to validate",
 )
-def validate(*, strict: bool, path: str) -> None:
+@click.option(
+    "--skip-context",
+    is_flag=True,
+    help="Skip .context/ directory validation",
+)
+def validate(*, strict: bool, path: str, skip_context: bool) -> None:
     """
     Validate RDF compliance.
 
-    Checks .context.md coverage, REPOMAP freshness, and docstring requirements.
+    Checks .context/ directory, .context.md coverage, REPOMAP freshness,
+    and docstring requirements.
     """
     console.print("[bold green]Validating RDF compliance...[/bold green]\n")
 
@@ -378,6 +385,31 @@ def validate(*, strict: bool, path: str) -> None:
             f"{len(dirs_without_contextmd)} directories missing",
         )
 
+    # .context/ directory check
+    all_violations = list(result.violations)
+    if not skip_context:
+        context_result = ContextValidator(root=Path(".")).validate()
+        ctx_errors = sum(1 for v in context_result.violations if v.severity == Severity.ERROR)
+        ctx_warnings = sum(1 for v in context_result.violations if v.severity == Severity.WARNING)
+        ctx_infos = sum(1 for v in context_result.violations if v.severity == Severity.INFO)
+
+        if ctx_errors == 0 and ctx_warnings == 0:
+            table.add_row(".context/ directory", "[green]PASS[/green]", "All files present")
+        elif ctx_errors > 0:
+            table.add_row(
+                ".context/ directory",
+                "[red]FAIL[/red]",
+                f"{ctx_errors} missing required, {ctx_warnings} warnings",
+            )
+        else:
+            table.add_row(
+                ".context/ directory",
+                "[yellow]WARN[/yellow]",
+                f"{ctx_warnings} warnings, {ctx_infos} info",
+            )
+
+        all_violations.extend(context_result.violations)
+
     # REPOMAP check
     repomap_path = Path("REPOMAP.yaml")
     if repomap_path.exists():
@@ -388,18 +420,19 @@ def validate(*, strict: bool, path: str) -> None:
     console.print(table)
 
     # Show violations if any
-    if result.violations:
+    if all_violations:
         console.print("\n[bold]Violations:[/bold]")
-        for v in result.violations[:10]:  # Limit to first 10
+        for v in all_violations[:10]:  # Limit to first 10
             severity_color = "red" if v.severity == Severity.ERROR else "yellow"
             console.print(
                 f"  [{severity_color}]{v.code}[/{severity_color}] {v.path}:{v.line} - {v.message}"
             )
-        if len(result.violations) > 10:
-            console.print(f"  ... and {len(result.violations) - 10} more")
+        if len(all_violations) > 10:
+            console.print(f"  ... and {len(all_violations) - 10} more")
 
     # Exit with appropriate code
-    if error_count > 0:
+    total_errors = sum(1 for v in all_violations if v.severity == Severity.ERROR)
+    if total_errors > 0:
         sys.exit(1)
 
 
