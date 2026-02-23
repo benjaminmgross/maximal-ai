@@ -15,6 +15,7 @@ Invariants
 
 from __future__ import annotations
 
+import importlib.resources
 import sys
 from pathlib import Path
 
@@ -28,6 +29,72 @@ from rdf.generators.repomap import RepomapGenerator
 from rdf.linters.docstring import DocstringLinter, Severity, Strictness
 
 console = Console()
+
+# Template directory for .context/ files
+_TEMPLATE_BASE = Path(__file__).resolve().parent.parent.parent / "templates" / "rdf"
+
+# Mapping of context file types to their template paths and output paths
+_CONTEXT_FILE_MAP: dict[str, tuple[str, str]] = {
+    "substrate": ("context/substrate.md.template", "substrate.md"),
+    "ai-rules": ("context/ai-rules.md.template", "ai-rules.md"),
+    "anti-patterns": ("context/anti-patterns.md.template", "anti-patterns.md"),
+    "glossary": ("context/glossary.md.template", "glossary.md"),
+    "testing": ("context/testing.md.template", "testing.md"),
+}
+
+_CONTEXT_DIR_MAP: dict[str, list[tuple[str, str]]] = {
+    "prompts": [
+        ("context/prompts/README.md.template", "README.md"),
+        ("context/prompts/new-endpoint.md.template", "new-endpoint.md"),
+        ("context/prompts/fix-bug.md.template", "fix-bug.md"),
+        ("context/prompts/refactor.md.template", "refactor.md"),
+    ],
+    "architecture": [
+        ("context/architecture/overview.md.template", "overview.md"),
+    ],
+    "decisions": [
+        ("context/decisions/adr-template.md.template", "adr-template.md"),
+    ],
+}
+
+
+def _load_template(template_path: str) -> str:
+    """Load a template file from the templates directory."""
+    full_path = _TEMPLATE_BASE / template_path
+    return full_path.read_text()
+
+
+def _scaffold_context_dir(
+    *,
+    context_dir: Path,
+    force: bool = False,
+    quiet: bool = False,
+) -> None:
+    """Scaffold the full .context/ directory from templates."""
+    context_dir.mkdir(exist_ok=True)
+
+    # Create top-level files
+    for file_type, (template_path, filename) in _CONTEXT_FILE_MAP.items():
+        filepath = context_dir / filename
+        if not filepath.exists() or force:
+            filepath.write_text(_load_template(template_path))
+            if not quiet:
+                console.print(f"  Created .context/{filename}")
+        elif not quiet:
+            console.print(f"  Skipped .context/{filename} (already exists)")
+
+    # Create subdirectories and their files
+    for dirname, file_list in _CONTEXT_DIR_MAP.items():
+        subdir = context_dir / dirname
+        subdir.mkdir(exist_ok=True)
+        for template_path, filename in file_list:
+            filepath = subdir / filename
+            if not filepath.exists() or force:
+                filepath.write_text(_load_template(template_path))
+                if not quiet:
+                    console.print(f"  Created .context/{dirname}/{filename}")
+            elif not quiet:
+                console.print(f"  Skipped .context/{dirname}/{filename} (already exists)")
 
 
 @click.group()
@@ -75,6 +142,13 @@ def init(*, dry_run: bool) -> None:
             console.print(f"  [dir] {d}/")
         for f in files_to_create:
             console.print(f"  [file] {f}")
+        console.print("  [dir] .context/")
+        for _file_type, (_tpl, filename) in _CONTEXT_FILE_MAP.items():
+            console.print(f"  [file] .context/{filename}")
+        for dirname, file_list in _CONTEXT_DIR_MAP.items():
+            console.print(f"  [dir] .context/{dirname}/")
+            for _tpl, filename in file_list:
+                console.print(f"  [file] .context/{dirname}/{filename}")
         return
 
     # Create directories
@@ -91,7 +165,57 @@ def init(*, dry_run: bool) -> None:
         else:
             console.print(f"  Skipped {filepath} (exists)")
 
+    # Scaffold .context/ directory
+    console.print("\n[bold]Scaffolding .context/ directory...[/bold]")
+    _scaffold_context_dir(context_dir=Path(".context"))
+
     console.print("\n[bold green]RDF initialized![/bold green]")
+
+
+@main.command("scaffold-context")
+@click.argument(
+    "file_type",
+    type=click.Choice([
+        "substrate", "ai-rules", "anti-patterns", "glossary",
+        "testing", "prompts", "architecture", "decisions", "all",
+    ]),
+)
+@click.option("--force", is_flag=True, help="Overwrite existing files")
+def scaffold_context(file_type: str, *, force: bool) -> None:
+    """Scaffold individual .context/ files from templates."""
+    context_dir = Path(".context")
+    context_dir.mkdir(exist_ok=True)
+
+    if file_type == "all":
+        _scaffold_context_dir(context_dir=context_dir, force=force)
+        console.print("\n[bold green]All .context/ files scaffolded![/bold green]")
+        return
+
+    # Check if it's a top-level file
+    if file_type in _CONTEXT_FILE_MAP:
+        template_path, filename = _CONTEXT_FILE_MAP[file_type]
+        filepath = context_dir / filename
+        if not filepath.exists() or force:
+            filepath.write_text(_load_template(template_path))
+            console.print(f"  Created .context/{filename}")
+        else:
+            console.print(f"  Skipped .context/{filename} (already exists, use --force)")
+        return
+
+    # Check if it's a directory type
+    if file_type in _CONTEXT_DIR_MAP:
+        subdir = context_dir / file_type
+        subdir.mkdir(exist_ok=True)
+        for template_path, filename in _CONTEXT_DIR_MAP[file_type]:
+            filepath = subdir / filename
+            if not filepath.exists() or force:
+                filepath.write_text(_load_template(template_path))
+                console.print(f"  Created .context/{file_type}/{filename}")
+            else:
+                console.print(
+                    f"  Skipped .context/{file_type}/{filename} (already exists, use --force)"
+                )
+        return
 
 
 @main.command("scaffold-context-files")

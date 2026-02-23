@@ -101,6 +101,64 @@ class TestCLI:
 
             assert Path("REPOMAP.yaml").exists()
 
+    def test_init_creates_context_directory(self, runner: CliRunner) -> None:
+        """Test init command creates .context/ directory with all expected files."""
+        with runner.isolated_filesystem():
+            result = runner.invoke(main, ["init"])
+            assert result.exit_code == 0
+
+            assert Path(".context/substrate.md").exists()
+            assert Path(".context/ai-rules.md").exists()
+            assert Path(".context/glossary.md").exists()
+            assert Path(".context/anti-patterns.md").exists()
+            assert Path(".context/testing.md").exists()
+            assert Path(".context/prompts").is_dir()
+            assert Path(".context/architecture").is_dir()
+            assert Path(".context/decisions").is_dir()
+
+    def test_init_preserves_existing_context(self, runner: CliRunner) -> None:
+        """Test init preserves existing .context/ files."""
+        with runner.isolated_filesystem():
+            Path(".context").mkdir()
+            Path(".context/glossary.md").write_text("# My Custom Glossary\n")
+
+            result = runner.invoke(main, ["init"])
+            assert result.exit_code == 0
+
+            content = Path(".context/glossary.md").read_text()
+            assert content == "# My Custom Glossary\n"
+
+    def test_scaffold_context_creates_single_file(self, runner: CliRunner) -> None:
+        """Test scaffold-context creates a single .context/ file."""
+        with runner.isolated_filesystem():
+            Path(".context").mkdir()
+            result = runner.invoke(main, ["scaffold-context", "glossary"])
+            assert result.exit_code == 0
+            assert Path(".context/glossary.md").exists()
+
+    def test_scaffold_context_all(self, runner: CliRunner) -> None:
+        """Test scaffold-context all creates all .context/ files."""
+        with runner.isolated_filesystem():
+            Path(".context").mkdir()
+            result = runner.invoke(main, ["scaffold-context", "all"])
+            assert result.exit_code == 0
+            assert Path(".context/substrate.md").exists()
+            assert Path(".context/ai-rules.md").exists()
+            assert Path(".context/glossary.md").exists()
+
+    def test_scaffold_context_force_overwrites(self, runner: CliRunner) -> None:
+        """Test scaffold-context --force overwrites existing files."""
+        with runner.isolated_filesystem():
+            Path(".context").mkdir()
+            Path(".context/glossary.md").write_text("# Old content\n")
+
+            result = runner.invoke(main, ["scaffold-context", "glossary", "--force"])
+            assert result.exit_code == 0
+
+            content = Path(".context/glossary.md").read_text()
+            assert "# Old content" not in content
+            assert "Glossary" in content
+
     def test_validate_command(self, runner: CliRunner) -> None:
         """Test validate command."""
         with runner.isolated_filesystem():
