@@ -30,7 +30,7 @@ class TestCLI:
         result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
         assert "init" in result.output
-        assert "scaffold-folders" in result.output
+        assert "scaffold-context-files" in result.output
         assert "generate-repomap" in result.output
         assert "validate" in result.output
 
@@ -61,32 +61,32 @@ class TestCLI:
             assert Path("docs/AGENTS.md").exists()
             assert Path(".repomap.yaml").exists()
 
-    def test_scaffold_folders_dry_run(self, runner: CliRunner) -> None:
-        """Test scaffold-folders command in dry-run mode."""
+    def test_scaffold_context_files_dry_run(self, runner: CliRunner) -> None:
+        """Test scaffold-context-files command in dry-run mode."""
         with runner.isolated_filesystem():
             # Create directory structure
             Path("src/module").mkdir(parents=True)
             Path("src/utils").mkdir()
 
-            result = runner.invoke(main, ["scaffold-folders", "src", "--dry-run"])
+            result = runner.invoke(main, ["scaffold-context-files", "src", "--dry-run"])
             assert result.exit_code == 0
             assert "Dry run" in result.output
 
             # Verify no files were created
-            assert not Path("src/.folder.md").exists()
+            assert not Path("src/.context.md").exists()
 
-    def test_scaffold_folders_creates_files(self, runner: CliRunner) -> None:
-        """Test scaffold-folders command creates .folder.md files."""
+    def test_scaffold_context_files_creates_files(self, runner: CliRunner) -> None:
+        """Test scaffold-context-files command creates .context.md files."""
         with runner.isolated_filesystem():
             # Create directory structure
             Path("src/module").mkdir(parents=True)
             Path("src/module/main.py").write_text("# main")
 
-            result = runner.invoke(main, ["scaffold-folders", "src"])
+            result = runner.invoke(main, ["scaffold-context-files", "src"])
             assert result.exit_code == 0
 
-            assert Path("src/.folder.md").exists()
-            assert Path("src/module/.folder.md").exists()
+            assert Path("src/.context.md").exists()
+            assert Path("src/module/.context.md").exists()
 
     def test_generate_repomap(self, runner: CliRunner) -> None:
         """Test generate-repomap command."""

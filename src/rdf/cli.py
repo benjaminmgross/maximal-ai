@@ -23,7 +23,7 @@ from rich.console import Console
 from rich.table import Table
 
 from rdf import __version__
-from rdf.generators.foldermd import FolderMdGenerator
+from rdf.generators.context_file import ContextFileGenerator
 from rdf.generators.repomap import RepomapGenerator
 from rdf.linters.docstring import DocstringLinter, Severity, Strictness
 
@@ -94,54 +94,56 @@ def init(*, dry_run: bool) -> None:
     console.print("\n[bold green]RDF initialized![/bold green]")
 
 
-@main.command("scaffold-folders")
+@main.command("scaffold-context-files")
 @click.argument("path", type=click.Path(exists=True))
 @click.option(
     "--dry-run",
     is_flag=True,
     help="Preview changes without writing files",
 )
-def scaffold_folders(path: str, *, dry_run: bool) -> None:
+def scaffold_context_files(path: str, *, dry_run: bool) -> None:
     """
-    Add .folder.md files to source directories.
+    Add .context.md files to source directories.
 
-    Scans PATH recursively and creates .folder.md templates for folders
+    Scans PATH recursively and creates .context.md templates for folders
     that don't have them.
     """
     source_path = Path(path)
-    console.print(f"[bold green]Scaffolding .folder.md in {source_path}[/bold green]")
+    console.print(f"[bold green]Scaffolding .context.md in {source_path}[/bold green]")
 
-    # Find directories without .folder.md
+    # Find directories without .context.md
     dirs_to_scaffold = []
     for dir_path in source_path.rglob("*"):
         if dir_path.is_dir() and not dir_path.name.startswith("."):
             if "__pycache__" in str(dir_path):
                 continue
-            folder_md = dir_path / ".folder.md"
-            if not folder_md.exists():
+            context_md = dir_path / ".context.md"
+            if not context_md.exists():
                 dirs_to_scaffold.append(dir_path)
 
     # Also check the root
-    root_folder_md = source_path / ".folder.md"
-    if not root_folder_md.exists():
+    root_context_md = source_path / ".context.md"
+    if not root_context_md.exists():
         dirs_to_scaffold.insert(0, source_path)
 
     if not dirs_to_scaffold:
-        console.print("[yellow]All directories already have .folder.md files[/yellow]")
+        console.print("[yellow]All directories already have .context.md files[/yellow]")
         return
 
     if dry_run:
-        console.print("[yellow]Dry run - would create .folder.md in:[/yellow]")
+        console.print("[yellow]Dry run - would create .context.md in:[/yellow]")
         for d in dirs_to_scaffold:
             console.print(f"  {d}/")
         return
 
     for dir_path in dirs_to_scaffold:
-        generator = FolderMdGenerator(dir_path)
+        generator = ContextFileGenerator(dir_path)
         generator.generate(dry_run=False)
-        console.print(f"  Created {dir_path}/.folder.md")
+        console.print(f"  Created {dir_path}/.context.md")
 
-    console.print(f"\n[bold green]Created {len(dirs_to_scaffold)} .folder.md files[/bold green]")
+    console.print(
+        f"\n[bold green]Created {len(dirs_to_scaffold)} .context.md files[/bold green]"
+    )
 
 
 @main.command("generate-repomap")
@@ -198,7 +200,7 @@ def validate(*, strict: bool, path: str) -> None:
     """
     Validate RDF compliance.
 
-    Checks .folder.md coverage, REPOMAP freshness, and docstring requirements.
+    Checks .context.md coverage, REPOMAP freshness, and docstring requirements.
     """
     console.print("[bold green]Validating RDF compliance...[/bold green]\n")
 
@@ -209,15 +211,15 @@ def validate(*, strict: bool, path: str) -> None:
     linter = DocstringLinter(strictness=strictness)
     result = linter.lint_directory(source_path)
 
-    # Check .folder.md coverage
-    dirs_without_foldermd = []
+    # Check .context.md coverage
+    dirs_without_contextmd = []
     for dir_path in source_path.rglob("*"):
         if dir_path.is_dir() and not dir_path.name.startswith("."):
             if "__pycache__" in str(dir_path):
                 continue
-            folder_md = dir_path / ".folder.md"
-            if not folder_md.exists():
-                dirs_without_foldermd.append(dir_path)
+            context_md = dir_path / ".context.md"
+            if not context_md.exists():
+                dirs_without_contextmd.append(dir_path)
 
     # Display results
     table = Table(title="Validation Results")
@@ -242,14 +244,14 @@ def validate(*, strict: bool, path: str) -> None:
             f"{error_count} errors, {warning_count} warnings",
         )
 
-    # .folder.md check
-    if not dirs_without_foldermd:
-        table.add_row(".folder.md coverage", "[green]PASS[/green]", "All directories covered")
+    # .context.md check
+    if not dirs_without_contextmd:
+        table.add_row(".context.md coverage", "[green]PASS[/green]", "All directories covered")
     else:
         table.add_row(
-            ".folder.md coverage",
+            ".context.md coverage",
             "[yellow]WARN[/yellow]",
-            f"{len(dirs_without_foldermd)} directories missing",
+            f"{len(dirs_without_contextmd)} directories missing",
         )
 
     # REPOMAP check

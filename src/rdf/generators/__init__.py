@@ -1,6 +1,6 @@
 """RDF generators for documentation artifacts."""
 
-from rdf.generators.foldermd import FolderMdGenerator
+from rdf.generators.context_file import ContextFileGenerator
 from rdf.generators.repomap import RepomapGenerator
 
-__all__ = ["FolderMdGenerator", "RepomapGenerator"]
+__all__ = ["ContextFileGenerator", "RepomapGenerator"]
