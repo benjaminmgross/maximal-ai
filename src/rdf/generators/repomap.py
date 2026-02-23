@@ -25,6 +25,8 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+from rdf import __version__
+
 
 @dataclass
 class SymbolInfo:
@@ -272,6 +274,10 @@ class RepomapGenerator:
         max_lines = max((f.lines for f in self.files), default=1)
 
         for file_info in self.files:
+            # Context files keep their high rank — they're pre-ranked
+            if file_info.file_type == "context":
+                continue
+
             # Base score from lines (normalized)
             line_score = (file_info.lines / max_lines) * 3
 
@@ -288,7 +294,59 @@ class RepomapGenerator:
 
             file_info.rank = min(line_score + symbol_score + import_score, 10.0)
 
-    def generate(self, output_path: Path) -> dict[str, Any]:
+    def _scan_context_files(self, context_dir: Path) -> list[FileInfo]:
+        """
+        Scan .context/ directory and create FileInfo entries for markdown files.
+
+        Parameters
+        ----------
+        context_dir : Path
+            Path to the .context/ directory.
+
+        Returns
+        -------
+        list[FileInfo]
+            FileInfo entries for each .context/ markdown file.
+        """
+        context_files: list[FileInfo] = []
+        if not context_dir.exists():
+            return context_files
+
+        for md_file in sorted(context_dir.rglob("*.md")):
+            content = md_file.read_text()
+            lines = content.splitlines()
+
+            # Extract section headings as symbols
+            symbols: list[SymbolInfo] = []
+            for i, line in enumerate(lines, 1):
+                if line.startswith("## "):
+                    symbols.append(
+                        SymbolInfo(
+                            name=line[3:].strip(),
+                            symbol_type="section",
+                            line=i,
+                        )
+                    )
+
+            try:
+                rel_path = md_file.relative_to(context_dir.parent)
+            except ValueError:
+                rel_path = md_file
+
+            context_files.append(
+                FileInfo(
+                    path=str(rel_path),
+                    rank=9.0,  # High rank — critical for AI navigation
+                    file_type="context",
+                    lines=len(lines),
+                    position=f"Project context documentation: {md_file.stem}",
+                    symbols=symbols,
+                )
+            )
+
+        return context_files
+
+    def generate(self, output_path: Path, *, context_dir: Path | None = None) -> dict[str, Any]:
         """
         Generate REPOMAP.yaml and write to output path.
 
@@ -296,6 +354,8 @@ class RepomapGenerator:
         ----------
         output_path : Path
             Where to write REPOMAP.yaml.
+        context_dir : Path | None
+            Optional path to .context/ directory to include in the map.
 
         Returns
         -------
@@ -304,6 +364,11 @@ class RepomapGenerator:
         """
         files = self.scan_files()
         self.files = [f for f in (self.parse_file(p) for p in files) if f is not None]
+
+        # Include .context/ files if directory provided
+        if context_dir is not None:
+            self.files.extend(self._scan_context_files(context_dir))
+
         self.rank_files()
 
         # Sort by rank descending
@@ -314,7 +379,7 @@ class RepomapGenerator:
             "meta": {
                 "version": "1.0",
                 "generated": datetime.now().isoformat(),
-                "generator": "rdf v0.1.0",
+                "generator": f"rdf v{__version__}",
                 "files_indexed": len(self.files),
             },
             "files": [],

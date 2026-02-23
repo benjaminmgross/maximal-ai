@@ -1,0 +1,53 @@
+# Architecture Overview
+
+> System design documentation with visual diagrams.
+> **Update Trigger:** Modify when architecture changes, new services are added, or boundaries shift.
+
+## System Overview
+
+[PROJECT_NAME] is a [BRIEF_DESCRIPTION].
+
+## Architecture Diagram
+
+```mermaid
+graph TB
+    Client[Client] --> API[API Layer]
+    API --> Services[Service Layer]
+    Services --> DB[(Database)]
+    Services --> Cache[(Cache)]
+    Services --> External[External APIs]
+```
+
+## Layers
+
+### API Layer
+- **Responsibility:** HTTP request handling, validation, authentication
+- **Key files:** [List main files]
+- **Depends on:** Service layer
+
+### Service Layer
+- **Responsibility:** Business logic, orchestration
+- **Key files:** [List main files]
+- **Depends on:** Data layer, external integrations
+
+### Data Layer
+- **Responsibility:** Database access, data models
+- **Key files:** [List main files]
+- **Depends on:** Database
+
+## Key Integration Points
+
+| Integration | Protocol | Purpose |
+|-------------|----------|---------|
+| [Service] | [REST/gRPC/etc.] | [What it does] |
+
+## Infrastructure
+
+- **Hosting:** [AWS / GCP / Vercel / etc.]
+- **Database:** [PostgreSQL / DynamoDB / etc.]
+- **Cache:** [Redis / Memcached / etc.]
+- **CI/CD:** [GitHub Actions / etc.]
+
+## Decisions
+
+Architecture Decision Records are in `.context/decisions/`.

@@ -1,0 +1,65 @@
+# Testing Standards
+
+> Testing conventions, patterns, and requirements for this project.
+> **Update Trigger:** Modify when testing framework, patterns, or coverage requirements change.
+
+## Framework Stack
+
+- **Test runner:** [pytest / vitest / jest]
+- **Coverage:** [pytest-cov / c8 / istanbul]
+- **Mocking:** [unittest.mock / responses / nock]
+- **Fixtures:** [pytest fixtures / factory-boy / etc.]
+
+## Test Organization
+
+```
+tests/
+├── unit/           # Isolated tests, no I/O
+├── integration/    # Tests with real dependencies
+├── e2e/            # End-to-end tests
+└── conftest.py     # Shared fixtures
+```
+
+## Naming Conventions
+
+- Test files: `test_<module_name>.py`
+- Test functions: `test_<what_it_does>`
+- Test classes: `Test<ClassName>`
+
+## AAA Pattern
+
+All tests follow **Arrange-Act-Assert**:
+
+```python
+def test_user_creation():
+    # Arrange
+    user_data = {"name": "Alice", "email": "alice@example.com"}
+
+    # Act
+    user = create_user(**user_data)
+
+    # Assert
+    assert user.name == "Alice"
+    assert user.email == "alice@example.com"
+```
+
+## Fixture Patterns
+
+```python
+@pytest.fixture
+def sample_user():
+    """Create a sample user for testing."""
+    return User(name="Test User", email="test@example.com")
+```
+
+## HTTP Mocking
+
+```python
+# [Document your HTTP mocking approach here]
+```
+
+## Coverage Requirements
+
+- **Minimum coverage:** [80% / 90%]
+- **Branch coverage:** [Required / Optional]
+- **Run:** `[coverage command]`

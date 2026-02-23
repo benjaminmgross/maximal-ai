@@ -1,0 +1,31 @@
+# ADR-[NUMBER]: [TITLE]
+
+> **Status:** [Proposed | Accepted | Deprecated | Superseded by ADR-XXX]
+> **Date:** [YYYY-MM-DD]
+> **Decision Makers:** [Names]
+
+## Context
+
+[What is the issue that we're seeing that is motivating this decision or change?]
+
+## Decision
+
+[What is the change that we're proposing and/or doing?]
+
+## Trade-offs
+
+### Benefits
+- [Benefit 1]
+- [Benefit 2]
+
+### Costs
+- [Cost 1]
+- [Cost 2]
+
+## Consequences
+
+[What becomes easier or more difficult to do because of this change?]
+
+## References
+
+- [Link to relevant discussion, research, or documentation]

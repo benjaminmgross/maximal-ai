@@ -1,0 +1,32 @@
+# Prompt Templates
+
+> Reusable AI task templates for common development workflows.
+> **Update Trigger:** Add templates when new recurring task patterns emerge.
+
+## What Are Prompt Templates?
+
+Prompt templates are pre-written task descriptions with `[PLACEHOLDER]` sections.
+They help AI agents perform common tasks consistently and correctly.
+
+## Available Templates
+
+| Template | Purpose | When to Use |
+|----------|---------|-------------|
+| `new-endpoint.md` | Create a new API endpoint | Adding new routes or API functionality |
+| `fix-bug.md` | Fix a reported bug | Bug investigation and resolution |
+| `refactor.md` | Refactor existing code | Code improvement without behavior change |
+
+## How to Use
+
+1. Open the template for your task type
+2. Fill in all `[PLACEHOLDER]` sections with specifics
+3. Provide the completed template as context to your AI assistant
+
+## Adding New Templates
+
+When you find yourself giving the same instructions repeatedly:
+
+1. Create a new `.md` file in this directory
+2. Include clear sections: Context, Requirements, Constraints, Expected Output
+3. Use `[PLACEHOLDER]` for variable parts
+4. Add an entry to the table above

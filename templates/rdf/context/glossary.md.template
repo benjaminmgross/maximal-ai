@@ -1,0 +1,30 @@
+# Domain Glossary
+
+> Terminology definitions for AI agents and new team members.
+> **Update Trigger:** Add terms when new domain concepts are introduced.
+
+## Business Domain
+
+| Term | Definition | Where Used |
+|------|-----------|------------|
+| [Term 1] | [What it means in this project] | [Files/modules where it appears] |
+| [Term 2] | [What it means in this project] | [Files/modules where it appears] |
+
+## External Integrations
+
+| Term | Definition | Where Used |
+|------|-----------|------------|
+| [Service Name] | [What this external service does for us] | [Integration points] |
+
+## Technical Concepts
+
+| Term | Definition | Where Used |
+|------|-----------|------------|
+| [Concept] | [Project-specific meaning — may differ from general usage] | [Files/modules] |
+
+## Maintaining This Glossary
+
+- Add terms when they first appear in code or documentation
+- Focus on terms that are **ambiguous** or **project-specific**
+- Include the "Where Used" column to help AI agents find context
+- Don't duplicate standard programming terms unless they have special meaning here

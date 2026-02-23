@@ -23,11 +23,78 @@ from rich.console import Console
 from rich.table import Table
 
 from rdf import __version__
-from rdf.generators.foldermd import FolderMdGenerator
+from rdf.generators.context_file import ContextFileGenerator
 from rdf.generators.repomap import RepomapGenerator
 from rdf.linters.docstring import DocstringLinter, Severity, Strictness
+from rdf.validators.context import ContextValidator
 
 console = Console()
+
+# Template directory for .context/ files
+_TEMPLATE_BASE = Path(__file__).resolve().parent.parent.parent / "templates" / "rdf"
+
+# Mapping of context file types to their template paths and output paths
+_CONTEXT_FILE_MAP: dict[str, tuple[str, str]] = {
+    "substrate": ("context/substrate.md.template", "substrate.md"),
+    "ai-rules": ("context/ai-rules.md.template", "ai-rules.md"),
+    "anti-patterns": ("context/anti-patterns.md.template", "anti-patterns.md"),
+    "glossary": ("context/glossary.md.template", "glossary.md"),
+    "testing": ("context/testing.md.template", "testing.md"),
+}
+
+_CONTEXT_DIR_MAP: dict[str, list[tuple[str, str]]] = {
+    "prompts": [
+        ("context/prompts/README.md.template", "README.md"),
+        ("context/prompts/new-endpoint.md.template", "new-endpoint.md"),
+        ("context/prompts/fix-bug.md.template", "fix-bug.md"),
+        ("context/prompts/refactor.md.template", "refactor.md"),
+    ],
+    "architecture": [
+        ("context/architecture/overview.md.template", "overview.md"),
+    ],
+    "decisions": [
+        ("context/decisions/adr-template.md.template", "adr-template.md"),
+    ],
+}
+
+
+def _load_template(template_path: str) -> str:
+    """Load a template file from the templates directory."""
+    full_path = _TEMPLATE_BASE / template_path
+    return full_path.read_text()
+
+
+def _scaffold_context_dir(
+    *,
+    context_dir: Path,
+    force: bool = False,
+    quiet: bool = False,
+) -> None:
+    """Scaffold the full .context/ directory from templates."""
+    context_dir.mkdir(exist_ok=True)
+
+    # Create top-level files
+    for _type, (template_path, filename) in _CONTEXT_FILE_MAP.items():
+        filepath = context_dir / filename
+        if not filepath.exists() or force:
+            filepath.write_text(_load_template(template_path))
+            if not quiet:
+                console.print(f"  Created .context/{filename}")
+        elif not quiet:
+            console.print(f"  Skipped .context/{filename} (already exists)")
+
+    # Create subdirectories and their files
+    for dirname, file_list in _CONTEXT_DIR_MAP.items():
+        subdir = context_dir / dirname
+        subdir.mkdir(exist_ok=True)
+        for template_path, filename in file_list:
+            filepath = subdir / filename
+            if not filepath.exists() or force:
+                filepath.write_text(_load_template(template_path))
+                if not quiet:
+                    console.print(f"  Created .context/{dirname}/{filename}")
+            elif not quiet:
+                console.print(f"  Skipped .context/{dirname}/{filename} (already exists)")
 
 
 @click.group()
@@ -75,6 +142,13 @@ def init(*, dry_run: bool) -> None:
             console.print(f"  [dir] {d}/")
         for f in files_to_create:
             console.print(f"  [file] {f}")
+        console.print("  [dir] .context/")
+        for _file_type, (_tpl, filename) in _CONTEXT_FILE_MAP.items():
+            console.print(f"  [file] .context/{filename}")
+        for dirname, file_list in _CONTEXT_DIR_MAP.items():
+            console.print(f"  [dir] .context/{dirname}/")
+            for _tpl, filename in file_list:
+                console.print(f"  [file] .context/{dirname}/{filename}")
         return
 
     # Create directories
@@ -91,57 +165,109 @@ def init(*, dry_run: bool) -> None:
         else:
             console.print(f"  Skipped {filepath} (exists)")
 
+    # Scaffold .context/ directory
+    console.print("\n[bold]Scaffolding .context/ directory...[/bold]")
+    _scaffold_context_dir(context_dir=Path(".context"))
+
     console.print("\n[bold green]RDF initialized![/bold green]")
 
 
-@main.command("scaffold-folders")
+@main.command("scaffold-context")
+@click.argument(
+    "file_type",
+    type=click.Choice([
+        "substrate", "ai-rules", "anti-patterns", "glossary",
+        "testing", "prompts", "architecture", "decisions", "all",
+    ]),
+)
+@click.option("--force", is_flag=True, help="Overwrite existing files")
+def scaffold_context(file_type: str, *, force: bool) -> None:
+    """Scaffold individual .context/ files from templates."""
+    context_dir = Path(".context")
+    context_dir.mkdir(exist_ok=True)
+
+    if file_type == "all":
+        _scaffold_context_dir(context_dir=context_dir, force=force)
+        console.print("\n[bold green]All .context/ files scaffolded![/bold green]")
+        return
+
+    # Check if it's a top-level file
+    if file_type in _CONTEXT_FILE_MAP:
+        template_path, filename = _CONTEXT_FILE_MAP[file_type]
+        filepath = context_dir / filename
+        if not filepath.exists() or force:
+            filepath.write_text(_load_template(template_path))
+            console.print(f"  Created .context/{filename}")
+        else:
+            console.print(f"  Skipped .context/{filename} (already exists, use --force)")
+        return
+
+    # Check if it's a directory type
+    if file_type in _CONTEXT_DIR_MAP:
+        subdir = context_dir / file_type
+        subdir.mkdir(exist_ok=True)
+        for template_path, filename in _CONTEXT_DIR_MAP[file_type]:
+            filepath = subdir / filename
+            if not filepath.exists() or force:
+                filepath.write_text(_load_template(template_path))
+                console.print(f"  Created .context/{file_type}/{filename}")
+            else:
+                console.print(
+                    f"  Skipped .context/{file_type}/{filename} (already exists, use --force)"
+                )
+        return
+
+
+@main.command("scaffold-context-files")
 @click.argument("path", type=click.Path(exists=True))
 @click.option(
     "--dry-run",
     is_flag=True,
     help="Preview changes without writing files",
 )
-def scaffold_folders(path: str, *, dry_run: bool) -> None:
+def scaffold_context_files(path: str, *, dry_run: bool) -> None:
     """
-    Add .folder.md files to source directories.
+    Add .context.md files to source directories.
 
-    Scans PATH recursively and creates .folder.md templates for folders
+    Scans PATH recursively and creates .context.md templates for folders
     that don't have them.
     """
     source_path = Path(path)
-    console.print(f"[bold green]Scaffolding .folder.md in {source_path}[/bold green]")
+    console.print(f"[bold green]Scaffolding .context.md in {source_path}[/bold green]")
 
-    # Find directories without .folder.md
+    # Find directories without .context.md
     dirs_to_scaffold = []
     for dir_path in source_path.rglob("*"):
         if dir_path.is_dir() and not dir_path.name.startswith("."):
             if "__pycache__" in str(dir_path):
                 continue
-            folder_md = dir_path / ".folder.md"
-            if not folder_md.exists():
+            context_md = dir_path / ".context.md"
+            if not context_md.exists():
                 dirs_to_scaffold.append(dir_path)
 
     # Also check the root
-    root_folder_md = source_path / ".folder.md"
-    if not root_folder_md.exists():
+    root_context_md = source_path / ".context.md"
+    if not root_context_md.exists():
         dirs_to_scaffold.insert(0, source_path)
 
     if not dirs_to_scaffold:
-        console.print("[yellow]All directories already have .folder.md files[/yellow]")
+        console.print("[yellow]All directories already have .context.md files[/yellow]")
         return
 
     if dry_run:
-        console.print("[yellow]Dry run - would create .folder.md in:[/yellow]")
+        console.print("[yellow]Dry run - would create .context.md in:[/yellow]")
         for d in dirs_to_scaffold:
             console.print(f"  {d}/")
         return
 
     for dir_path in dirs_to_scaffold:
-        generator = FolderMdGenerator(dir_path)
+        generator = ContextFileGenerator(dir_path)
         generator.generate(dry_run=False)
-        console.print(f"  Created {dir_path}/.folder.md")
+        console.print(f"  Created {dir_path}/.context.md")
 
-    console.print(f"\n[bold green]Created {len(dirs_to_scaffold)} .folder.md files[/bold green]")
+    console.print(
+        f"\n[bold green]Created {len(dirs_to_scaffold)} .context.md files[/bold green]"
+    )
 
 
 @main.command("generate-repomap")
@@ -174,7 +300,11 @@ def generate_repomap(source: str, output: str) -> None:
         sys.exit(2)
 
     generator = RepomapGenerator(source_path)
-    result = generator.generate(output_path)
+    context_dir = Path(".context")
+    result = generator.generate(
+        output_path,
+        context_dir=context_dir if context_dir.exists() else None,
+    )
 
     console.print(f"  Source: {source}")
     console.print(f"  Output: {output}")
@@ -194,11 +324,17 @@ def generate_repomap(source: str, output: str) -> None:
     default="src",
     help="Path to validate",
 )
-def validate(*, strict: bool, path: str) -> None:
+@click.option(
+    "--skip-context",
+    is_flag=True,
+    help="Skip .context/ directory validation",
+)
+def validate(*, strict: bool, path: str, skip_context: bool) -> None:
     """
     Validate RDF compliance.
 
-    Checks .folder.md coverage, REPOMAP freshness, and docstring requirements.
+    Checks .context/ directory, .context.md coverage, REPOMAP freshness,
+    and docstring requirements.
     """
     console.print("[bold green]Validating RDF compliance...[/bold green]\n")
 
@@ -209,15 +345,15 @@ def validate(*, strict: bool, path: str) -> None:
     linter = DocstringLinter(strictness=strictness)
     result = linter.lint_directory(source_path)
 
-    # Check .folder.md coverage
-    dirs_without_foldermd = []
+    # Check .context.md coverage
+    dirs_without_contextmd = []
     for dir_path in source_path.rglob("*"):
         if dir_path.is_dir() and not dir_path.name.startswith("."):
             if "__pycache__" in str(dir_path):
                 continue
-            folder_md = dir_path / ".folder.md"
-            if not folder_md.exists():
-                dirs_without_foldermd.append(dir_path)
+            context_md = dir_path / ".context.md"
+            if not context_md.exists():
+                dirs_without_contextmd.append(dir_path)
 
     # Display results
     table = Table(title="Validation Results")
@@ -242,15 +378,40 @@ def validate(*, strict: bool, path: str) -> None:
             f"{error_count} errors, {warning_count} warnings",
         )
 
-    # .folder.md check
-    if not dirs_without_foldermd:
-        table.add_row(".folder.md coverage", "[green]PASS[/green]", "All directories covered")
+    # .context.md check
+    if not dirs_without_contextmd:
+        table.add_row(".context.md coverage", "[green]PASS[/green]", "All directories covered")
     else:
         table.add_row(
-            ".folder.md coverage",
+            ".context.md coverage",
             "[yellow]WARN[/yellow]",
-            f"{len(dirs_without_foldermd)} directories missing",
+            f"{len(dirs_without_contextmd)} directories missing",
         )
+
+    # .context/ directory check
+    all_violations = list(result.violations)
+    if not skip_context:
+        context_result = ContextValidator(root=Path(".")).validate()
+        ctx_errors = sum(1 for v in context_result.violations if v.severity == Severity.ERROR)
+        ctx_warnings = sum(1 for v in context_result.violations if v.severity == Severity.WARNING)
+        ctx_infos = sum(1 for v in context_result.violations if v.severity == Severity.INFO)
+
+        if ctx_errors == 0 and ctx_warnings == 0:
+            table.add_row(".context/ directory", "[green]PASS[/green]", "All files present")
+        elif ctx_errors > 0:
+            table.add_row(
+                ".context/ directory",
+                "[red]FAIL[/red]",
+                f"{ctx_errors} missing required, {ctx_warnings} warnings",
+            )
+        else:
+            table.add_row(
+                ".context/ directory",
+                "[yellow]WARN[/yellow]",
+                f"{ctx_warnings} warnings, {ctx_infos} info",
+            )
+
+        all_violations.extend(context_result.violations)
 
     # REPOMAP check
     repomap_path = Path("REPOMAP.yaml")
@@ -262,18 +423,19 @@ def validate(*, strict: bool, path: str) -> None:
     console.print(table)
 
     # Show violations if any
-    if result.violations:
+    if all_violations:
         console.print("\n[bold]Violations:[/bold]")
-        for v in result.violations[:10]:  # Limit to first 10
+        for v in all_violations[:10]:  # Limit to first 10
             severity_color = "red" if v.severity == Severity.ERROR else "yellow"
             console.print(
                 f"  [{severity_color}]{v.code}[/{severity_color}] {v.path}:{v.line} - {v.message}"
             )
-        if len(result.violations) > 10:
-            console.print(f"  ... and {len(result.violations) - 10} more")
+        if len(all_violations) > 10:
+            console.print(f"  ... and {len(all_violations) - 10} more")
 
     # Exit with appropriate code
-    if error_count > 0:
+    total_errors = sum(1 for v in all_violations if v.severity == Severity.ERROR)
+    if total_errors > 0:
         sys.exit(1)
 
 

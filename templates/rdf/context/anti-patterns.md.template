@@ -1,0 +1,84 @@
+# Anti-Patterns Catalog
+
+> Educational catalog of common mistakes and their corrections.
+> **Update Trigger:** Add entries when recurring mistakes are identified in code reviews.
+
+## How to Read This File
+
+Each anti-pattern shows a **Wrong** implementation followed by the **Right** way.
+Code blocks are annotated with why the pattern is problematic.
+
+---
+
+## Architecture
+
+### 1. Single-Method Service Class
+
+#### Wrong
+
+```python
+class UserService:
+    def get_user(self, user_id: str) -> User:
+        return db.query(User).filter_by(id=user_id).first()
+```
+
+*Why it's wrong:* A class with a single method is just a function with extra steps.
+
+#### Right
+
+```python
+def get_user(*, user_id: str) -> User:
+    return db.query(User).filter_by(id=user_id).first()
+```
+
+---
+
+## Code Style
+
+### 2. [PATTERN_NAME]
+
+#### Wrong
+
+```python
+# [Example of the wrong pattern]
+```
+
+*Why it's wrong:* [Explanation]
+
+#### Right
+
+```python
+# [Example of the correct pattern]
+```
+
+---
+
+## Testing
+
+### 3. [PATTERN_NAME]
+
+#### Wrong
+
+```python
+# [Example of the wrong pattern]
+```
+
+*Why it's wrong:* [Explanation]
+
+#### Right
+
+```python
+# [Example of the correct pattern]
+```
+
+---
+
+## Adding New Anti-Patterns
+
+When you encounter a recurring mistake:
+
+1. Identify the category (Architecture, Code Style, Testing, Security)
+2. Write a minimal Wrong example
+3. Write the corrected Right example
+4. Explain **why** the wrong version is problematic
+5. Add it to the appropriate section above

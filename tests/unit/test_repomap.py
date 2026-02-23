@@ -2,9 +2,7 @@
 
 from pathlib import Path
 
-import pytest
-
-from rdf.generators.repomap import RepomapGenerator, FileInfo, SymbolInfo
+from rdf.generators.repomap import FileInfo, RepomapGenerator, SymbolInfo
 
 
 class TestRepomapGenerator:
@@ -177,6 +175,46 @@ from typing import List, Optional
         utils_info = next(f for f in generator.files if "utils" in f.path)
 
         assert cli_info.rank > utils_info.rank
+
+
+    def test_repomap_includes_context_files(self, temp_dir: Path) -> None:
+        """Test that REPOMAP includes .context/ files with high rank."""
+        src = temp_dir / "src"
+        src.mkdir()
+        (src / "module.py").write_text('"""Module."""\n\ndef hello(): pass')
+
+        context = temp_dir / ".context"
+        context.mkdir()
+        (context / "substrate.md").write_text("# Substrate\n")
+        (context / "glossary.md").write_text("# Glossary\n")
+
+        output = temp_dir / "REPOMAP.yaml"
+        generator = RepomapGenerator(src, config={"context_dir": str(context)})
+        result = generator.generate(output, context_dir=context)
+
+        context_files = [f for f in result["files"] if ".context/" in f["path"]]
+        assert len(context_files) >= 2
+        # Context files should have high rank
+        for f in context_files:
+            assert f["rank"] >= 8
+
+    def test_repomap_context_file_type(self, temp_dir: Path) -> None:
+        """Test that .context/ files are classified as 'context' type."""
+        src = temp_dir / "src"
+        src.mkdir()
+        (src / "module.py").write_text('"""Module."""')
+
+        context = temp_dir / ".context"
+        context.mkdir()
+        (context / "substrate.md").write_text("# Substrate\n\n## Overview\n")
+
+        output = temp_dir / "REPOMAP.yaml"
+        generator = RepomapGenerator(src)
+        result = generator.generate(output, context_dir=context)
+
+        context_files = [f for f in result["files"] if ".context/" in f["path"]]
+        for f in context_files:
+            assert f["type"] == "context"
 
 
 class TestFileInfo:
