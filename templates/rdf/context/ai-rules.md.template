@@ -1,0 +1,47 @@
+# AI Rules
+
+> Hard, non-negotiable constraints for code generation in this project.
+> **Update Trigger:** Modify when language version, tooling, or conventions change.
+
+## Language & Runtime
+
+- **Language:** [Python 3.12+ / TypeScript 5.x / etc.]
+- **Package Manager:** [uv / npm / pnpm / etc.]
+- **Runtime:** [CPython / Node.js / Deno / etc.]
+
+## Code Organization
+
+- [All new modules must have a module-level docstring]
+- [Functions use keyword-only arguments after `*` separator]
+- [No single-method service classes — use plain functions]
+
+## Function Signatures
+
+- [All public functions must have type annotations]
+- [Use `*` separator for keyword-only arguments]
+- [Return types are always explicit]
+
+## Formatting & Linting
+
+- **Formatter:** [ruff format / prettier / etc.]
+- **Linter:** [ruff / eslint / etc.]
+- **Line length:** [100 / 80 / etc.]
+- **Run before commit:** `[linting command]`
+
+## Type Checking
+
+- **Tool:** [mypy / pyright / tsc / etc.]
+- **Strictness:** [strict / basic / etc.]
+- **Run:** `[type check command]`
+
+## Testing
+
+- **Framework:** [pytest / vitest / jest / etc.]
+- **Run:** `[test command]`
+- **Coverage minimum:** [80% / 90% / etc.]
+
+## Docstrings
+
+- **Format:** NumPy-style (see `.context/testing.md` for full standard)
+- **Required sections:** Summary, Parameters, Returns
+- **STRICT mode sections:** Position, Invariants, Raises, Silences

@@ -63,6 +63,59 @@ from pydantic import BaseModel
 ...
 ```
 
+## Docstring Contract Sections
+
+In addition to source file headers, RDF 3.0 defines a unified NumPy docstring standard
+with semantic sections for documenting function contracts:
+
+```python
+def process_payment(*, invoice_id: str, amount: int) -> Receipt:
+    """Process a payment for the given invoice.
+
+    Position
+    --------
+    Service-layer function called by API route handlers.
+    I/O: DATABASE_READ, DATABASE_WRITE, NETWORK_CALL
+
+    Invariants
+    ----------
+    - amount must be positive
+    - invoice must exist and be unpaid
+
+    Parameters
+    ----------
+    invoice_id : str
+        The unique identifier for the invoice.
+    amount : int
+        Payment amount in cents.
+
+    Returns
+    -------
+    Receipt
+        Confirmation of payment processed.
+
+    Raises
+    ------
+    InvoiceNotFoundError
+        If no invoice exists with the given ID.
+    ValueError
+        If amount is not positive.
+
+    Silences
+    --------
+    ConnectionError
+        Caught during receipt email delivery; logged as warning.
+        Payment still succeeds — email is best-effort.
+    """
+```
+
+| Section | Purpose | When Required |
+|---------|---------|---------------|
+| Position | Structural role, call graph, I/O patterns | STRICT mode |
+| Invariants | Constraints that must always hold | STRICT mode |
+| Raises | Exceptions the function can raise | Recommended |
+| Silences | Exceptions caught and suppressed | Recommended |
+
 ## When to Use
 
 - Add headers to new files

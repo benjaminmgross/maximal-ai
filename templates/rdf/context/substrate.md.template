@@ -1,0 +1,51 @@
+# Project Context Substrate
+
+> Navigation hub for AI agents and developers. Start here.
+> **Update Trigger:** Modify when project structure, key files, or reading paths change.
+
+## Project Overview
+
+[PROJECT_NAME] — [ONE_LINE_DESCRIPTION]
+
+## Directory Map
+
+| Directory | Purpose | Context File |
+|-----------|---------|--------------|
+| `src/` | Application source code | `.context.md` |
+| `tests/` | Test suite | `.context.md` |
+| `docs/` | Documentation | `.context.md` |
+
+## Reading Paths
+
+### New Developer
+1. This file (`.context/substrate.md`)
+2. `.context/glossary.md` — learn the domain language
+3. `.context/architecture/overview.md` — understand the system
+4. `CLAUDE.md` — quick start commands
+
+### AI Agent
+1. `CLAUDE.md` — commands and constraints
+2. `.context/ai-rules.md` — hard rules for code generation
+3. `.context/anti-patterns.md` — what NOT to do
+4. `REPOMAP.yaml` — codebase index
+
+### Feature Developer
+1. `.context/substrate.md` — this file
+2. `.context/testing.md` — testing standards
+3. `.context/architecture/overview.md` — where things go
+4. `.context/prompts/` — task templates
+
+## Token Budget Guide
+
+| Level | Files to Load | Approximate Tokens |
+|-------|--------------|-------------------|
+| Minimal | `CLAUDE.md` + `substrate.md` | ~2-4K |
+| Standard | Minimal + `ai-rules.md` + `glossary.md` + `REPOMAP.yaml` | ~8-15K |
+| Comprehensive | Standard + `anti-patterns.md` + `testing.md` + `architecture/overview.md` | ~20-30K |
+
+## Key Files
+
+- `CLAUDE.md` — Auto-loaded entry point for Claude Code
+- `REPOMAP.yaml` — Auto-generated codebase index
+- `.context/ai-rules.md` — Non-negotiable code generation rules
+- `.context/glossary.md` — Domain terminology

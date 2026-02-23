@@ -1,0 +1,22 @@
+# Prompt: Refactor Code
+
+## Target
+Refactor `[FILE_OR_MODULE]` to [IMPROVEMENT_GOAL].
+
+## Current State
+[DESCRIBE_CURRENT_ISSUES — complexity, duplication, unclear naming, etc.]
+
+## Desired State
+[DESCRIBE_TARGET STATE — clearer structure, reduced duplication, better naming, etc.]
+
+## Constraints
+- **No behavior changes** — all existing tests must continue to pass
+- Follow patterns in `.context/ai-rules.md`
+- Avoid patterns in `.context/anti-patterns.md`
+- Keep commits atomic: one logical change per commit
+
+## Verification
+- [ ] All existing tests pass
+- [ ] No new warnings from linter
+- [ ] Type checking passes
+- [ ] Code review confirms no behavior change

@@ -1,0 +1,26 @@
+# Prompt: Fix Bug
+
+## Bug Description
+[DESCRIBE_THE_BUG]
+
+## Steps to Reproduce
+1. [STEP_1]
+2. [STEP_2]
+3. [STEP_3]
+
+## Expected Behavior
+[WHAT_SHOULD_HAPPEN]
+
+## Actual Behavior
+[WHAT_ACTUALLY_HAPPENS]
+
+## Investigation Checklist
+- [ ] Read the failing test or error log
+- [ ] Identify the root cause (not just the symptom)
+- [ ] Check `.context/anti-patterns.md` for related patterns
+- [ ] Write a regression test BEFORE fixing
+
+## Constraints
+- Follow TDD: write failing test first, then fix
+- Minimal change — don't refactor surrounding code
+- Update `.context/anti-patterns.md` if this is a recurring issue

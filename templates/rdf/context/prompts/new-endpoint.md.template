@@ -1,0 +1,22 @@
+# Prompt: Create New API Endpoint
+
+## Context
+I need to add a new [GET/POST/PUT/DELETE] endpoint to [MODULE_NAME].
+
+## Requirements
+- **Route:** `[METHOD] /api/v1/[RESOURCE]`
+- **Authentication:** [Required / Public]
+- **Request body:** [Describe expected input]
+- **Response:** [Describe expected output]
+- **Status codes:** [List expected codes]
+
+## Constraints
+- Follow existing patterns in `.context/architecture/overview.md`
+- Follow rules in `.context/ai-rules.md`
+- Check `.context/anti-patterns.md` before implementing
+
+## Expected Output
+1. Route handler in `[FILE_PATH]`
+2. Request/response schemas in `[SCHEMA_PATH]`
+3. Tests in `[TEST_PATH]`
+4. Updated `.context.md` if new files added
