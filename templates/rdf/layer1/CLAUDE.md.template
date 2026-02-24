@@ -6,53 +6,39 @@
 
 ## Project Overview
 
-FastAPI REST API for user authentication and profile management.
-Supports OAuth2 (Google, GitHub), JWT sessions, and profile CRUD operations.
+<!-- TODO: Replace with your project description -->
+Describe your project here: what it does, what technologies it uses, and its primary purpose.
 
 ## Quick Start
 
 ```bash
-uv sync                              # Install dependencies
-docker compose up -d                 # Start PostgreSQL + Redis
-uv run alembic upgrade head          # Apply migrations
-uv run uvicorn app.main:app --reload # Start dev server (localhost:8000)
-uv run pytest                        # Run test suite
+# TODO: Replace with your project's setup commands
+# Example for Python:
+# uv sync                              # Install dependencies
+# uv run pytest                        # Run test suite
+#
+# Example for Node.js:
+# npm install                          # Install dependencies
+# npm test                             # Run test suite
 ```
 
 ## Key Files
 
-- `src/app/main.py` - FastAPI application entry point
-- `src/app/core/config.py` - Settings (Pydantic BaseSettings)
-- `src/app/core/security.py` - JWT and OAuth2 utilities
-- `src/app/api/deps.py` - Dependency injection (db, auth)
-- `tests/conftest.py` - pytest fixtures and test database setup
+<!-- TODO: Replace with your project's key entry points -->
+- `src/` - Application source code
+- `tests/` - Test suite
 
 ## Code Standards
 
 - Follow existing patterns in the codebase
-- Write tests for new functionality (TDD preferred)
-- Use type hints for all function signatures
-- Run `uv run ruff check . && uv run pytest` before commits
+- Write tests for new functionality
+- Use type hints / type annotations for all function signatures
+- Run linting and tests before commits
 
 ## Detailed Guides
 
 For extended documentation, see:
-- @docs/ai/guides/architecture.md - Detailed system design
-- @docs/ai/guides/testing.md - Testing patterns and fixtures
-- @docs/ai/protocols/code-review.md - PR review checklist
-- @docs/ai/protocols/deployment.md - Deployment procedures
-
-## Project Context
-
-See `.context/substrate.md` for comprehensive project documentation including:
-- Architecture overview
-- AI rules and constraints
-- Anti-patterns catalog
-- Domain glossary
-- Testing standards
-
-## Getting Help
-
-- See `AGENTS.md` for detailed AI guidance and boundaries
-- See `REPOMAP.yaml` for codebase structure
-- See `.context.md` files in directories for local context
+- `docs/AGENTS.md` — AI agent registry and project commands
+- `.context/substrate.md` — Project context navigation hub
+- `REPOMAP.yaml` — Auto-generated codebase index
+- `.context.md` files in source directories for local context

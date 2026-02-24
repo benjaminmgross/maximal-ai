@@ -70,7 +70,8 @@ show_help() {
     echo "RDF CLI (if Layer 5 installed):"
     echo "  rdf --help       - Show RDF CLI commands"
     echo "  rdf init         - Initialize RDF in repository"
-    echo "  rdf scaffold-folders src/  - Create .folder.md files"
+    echo "  rdf scaffold-context-files src/  - Create .context.md files"
+    echo "  rdf status       - Show documentation health"
     echo "  rdf validate     - Check RDF compliance"
 }
 
