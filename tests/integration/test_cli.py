@@ -255,4 +255,6 @@ def hello():
             result = runner.invoke(main, ["status"])
             assert result.exit_code == 0
             assert ".context.md coverage" in result.output
-            assert "1/2 (50%)" in result.output
+            # 3 dirs: src/ (root), src/module_a, src/module_b
+            # Only module_a has .context.md
+            assert "1/3 (33%)" in result.output
