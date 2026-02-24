@@ -583,6 +583,10 @@ def status(path: str) -> None:
     total_dirs = 0
     covered_dirs = 0
     for src in source_dirs:
+        # Include the source root directory itself
+        total_dirs += 1
+        if (src / ".context.md").exists() or (src / ".folder.md").exists():
+            covered_dirs += 1
         for d in src.rglob("*"):
             if (
                 d.is_dir()
