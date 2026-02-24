@@ -415,13 +415,13 @@ install_layer2() {
                 # Prefer .context.md template, fall back to .folder.md template
                 if [ -f "$CONTEXT_TEMPLATE" ]; then
                     dir_name=$(basename "$subdir")
-                    sed "s/{{FOLDER_NAME}}/$dir_name/g" "$CONTEXT_TEMPLATE" > "$subdir/.context.md" 2>/dev/null || \
+                    awk -v name="$dir_name" '{gsub(/\{\{FOLDER_NAME\}\}/, name)}1' "$CONTEXT_TEMPLATE" > "$subdir/.context.md" 2>/dev/null || \
                         cp "$CONTEXT_TEMPLATE" "$subdir/.context.md"
                     echo "  Created $rel_path/.context.md"
                     CREATED=$((CREATED + 1))
                 elif [ -f "$FOLDER_TEMPLATE" ]; then
                     dir_name=$(basename "$subdir")
-                    sed "s/{{FOLDER_NAME}}/$dir_name/g" "$FOLDER_TEMPLATE" > "$subdir/.context.md" 2>/dev/null || \
+                    awk -v name="$dir_name" '{gsub(/\{\{FOLDER_NAME\}\}/, name)}1' "$FOLDER_TEMPLATE" > "$subdir/.context.md" 2>/dev/null || \
                         cp "$FOLDER_TEMPLATE" "$subdir/.context.md"
                     echo "  Created $rel_path/.context.md"
                     CREATED=$((CREATED + 1))
