@@ -951,7 +951,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## 📖 References
 
 - [Original Talk: Advanced Context Engineering for Coding Agents](https://youtu.be/IS_y40zY-hc)
-- [AI Coding Kit](https://github.com/JessyTsui/ai-coding-kit) - Inspiration for the RDF Framework, featuring the Fractal Docs Protocol with `.folder.md` files and layered AI guidance structure
+- [AI Coding Kit](https://github.com/JessyTsui/ai-coding-kit) - Inspiration for the RDF Framework, featuring the Fractal Docs Protocol with `.folder.md` files (RDF adopted `.context.md` naming) and layered AI guidance structure
 - [Human Layer Repository](https://github.com/humanlayer/humanlayer)
 - [AI That Works Examples](https://github.com/dexhorthy/ai-that-works)
 
