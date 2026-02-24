@@ -124,4 +124,4 @@ async def get_user_by_id(
 
 - See `docs/ai/protocols/` for workflow protocols
 - See `docs/ai/guides/` for detailed implementation guides
-- See `.folder.md` files in each directory for local context
+- See `.context.md` files in each directory for local context

@@ -299,12 +299,12 @@ tests/
 | CLAUDE.md | Root | AI agent entry point |
 | AGENTS.md | Root | AI agent detailed guidance |
 | README.md | Root | Human entry point |
-| .folder.md | Each dir | Local context |
+| .context.md | Each dir | Local context |
 | REPOMAP.yaml | Root | Codebase structure |
 
 ### Update Triggers
 
 - **README.md**: User-facing changes, setup changes
 - **AGENTS.md**: Command changes, pattern changes
-- **.folder.md**: File additions/removals, responsibility changes
+- **.context.md**: File additions/removals, responsibility changes
 - **REPOMAP.yaml**: Directory structure changes
