@@ -1,0 +1,58 @@
+
+## Repository Documentation Framework (RDF)
+
+> This repository uses RDF for structured, AI-navigable documentation.
+> Documentation is organized in layers of increasing depth — load only what you need.
+
+### How to Navigate Documentation
+
+**Start here (always loaded):**
+- `CLAUDE.md` — You're reading it. Quick start, commands, code standards.
+
+**When you need deeper context:**
+- `.context/substrate.md` — Navigation hub with reading paths for different tasks.
+- `.context/ai-rules.md` — Hard constraints for code generation in this project.
+- `REPOMAP.yaml` — Auto-generated codebase index with file rankings and symbols.
+
+**When working in a specific directory:**
+- Check for `.context.md` in that directory — it describes purpose, invariants, and file listings.
+- Human-authored sections (Purpose, Invariants) are authoritative; do not modify them.
+- Auto-generated sections (Files, Dependencies) are refreshed by tooling.
+
+**When you need anti-patterns or testing guidance:**
+- `.context/anti-patterns.md` — Common mistakes with wrong/right examples.
+- `.context/testing.md` — Testing conventions, patterns, and fixture usage.
+- `.context/glossary.md` — Domain terminology definitions.
+
+**Architecture and decisions:**
+- `.context/architecture/overview.md` — System architecture.
+- `.context/decisions/` — Architecture Decision Records (ADRs).
+- `.context/prompts/` — Task-specific prompt templates (new-endpoint, fix-bug, refactor).
+
+### Token Budget
+
+Load documentation progressively based on task complexity:
+
+| Depth | What to Load | ~Tokens |
+|-------|-------------|---------|
+| Minimal | This file + `.context/substrate.md` | 2-4K |
+| Standard | + `ai-rules.md` + `glossary.md` + `REPOMAP.yaml` | 8-15K |
+| Deep | + `anti-patterns.md` + `testing.md` + `architecture/overview.md` | 20-30K |
+
+### Generating & Maintaining Documentation
+
+- **Auto-generate docstrings** from runtime observation:
+  - In Claude: `/observe-docstrings tests/`
+  - CLI: `rdf observe src/main.py --entrypoint main`
+- **Regenerate directory listings**: `rdf scaffold-context-files src/`
+- **Regenerate codebase index**: `rdf generate-repomap --source src/`
+- **Check documentation health**: `rdf status`
+- **Validate docstring compliance**: `rdf validate --path src/`
+
+### Documentation Maintenance Protocol
+
+When modifying code in this repository:
+- If you add/remove files in a directory, the `.context.md` auto-generated section may need updating.
+- If you change a function's purpose or contract, update its docstring.
+- If you add a new architectural pattern or anti-pattern, consider updating `.context/` files.
+- Run `rdf status` to check documentation health after significant changes.

@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Layer 5: Full linting enforcement (CI/CD integration)
 - **Python package `rdf`** with CLI tools
   - `rdf init` - Initialize RDF structure
-  - `rdf scaffold-folders` - Generate .folder.md files
+  - `rdf scaffold-context-files` - Generate .context.md files
   - `rdf generate-repomap` - Create REPOMAP.yaml
   - `rdf validate` - Lint docstrings with NumPy-style validation
 - **New subcommand system** for `maximal-ai`:

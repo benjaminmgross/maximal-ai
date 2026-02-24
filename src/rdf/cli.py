@@ -3,8 +3,8 @@ RDF Command-Line Interface.
 
 Position
 --------
-Main entry point for all RDF CLI commands. Orchestrates init, scaffold-folders,
-generate-repomap, and validate operations.
+Main entry point for all RDF CLI commands. Orchestrates init, scaffold-context,
+scaffold-context-files, generate-repomap, validate, status, and observe operations.
 
 Invariants
 ----------
@@ -539,6 +539,103 @@ def observe(
             console.print("[green]✓ Docstrings applied successfully[/green]")
     else:
         console.print("[yellow]No docstrings generated[/yellow]")
+
+
+@main.command()
+@click.option("--path", type=click.Path(exists=True), default=".", help="Project root")
+def status(path: str) -> None:
+    """Show RDF documentation status and coverage."""
+    project = Path(path).resolve()
+
+    console.print("[bold]RDF Documentation Status[/bold]\n")
+
+    # Check each component
+    checks: list[tuple[str, bool]] = [
+        ("CLAUDE.md", (project / "CLAUDE.md").exists()),
+        (
+            "CLAUDE.md has RDF bootstrap",
+            _has_rdf_bootstrap(project / "CLAUDE.md"),
+        ),
+        (".context/ directory", (project / ".context").is_dir()),
+        (
+            ".context/substrate.md",
+            (project / ".context" / "substrate.md").exists(),
+        ),
+        (
+            ".context/ai-rules.md",
+            (project / ".context" / "ai-rules.md").exists(),
+        ),
+        ("REPOMAP.yaml", (project / "REPOMAP.yaml").exists()),
+        ("docs/AGENTS.md", (project / "docs" / "AGENTS.md").exists()),
+    ]
+
+    for check_name, check_status in checks:
+        icon = "[green]✓[/green]" if check_status else "[red]✗[/red]"
+        console.print(f"  {icon} {check_name}")
+
+    # Count .context.md coverage in source directories
+    source_dirs = [
+        d
+        for d in project.iterdir()
+        if d.is_dir() and d.name in ("src", "lib", "app")
+    ]
+
+    total_dirs = 0
+    covered_dirs = 0
+    for src in source_dirs:
+        # Include the source root directory itself
+        total_dirs += 1
+        if (src / ".context.md").exists() or (src / ".folder.md").exists():
+            covered_dirs += 1
+        for d in src.rglob("*"):
+            if (
+                d.is_dir()
+                and not d.name.startswith(".")
+                and "__pycache__" not in str(d)
+            ):
+                total_dirs += 1
+                if (d / ".context.md").exists() or (d / ".folder.md").exists():
+                    covered_dirs += 1
+
+    if total_dirs > 0:
+        pct = int(covered_dirs / total_dirs * 100)
+        color = "green" if pct > 80 else "yellow" if pct > 50 else "red"
+        console.print(
+            f"\n  .context.md coverage: [{color}]{covered_dirs}/{total_dirs} ({pct}%)[/{color}]"
+        )
+
+    # Suggest next steps
+    suggestions = []
+    if not _has_rdf_bootstrap(project / "CLAUDE.md"):
+        suggestions.append(
+            "Run: maximal-ai rdf-framework -l 1  (to add RDF bootstrap to CLAUDE.md)"
+        )
+    if not (project / ".context").is_dir():
+        suggestions.append(
+            "Run: rdf scaffold-context all  (to create .context/ directory)"
+        )
+    if not (project / "REPOMAP.yaml").exists():
+        suggestions.append("Run: rdf generate-repomap --source src/")
+    if total_dirs > 0 and covered_dirs < total_dirs:
+        missing = total_dirs - covered_dirs
+        suggestions.append(
+            f"Run: rdf scaffold-context-files src/  ({missing} dirs need .context.md)"
+        )
+
+    if suggestions:
+        console.print("\n[bold]Suggested next steps:[/bold]")
+        for s in suggestions:
+            console.print(f"  → {s}")
+    else:
+        console.print("\n[bold green]All documentation checks passed![/bold green]")
+
+
+def _has_rdf_bootstrap(claude_md_path: Path) -> bool:
+    """Check if CLAUDE.md contains the RDF bootstrap section."""
+    if not claude_md_path.exists():
+        return False
+    content = claude_md_path.read_text()
+    return "## Repository Documentation Framework (RDF)" in content
 
 
 def _agents_template() -> str:

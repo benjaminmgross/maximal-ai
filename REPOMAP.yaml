@@ -8,8 +8,8 @@ files:
   rank: 6.9
   type: entry_point
   lines: 346
-  position: "Main entry point for all RDF CLI commands. Orchestrates init, scaffold-folders,\n\
-    generate-repomap, and validate operations."
+  position: "Main entry point for all RDF CLI commands. Orchestrates init, scaffold-context,\n\
+    scaffold-context-files, generate-repomap, validate, status, and observe operations."
   invariants:
   - All commands are idempotent where possible
   - Dry-run mode available for destructive operations

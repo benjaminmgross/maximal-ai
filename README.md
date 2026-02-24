@@ -29,11 +29,11 @@ graph TB
     end
 
     subgraph "RDF Framework"
-        D[Layer 1: Entry Points]
-        E[Layer 2: Folder Docs]
+        D[Layer 1: Entry Points + .context/]
+        E[Layer 2: Directory Docs]
         F[Layer 3: AI Guidance]
-        G[Layer 4: Python Tools]
-        H[Layer 5: CI/CD]
+        G[Layer 4: Cross-Repo]
+        H[Layer 5: Tooling + Observe]
         D --> E --> F --> G --> H
     end
 
@@ -120,13 +120,15 @@ maximal-ai complete
 #### RDF Framework Installation
 
 `maximal-ai rdf-framework` installs documentation layers:
-- **Layer 1**: Entry points (AGENTS.md, CLAUDE.md, .repomap.yaml)
-- **Layer 2**: Folder documentation (.folder.md files)
-- **Layer 3**: AI guidance (protocols/, checklists/, guides/)
-- **Layer 4**: Python tooling (`rdf` CLI)
-- **Layer 5**: CI/CD integration (linting enforcement)
+- **Layer 1**: Entry Points (CLAUDE.md with AI bootstrap, `.context/` directory, docs/AGENTS.md, .repomap.yaml)
+- **Layer 2**: Directory Docs (`.context.md` files in source directories)
+- **Layer 3**: AI Guidance (protocols/, checklists/, guides/)
+- **Layer 4**: Cross-Repo (external docs linkage via `$EXTERNAL_DOCS_PATH`)
+- **Layer 5**: Tooling (`rdf` CLI, linters, observe system)
 
 Use `-l` flag to select specific layers: `maximal-ai rdf-framework -l 1,2,3`
+
+After installation, the AI bootstrap section in CLAUDE.md teaches AI agents how to discover and navigate RDF documentation — no manual prompting required.
 
 ### Username Configuration
 
@@ -315,6 +317,20 @@ your-project/
 │       ├── file-analyzer.md
 │       ├── bug-hunter.md
 │       └── test-runner.md
+├── .context/                     # [RDF L1] Project-level context
+│   ├── substrate.md              # Navigation hub for AI and developers
+│   ├── ai-rules.md               # Hard constraints for code generation
+│   ├── anti-patterns.md          # Common mistakes with corrections
+│   ├── glossary.md               # Domain terminology
+│   ├── testing.md                # Testing conventions
+│   ├── architecture/
+│   │   └── overview.md           # System architecture
+│   ├── decisions/
+│   │   └── adr-template.md       # Architecture Decision Records
+│   └── prompts/                  # Task-specific prompt templates
+│       ├── new-endpoint.md
+│       ├── fix-bug.md
+│       └── refactor.md
 ├── docs/
 │   ├── AGENTS.md                 # [RDF L1] AI agent registry
 │   ├── ai/                       # [RDF L3] AI guidance
@@ -323,14 +339,15 @@ your-project/
 │   ├── guides/                   # [RDF L3] Developer guides
 │   └── coding-standards/         # Team coding standards (optional)
 ├── src/
-│   └── .folder.md                # [RDF L2] Folder documentation
+│   └── .context.md               # [RDF L2] Per-directory documentation
 ├── thoughts/                     # RPI artifacts
 │   ├── research/
 │   ├── plans/
-│   └── handoffs/
-├── .repomap.yaml                 # [RDF L1] Project overview
-├── REPOMAP.yaml                  # [RDF L4] Generated file index
-└── CLAUDE.md                     # [RDF L1] Project instructions
+│   ├── handoffs/
+│   └── learnings/
+├── .repomap.yaml                 # [RDF L1] Project overview config
+├── REPOMAP.yaml                  # [RDF L5] Generated file index
+└── CLAUDE.md                     # [RDF L1] Project instructions + AI bootstrap
 ```
 
 ### Enhanced Agents
@@ -457,35 +474,40 @@ RDF provides a layer-based approach to making your codebase AI-friendly. Each la
 
 ```mermaid
 graph TD
-    L1[Layer 1: Entry Points] --> L2[Layer 2: Folder Docs]
+    L1[Layer 1: Entry Points] --> L2[Layer 2: Directory Docs]
     L2 --> L3[Layer 3: AI Guidance]
-    L3 --> L4[Layer 4: Python Tools]
-    L4 --> L5[Layer 5: CI/CD]
+    L3 --> L4[Layer 4: Cross-Repo]
+    L4 --> L5[Layer 5: Tooling]
 
-    L1 -.->|AGENTS.md, CLAUDE.md| A1[Minimal AI setup]
-    L2 -.->|.folder.md| A2[Directory context]
+    L1 -.->|"CLAUDE.md + .context/ + AGENTS.md"| A1[AI bootstrap & project context]
+    L2 -.->|.context.md| A2[Per-directory documentation]
     L3 -.->|protocols/, guides/| A3[AI behavior guidance]
-    L4 -.->|rdf CLI| A4[Automated generation]
-    L5 -.->|Linting| A5[Quality enforcement]
+    L4 -.->|EXTERNAL_DOCS_PATH| A4[Cross-repo standards]
+    L5 -.->|rdf CLI| A5[Automated generation & linting]
 ```
 
-### Layer 1: Entry Points (Minimal)
-- `docs/AGENTS.md` - AI agent registry and capabilities
-- `CLAUDE.md` - Project-specific Claude instructions
-- `HOWTO.md` - Quick tips and gotchas for effective usage
-- `.repomap.yaml` - Quick project overview for AI
+### Layer 1: Entry Points
+- `CLAUDE.md` with RDF bootstrap section — teaches AI how to navigate documentation
+- `.context/` directory — project-level context (substrate, AI rules, glossary, anti-patterns)
+- `docs/AGENTS.md` — AI agent registry and capabilities
+- `.repomap.yaml` — project overview configuration
 
-### Layer 2: Folder Documentation
-- `.folder.md` files in each directory
+### Layer 2: Directory Documentation
+- `.context.md` files in each source directory
 - Hybrid format: human-authored Purpose/Invariants + auto-generated file tables
-- Helps AI understand folder organization
+- Helps AI understand folder organization and boundaries
 
 ### Layer 3: AI Guidance
-- `docs/ai/protocols/` - How to perform specific tasks
-- `docs/ai/checklists/` - Pre-commit, PR review, deployment checklists
-- `docs/guides/` - Developer and AI onboarding
+- `docs/ai/protocols/` — How to perform specific tasks (code review, error handling)
+- `docs/ai/checklists/` — Pre-commit, PR review checklists
+- `docs/guides/` — Architecture and testing guides
 
-### Layer 4: Python Tooling
+### Layer 4: Cross-Repo
+- External docs linkage via `$EXTERNAL_DOCS_PATH`
+- Organization-wide coding standards and AI protocols
+- Shared anti-patterns and best practices
+
+### Layer 5: Tooling
 
 Install the `rdf` CLI for automated documentation:
 
@@ -496,25 +518,31 @@ pip install -e /path/to/maximal-ai  # Or uv pip install -e /path/to/maximal-ai
 **Available Commands:**
 
 ```bash
-# Initialize RDF structure
+# Check documentation health
+rdf status
+
+# Initialize full RDF structure
 rdf init
 
-# Generate .folder.md files
-rdf scaffold-folders src/
+# Generate .context.md files in source directories
+rdf scaffold-context-files src/
 
-# Generate REPOMAP.yaml
+# Generate REPOMAP.yaml from source code
 rdf generate-repomap --source src/
 
-# Validate docstrings (NumPy style)
-rdf validate --path src/ --strictness standard
+# Validate docstrings and documentation coverage
+rdf validate --path src/
+
+# Observe functions at runtime and generate docstrings
+rdf observe src/main.py --entrypoint main
 ```
 
-**Strictness Levels:**
-- `minimal` - Module, class, function docstrings required
-- `standard` - Above + Returns section required
-- `strict` - Above + Position/Invariants sections required
+**Strictness Levels for validation:**
+- `minimal` — Module, class, function docstrings required
+- `standard` — Above + Returns section required
+- `strict` — Above + Position/Invariants sections required
 
-### Layer 5: CI/CD Integration
+### CI/CD Integration
 
 Add to your CI pipeline:
 
@@ -535,9 +563,194 @@ The frameworks complement each other:
 ```
 /research How does authentication work?
 → Uses REPOMAP.yaml to find entry points
-→ Reads .folder.md files for context
+→ Reads .context.md files for directory context
 → Follows protocols/ for research patterns
 ```
+
+### AI Bootstrap: How AI Discovers Your Documentation
+
+The **AI Bootstrap** is the key mechanism that makes RDF work. When you install Layer 1, a section called `## Repository Documentation Framework (RDF)` is automatically appended to your root `CLAUDE.md`. Claude Code auto-loads `CLAUDE.md` on every session, so the AI immediately knows:
+
+1. **Where to find documentation** — `.context/substrate.md` for deep context, `.context.md` files in directories, `REPOMAP.yaml` for codebase overview
+2. **How much to load** — a token budget guide (Minimal: 2-4K, Standard: 8-15K, Deep: 20-30K) so the AI self-regulates context usage based on task complexity
+3. **How to maintain documentation** — instructions for when and how to update `.context.md` files as code changes
+4. **Available tooling** — `rdf status`, `rdf observe`, `/observe-docstrings` for generating and checking documentation
+
+This eliminates the need to manually prompt the AI with "read the docs first" — it happens automatically every time.
+
+**CLAUDE.md merge behavior:**
+- **Fresh repo (no CLAUDE.md):** Creates CLAUDE.md with the bootstrap section
+- **Existing CLAUDE.md:** Appends the bootstrap section to the end (preserves your content)
+- **Re-running installer:** Detects the bootstrap marker and skips (no duplication)
+- **RPI + RDF (complete install):** RPI installer detects the RDF bootstrap and preserves it
+
+### The `.context/` Directory
+
+Layer 1 scaffolds a `.context/` directory at the project root containing structured project-level documentation:
+
+```
+.context/
+├── substrate.md              # Navigation hub — start here
+├── ai-rules.md               # Non-negotiable code generation constraints
+├── anti-patterns.md          # Wrong/right examples of common mistakes
+├── glossary.md               # Domain terminology definitions
+├── testing.md                # Testing conventions, fixtures, patterns
+├── architecture/
+│   └── overview.md           # System architecture and design decisions
+├── decisions/
+│   └── adr-template.md       # Architecture Decision Record template
+└── prompts/
+    ├── README.md             # Prompt template directory index
+    ├── new-endpoint.md       # Template: adding a new API endpoint
+    ├── fix-bug.md            # Template: debugging and fixing bugs
+    └── refactor.md           # Template: refactoring existing code
+```
+
+**Key files explained:**
+
+| File | Purpose | When to Read |
+|------|---------|-------------|
+| `substrate.md` | Navigation hub with reading paths for different roles (new developer, AI agent, feature developer) | Always — this is the map |
+| `ai-rules.md` | Hard constraints: language version, formatters, linters, type checking, docstring format | Before generating any code |
+| `anti-patterns.md` | Wrong/right code examples organized by category (architecture, code style, testing) | When writing new patterns |
+| `glossary.md` | Domain terminology so AI uses correct names | When working with domain logic |
+| `testing.md` | Test framework, AAA pattern, fixture patterns, coverage requirements | Before writing tests |
+| `architecture/overview.md` | System architecture, component relationships, data flow | When making structural changes |
+| `prompts/` | Task-specific prompt templates with step-by-step instructions | When starting common tasks |
+
+All files are created from templates with `TODO` placeholders. Fill them in with your project's specifics to maximize AI effectiveness.
+
+### `rdf status`: Documentation Health Check
+
+The `rdf status` command provides an instant overview of your RDF documentation completeness:
+
+```bash
+$ rdf status
+
+RDF Documentation Status
+
+  ✓ CLAUDE.md
+  ✓ CLAUDE.md has RDF bootstrap
+  ✓ .context/ directory
+  ✓ .context/substrate.md
+  ✓ .context/ai-rules.md
+  ✗ REPOMAP.yaml
+  ✓ docs/AGENTS.md
+
+  .context.md coverage: 3/5 (60%)
+
+Suggested next steps:
+  → Run: rdf generate-repomap --source src/
+  → Run: rdf scaffold-context-files src/  (2 dirs need .context.md)
+```
+
+It checks:
+- Whether `CLAUDE.md` exists and contains the RDF bootstrap section
+- Whether the `.context/` directory has required files (substrate.md, ai-rules.md)
+- Whether `REPOMAP.yaml` and `docs/AGENTS.md` exist
+- What percentage of source directories have `.context.md` files
+- Actionable suggestions for what to do next
+
+### Runtime Observation: Auto-Generating Docstrings
+
+The **observe system** (Layer 5) automatically generates complete NumPy-format docstrings by observing your code at runtime. It combines what it can infer (types, call graphs, invariants) with what only humans know (business purpose, design rationale).
+
+**Two ways to use it:**
+
+**1. Via Claude command** (interactive):
+```
+/observe-docstrings tests/
+```
+
+**2. Via CLI** (scriptable):
+```bash
+# Observe a script
+rdf observe src/main.py --entrypoint main
+
+# Observe via pytest
+pytest --rdf-observe tests/ --rdf-observe-output observations.json
+
+# Non-interactive mode (CI-friendly)
+rdf observe --resume observations.json --non-interactive
+```
+
+**How it works:**
+
+1. **Instrument** — Add `@observe` decorator to functions, or use the pytest plugin
+2. **Run** — Execute your code or tests; the system records arguments, returns, call graphs
+3. **Infer** — The inference engine determines structural roles (entry point, leaf, orchestrator), invariants (nullability, ranges), and I/O patterns
+4. **Prompt** — For each function, it shows what it inferred and asks for business context
+5. **Generate** — Produces complete NumPy-format docstrings with Position, Invariants, Parameters, Returns sections
+6. **Apply** — Writes docstrings to source files with automatic backups
+
+**Example output for a function:**
+```
+━━━ Function 3/15: calculate_salary ━━━━━━━━━━━━━━━━━━━━
+📍 payroll/calculations.py:45
+
+Auto-Inferred:
+├─ Role: leaf
+├─ Call Graph: Called by process_payroll
+├─ I/O: Pure computation
+├─ Observations: 89
+
+Invariants:
+  • `hours` is always >= 0 (100%, 89 obs)
+  • `rate` is always > 0 (100%, 89 obs)
+  • Return value is always >= 0 (100%, 89 obs)
+
+? Business purpose: Calculates gross salary before tax deductions
+? Architectural context: Core of compensation pipeline, pure for testability
+
+Action [a/e/s/q]: a
+✓ Applied to payroll/calculations.py
+```
+
+### Post-Install Activation Workflow
+
+After running `maximal-ai rdf-framework`, follow these four steps to activate the documentation:
+
+**Step 1: Fill in the templates**
+
+Edit these files with your project details:
+- `.context/substrate.md` — Replace `[PROJECT_NAME]` and directory map with your project
+- `.context/ai-rules.md` — Set your language, formatter, linter, type checker
+- `.context/glossary.md` — Define your domain terminology
+
+**Step 2: Generate documentation**
+
+```bash
+# Generate codebase index from source code
+rdf generate-repomap --source src/
+
+# Create .context.md files for all source directories
+rdf scaffold-context-files src/
+
+# Check what's complete and what's missing
+rdf status
+```
+
+**Step 3: Enrich with observation** (Python projects)
+
+```bash
+# Option A: Via Claude (interactive, guided)
+/observe-docstrings tests/
+
+# Option B: Via CLI
+rdf observe src/main.py --entrypoint main
+```
+
+**Step 4: Verify**
+
+```bash
+# Full documentation health check
+rdf status
+
+# Docstring compliance check
+rdf validate --path src/
+```
+
+After these four steps, AI agents working in your codebase will automatically discover and use the documentation through the bootstrap section in CLAUDE.md.
 
 ## 🎯 Best Practices
 
@@ -738,7 +951,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## 📖 References
 
 - [Original Talk: Advanced Context Engineering for Coding Agents](https://youtu.be/IS_y40zY-hc)
-- [AI Coding Kit](https://github.com/JessyTsui/ai-coding-kit) - Inspiration for the RDF Framework, featuring the Fractal Docs Protocol with `.folder.md` files and layered AI guidance structure
+- [AI Coding Kit](https://github.com/JessyTsui/ai-coding-kit) - Inspiration for the RDF Framework, featuring the Fractal Docs Protocol with `.folder.md` files (RDF adopted `.context.md` naming) and layered AI guidance structure
 - [Human Layer Repository](https://github.com/humanlayer/humanlayer)
 - [AI That Works Examples](https://github.com/dexhorthy/ai-that-works)
 

@@ -193,3 +193,68 @@ def hello():
 
             result = runner.invoke(main, ["validate", "--path", "src", "--strict"])
             assert "Validation Results" in result.output
+
+    def test_status_empty_project(self, runner: CliRunner) -> None:
+        """Test status in an empty project shows missing items."""
+        with runner.isolated_filesystem():
+            result = runner.invoke(main, ["status"])
+            assert result.exit_code == 0
+            assert "RDF Documentation Status" in result.output
+            # All items should be missing
+            assert result.output.count("✗") >= 5
+
+    def test_status_full_project(self, runner: CliRunner) -> None:
+        """Test status in a fully-configured project shows all green."""
+        with runner.isolated_filesystem():
+            # Create all expected RDF files
+            Path("CLAUDE.md").write_text(
+                "# CLAUDE.md\n\n## Repository Documentation Framework (RDF)\n"
+            )
+            Path(".context").mkdir()
+            Path(".context/substrate.md").write_text("# Substrate\n")
+            Path(".context/ai-rules.md").write_text("# AI Rules\n")
+            Path("REPOMAP.yaml").write_text("meta:\n  version: '1.0'\n")
+            Path("docs").mkdir()
+            Path("docs/AGENTS.md").write_text("# AGENTS\n")
+
+            result = runner.invoke(main, ["status"])
+            assert result.exit_code == 0
+            # All checks should pass
+            assert result.output.count("✓") >= 5
+            assert "✗" not in result.output
+
+    def test_status_partial_project(self, runner: CliRunner) -> None:
+        """Test status in a partially-configured project shows mixed results."""
+        with runner.isolated_filesystem():
+            # Create some but not all files
+            Path("CLAUDE.md").write_text("# CLAUDE.md\n")  # No RDF bootstrap
+            Path(".context").mkdir()
+            Path(".context/substrate.md").write_text("# Substrate\n")
+
+            result = runner.invoke(main, ["status"])
+            assert result.exit_code == 0
+            assert "✓" in result.output
+            assert "✗" in result.output
+            # Should suggest next steps
+            assert "Suggested next steps" in result.output
+
+    def test_status_context_md_coverage(self, runner: CliRunner) -> None:
+        """Test status reports .context.md coverage in source directories."""
+        with runner.isolated_filesystem():
+            # Create source directory structure
+            Path("src/module_a").mkdir(parents=True)
+            Path("src/module_b").mkdir(parents=True)
+            Path("src/module_a/.context.md").write_text("# Module A\n")
+            # module_b has no .context.md
+
+            # Create minimal RDF structure
+            Path("CLAUDE.md").write_text(
+                "# CLAUDE.md\n\n## Repository Documentation Framework (RDF)\n"
+            )
+
+            result = runner.invoke(main, ["status"])
+            assert result.exit_code == 0
+            assert ".context.md coverage" in result.output
+            # 3 dirs: src/ (root), src/module_a, src/module_b
+            # Only module_a has .context.md
+            assert "1/3 (33%)" in result.output

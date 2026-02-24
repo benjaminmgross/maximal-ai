@@ -135,12 +135,24 @@ echo "Hooks installation complete."
 echo ""
 
 # Copy or merge CLAUDE.md
+# Smart merge: preserve RDF bootstrap section if present
+RDF_MARKER="## Repository Documentation Framework (RDF)"
+
 if [ -f "$PROJECT_ROOT/CLAUDE.md" ]; then
-    echo ""
-    warn "CLAUDE.md already exists in your project."
-    echo "   The new configuration has been saved as CLAUDE.md.new"
-    echo "   Please merge the configurations manually."
-    cp "$INSTALL_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md.new"
+    if grep -q "$RDF_MARKER" "$PROJECT_ROOT/CLAUDE.md"; then
+        # CLAUDE.md has RDF bootstrap — preserve it, save RPI config as .new for merge
+        echo ""
+        warn "CLAUDE.md already exists with RDF bootstrap section."
+        echo "   The RPI configuration has been saved as CLAUDE.md.rpi-new"
+        echo "   Please merge the RPI commands/workflow sections manually."
+        cp "$INSTALL_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md.rpi-new"
+    else
+        echo ""
+        warn "CLAUDE.md already exists in your project."
+        echo "   The new configuration has been saved as CLAUDE.md.new"
+        echo "   Please merge the configurations manually."
+        cp "$INSTALL_DIR/CLAUDE.md" "$PROJECT_ROOT/CLAUDE.md.new"
+    fi
 else
     echo "Installing CLAUDE.md configuration..."
     cp "$INSTALL_DIR/CLAUDE.md" "$PROJECT_ROOT/"
