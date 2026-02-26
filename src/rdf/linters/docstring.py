@@ -1,17 +1,10 @@
 """
 Docstring Linter.
 
-Position
---------
 Validates Python docstrings meet RDF requirements: NumPy format and
-presence of semantic sections (Position, Invariants, etc.).
-
-Invariants
-----------
-- Does not modify source files (read-only)
-- Exit codes: 0=pass, 1=violations, 2=error
-- Configurable strictness levels
-- Output formats: text, JSON, SARIF
+presence of semantic sections (Position, Silences, etc.).
+Does not modify source files (read-only). Configurable strictness
+levels with text, JSON, and SARIF output formats.
 """
 
 from __future__ import annotations
@@ -35,7 +28,7 @@ class Strictness(Enum):
 
     MINIMAL = "minimal"  # Docstring exists
     STANDARD = "standard"  # NumPy format, Parameters/Returns
-    STRICT = "strict"  # + Position, Invariants where applicable
+    STRICT = "strict"  # + Position, Silences where applicable
 
 
 @dataclass
@@ -93,19 +86,14 @@ class DocstringLinter:
     """
     Lint Python files for docstring compliance.
 
-    Position
-    --------
-    Main linter class. Validates NumPy format and semantic sections.
-
-    Invariants
-    ----------
-    - Does not modify files
-    - Returns structured results for CI integration
+    Validates NumPy format and semantic sections (Position, Silences).
+    Does not modify files; returns structured results for CI integration.
 
     Parameters
     ----------
     strictness : Strictness
-        How strict to be about requirements.
+        How strict to be about requirements. Does not modify files at
+        any level.
 
     Examples
     --------
@@ -227,7 +215,7 @@ class DocstringLinter:
                 )
             )
 
-        # Strict mode: check for Position/Invariants
+        # Strict mode: check for Position, Raises, Silences
         if self.strictness == Strictness.STRICT:
             if "Position" not in docstring:
                 violations.append(

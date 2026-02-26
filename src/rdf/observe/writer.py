@@ -1,16 +1,9 @@
 """
 Docstring writer - applies generated docstrings to source files.
 
-Position
---------
-Modifies Python source files to insert or update docstrings.
-Creates backups before modification.
-
-Invariants
-----------
-- Always creates backup before modifying
-- Preserves file formatting where possible
-- Uses AST for accurate insertion points
+Modifies Python source files to insert or update docstrings. Always
+creates backups before modification, preserves file formatting where
+possible, and uses AST for accurate insertion points.
 """
 
 from __future__ import annotations

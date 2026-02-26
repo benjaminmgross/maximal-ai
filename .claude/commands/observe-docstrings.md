@@ -23,7 +23,7 @@ Where `target` is:
 2. **Collects** function call data (arguments, returns, call graph)
 3. **Infers** what it can automatically:
    - Position (structural role, call graph, I/O patterns)
-   - Invariants (types, ranges, nullability, collections)
+   - Parameter constraints (types, ranges, nullability, collections)
 4. **Prompts** you for what it can't infer:
    - Business purpose
    - Architectural context
@@ -45,7 +45,7 @@ Auto-Inferred:
 ├─ I/O: Pure computation
 ├─ Observations: 89
 
-Invariants:
+Parameter Constraints:
   • `employee_id` is never None (100%, 89 obs)
   • `hours` is always >= 0 (100%, 89 obs)
   • `rate` is always > 0 (100%, 89 obs)
@@ -72,26 +72,19 @@ Generated Docstring:
 │ Leaf function. Called by process_payroll. Pure computation. │
 │ Core of compensation pipeline, pure for testability.        │
 │                                                             │
-│ Invariants                                                  │
-│ ----------                                                  │
-│ - `employee_id` is never None                               │
-│ - `hours` is always >= 0                                    │
-│ - `rate` is always > 0                                      │
-│ - Return value is always >= 0                               │
-│                                                             │
 │ Parameters                                                  │
 │ ----------                                                  │
 │ employee_id : int                                           │
-│     TODO: Add description                                   │
+│     TODO: Add description. `employee_id` is never None      │
 │ hours : float                                               │
-│     TODO: Add description                                   │
+│     TODO: Add description. `hours` is always >= 0           │
 │ rate : float                                                │
-│     TODO: Add description                                   │
+│     TODO: Add description. `rate` is always > 0             │
 │                                                             │
 │ Returns                                                     │
 │ -------                                                     │
 │ float                                                       │
-│     TODO: Add description                                   │
+│     TODO: Add description. Return value is always >= 0      │
 │ """                                                         │
 ╰─────────────────────────────────────────────────────────────╯
 

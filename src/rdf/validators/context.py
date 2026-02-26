@@ -4,15 +4,10 @@
 Position
 --------
 Validates completeness and format of the .context/ project documentation
-directory. Part of the unified RDF 3.0 validation pipeline.
-
-Invariants
-----------
-- Does not modify any files (read-only)
-- Required files produce ERROR violations
-- Recommended files produce WARNING violations
-- Format checks produce WARNING violations
-- Empty directories produce INFO violations
+directory. Part of the unified RDF 3.0 validation pipeline. Read-only —
+never modifies any files. Required files produce ERROR violations,
+recommended files produce WARNING violations, format checks produce
+WARNING violations, and empty directories produce INFO violations.
 """
 
 from __future__ import annotations
@@ -33,12 +28,8 @@ class ContextValidator:
     Position
     --------
     Checks that the .context/ directory exists with required files,
-    recommended files, and proper format for structured files.
-
-    Invariants
-    ----------
-    - Read-only — never modifies files
-    - Returns structured LintResult for CI integration
+    recommended files, and proper format for structured files. Read-only —
+    never modifies files. Returns structured LintResult for CI integration.
 
     Parameters
     ----------

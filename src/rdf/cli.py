@@ -1,16 +1,10 @@
 """
 RDF Command-Line Interface.
 
-Position
---------
 Main entry point for all RDF CLI commands. Orchestrates init, scaffold-context,
 scaffold-context-files, generate-repomap, validate, status, and observe operations.
-
-Invariants
-----------
-- All commands are idempotent where possible
-- Dry-run mode available for destructive operations
-- Exit codes: 0=success, 1=validation failure, 2=error
+All commands are idempotent where possible, with dry-run mode available for
+destructive operations. Exit codes: 0=success, 1=validation failure, 2=error.
 """
 
 from __future__ import annotations

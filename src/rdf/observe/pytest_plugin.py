@@ -3,14 +3,10 @@ pytest plugin for observation during tests.
 
 Position
 --------
-Automatically collects observations when tests run.
-Outputs suggestions after test session completes.
-
-Invariants
-----------
-- Minimal overhead when not enabled
-- Does not affect test results
-- Saves observations for later interactive processing
+Automatically collects observations when tests run and outputs suggestions
+after test session completes. Has minimal overhead when not enabled, does
+not affect test results, and saves observations for later interactive
+processing.
 """
 
 from __future__ import annotations

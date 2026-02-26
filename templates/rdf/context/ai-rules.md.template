@@ -44,4 +44,5 @@
 
 - **Format:** NumPy-style (see `.context/testing.md` for full standard)
 - **Required sections:** Summary, Parameters, Returns
-- **STRICT mode sections:** Position, Invariants, Raises, Silences
+- **STRICT mode sections:** Position, Raises, Silences
+- **Invariants:** Embed constraints in parameter/return descriptions, not as standalone section

@@ -3,13 +3,9 @@ Script runner with observation.
 
 Position
 --------
-Executes Python scripts with automatic instrumentation.
-
-Invariants
-----------
-- Does not permanently modify the script
-- Instruments only functions in the target module
-- Returns observations after execution
+Executes Python scripts with automatic instrumentation. Does not permanently
+modify the script — instruments only functions in the target module and
+returns observations after execution.
 """
 
 from __future__ import annotations

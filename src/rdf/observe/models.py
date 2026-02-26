@@ -1,16 +1,10 @@
 """
 Data models for runtime observations.
 
-Position
---------
 Defines data structures for function observations, call graphs,
-and inferred docstring components.
-
-Invariants
-----------
-- All observation models are immutable dataclasses where appropriate
-- Timestamps use UTC
-- Values stored as analyzed summaries (not raw objects)
+and inferred docstring components. All observation models are
+immutable dataclasses where appropriate, timestamps use UTC, and
+values are stored as analyzed summaries (not raw objects).
 """
 
 from __future__ import annotations
@@ -277,6 +271,12 @@ class GeneratedDocstring:
             lines.append(self.human_input.business_purpose)
             lines.append("")
 
+        # Function-level invariants from human input go in the description
+        if self.human_input.additional_invariants:
+            for inv in self.human_input.additional_invariants:
+                lines.append(inv)
+            lines.append("")
+
         # Position section
         lines.append("Position")
         lines.append("-" * 8)
@@ -304,20 +304,13 @@ class GeneratedDocstring:
         )
         lines.append("")
 
-        # Invariants section
-        all_invariants = [
-            inv.description for inv in self.inferred_invariants if inv.confidence >= 0.95
-        ]
-        all_invariants.extend(self.human_input.additional_invariants)
+        # Group inferred invariants by parameter for embedding in descriptions
+        param_invariants: dict[str, list[str]] = {}
+        for inv in self.inferred_invariants:
+            if inv.confidence >= 0.95:
+                param_invariants.setdefault(inv.parameter, []).append(inv.description)
 
-        if all_invariants:
-            lines.append("Invariants")
-            lines.append("-" * 10)
-            for inv in all_invariants:
-                lines.append(f"- {inv}")
-            lines.append("")
-
-        # Parameters section
+        # Parameters section (with invariants folded into descriptions)
         if self.inferred_params:
             lines.append("Parameters")
             lines.append("-" * 10)
@@ -325,15 +318,24 @@ class GeneratedDocstring:
                 human_desc = self.human_input.parameter_descriptions.get(param, "")
                 type_hint = analysis.type_name
                 lines.append(f"{param} : {type_hint}")
-                lines.append(f"    {human_desc or 'TODO: Add description'}")
+                desc = human_desc or "TODO: Add description"
+                # Append parameter-specific invariants
+                inv_list = param_invariants.get(param, [])
+                if inv_list:
+                    desc += ". " + ". ".join(inv_list)
+                lines.append(f"    {desc}")
             lines.append("")
 
-        # Returns section
+        # Returns section (with return-value invariants folded in)
         if self.inferred_return and self.inferred_return.type_name != "NoneType":
             lines.append("Returns")
             lines.append("-" * 7)
             lines.append(self.inferred_return.type_name)
-            lines.append(f"    {self.human_input.return_description or 'TODO: Add description'}")
+            return_desc = self.human_input.return_description or "TODO: Add description"
+            return_invs = param_invariants.get("__return__", [])
+            if return_invs:
+                return_desc += ". " + ". ".join(return_invs)
+            lines.append(f"    {return_desc}")
 
         return "\n".join(lines)
 

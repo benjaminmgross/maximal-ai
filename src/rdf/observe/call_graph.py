@@ -1,16 +1,10 @@
 """
 Call graph tracking during observation.
 
-Position
---------
 Tracks caller/callee relationships between functions during execution.
-Uses sys.setprofile for lightweight call tracking.
-
-Invariants
-----------
-- Minimal overhead (no argument inspection during tracking)
-- Thread-safe call stack management
-- Accurately tracks call depth
+Uses sys.setprofile for lightweight call tracking with minimal overhead
+(no argument inspection), thread-safe call stack management, and
+accurate call depth tracking.
 """
 
 from __future__ import annotations
@@ -27,15 +21,9 @@ class CallGraphTracker:
     """
     Track function call relationships.
 
-    Position
-    --------
-    Lightweight call graph builder using sys.setprofile.
-
-    Invariants
-    ----------
-    - Does not inspect argument values (that's the decorator's job)
-    - Tracks only Python function calls
-    - Thread-local call stacks
+    Lightweight call graph builder using sys.setprofile. Does not inspect
+    argument values (that's the decorator's job), tracks only Python
+    function calls, and uses thread-local call stacks.
     """
 
     # Tracked modules (only track calls within these)

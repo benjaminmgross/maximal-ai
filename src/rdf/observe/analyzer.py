@@ -1,16 +1,10 @@
 """
-Inference engine for Invariants and Position.
+Inference engine for parameter constraints and Position.
 
-Position
---------
-Analyzes collected observations to infer docstring content.
-Produces both Invariant candidates and Position hints.
-
-Invariants
-----------
-- Only suggests with sufficient confidence
-- Never modifies source code directly
-- Returns structured suggestions for human review
+Analyzes collected observations to infer docstring content. Produces
+constraint candidates (embedded in parameter descriptions) and Position
+hints. Only suggests with sufficient confidence, never modifies source
+code directly, and returns structured suggestions for human review.
 """
 
 from __future__ import annotations
@@ -29,15 +23,10 @@ class InferenceEngine:
     """
     Analyze function profiles to infer docstring content.
 
-    Position
-    --------
-    Core inference engine. Produces Position hints and Invariant candidates.
-
-    Invariants
-    ----------
-    - Requires minimum observation count for invariant inference
-    - Position inference works with any observation count
-    - Does not infer overly specific invariants
+    Core inference engine. Produces Position hints and constraint
+    candidates for parameter descriptions. Requires minimum observation
+    count for constraint inference; Position inference works with any
+    observation count.
     """
 
     MIN_OBSERVATIONS = 5

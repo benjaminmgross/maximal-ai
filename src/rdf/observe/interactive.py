@@ -1,16 +1,9 @@
 """
 Interactive docstring generation prompts.
 
-Position
---------
 Handles user interaction for human-provided docstring content.
-Uses rich library for terminal UI.
-
-Invariants
-----------
-- Graceful handling of Ctrl+C
-- Session save/resume support
-- Non-interactive mode available
+Uses rich library for terminal UI. Supports graceful Ctrl+C handling,
+session save/resume, and non-interactive mode.
 """
 
 from __future__ import annotations
@@ -39,15 +32,9 @@ class InteractiveSession:
     """
     Interactive session for docstring generation.
 
-    Position
-    --------
     Orchestrates the user interaction flow for each function.
-
-    Invariants
-    ----------
-    - One function at a time
-    - Always shows auto-inferred before prompting
-    - Supports skip, edit, apply actions
+    Processes one function at a time, always shows auto-inferred
+    content before prompting, and supports skip, edit, apply actions.
     """
 
     profiles: dict[str, FunctionProfile]
