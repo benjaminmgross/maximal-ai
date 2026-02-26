@@ -28,7 +28,7 @@ class Strictness(Enum):
 
     MINIMAL = "minimal"  # Docstring exists
     STANDARD = "standard"  # NumPy format, Parameters/Returns
-    STRICT = "strict"  # + Position, Silences where applicable
+    STRICT = "strict"  # + Position, Raises, Silences where applicable
 
 
 @dataclass
