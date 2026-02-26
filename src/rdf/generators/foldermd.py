@@ -165,7 +165,7 @@ class FolderMdGenerator:
             # Create new template
             full_content = f"""# Folder: {self.target_dir.name}/
 
-> **Update Trigger:** Regenerate when files added/removed. Update Purpose/Invariants
+> **Update Trigger:** Regenerate when files added/removed. Update Purpose/Constraints
 > when folder responsibilities change.
 
 ## Purpose
@@ -173,7 +173,7 @@ class FolderMdGenerator:
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 TODO: Describe what this folder does.
 
-## Invariants
+## Constraints
 
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 TODO: List rules that must always be true.

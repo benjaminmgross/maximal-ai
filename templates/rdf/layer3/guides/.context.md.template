@@ -9,7 +9,7 @@
 Contains how-to guides for developers and AI agents.
 Guides provide context and explanations beyond what's in code comments.
 
-## Invariants
+## Constraints
 
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 - Guides should be beginner-friendly
