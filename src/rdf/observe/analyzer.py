@@ -47,7 +47,7 @@ class InferenceEngine:
         self,
     ) -> dict[str, tuple[InferredPosition, list[InferredInvariant]]]:
         """
-        Infer Position and Invariants for all functions.
+        Infer Position and parameter constraints for all functions.
 
         Returns
         -------
