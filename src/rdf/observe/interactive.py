@@ -204,9 +204,9 @@ class InteractiveSession:
             default="",
         )
 
-        # Additional invariants (optional)
+        # Additional constraints (optional)
         additional = Prompt.ask(
-            "? [bold]Additional invariants[/bold] "
+            "? [bold]Additional constraints[/bold] "
             "the code SHOULD enforce? [dim][Enter to skip][/dim]",
             default="",
         )
