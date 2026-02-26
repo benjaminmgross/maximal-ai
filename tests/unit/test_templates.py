@@ -24,8 +24,15 @@ def test_context_templates_exist():
 def test_docstring_template_includes_contract_sections():
     """Verify source-headers template includes all docstring contract sections."""
     template = (TEMPLATE_DIR / "layer2" / "source-headers.md.template").read_text()
-    for section in ["Position", "Invariants", "Raises", "Silences"]:
+    for section in ["Position", "Raises", "Silences"]:
         assert section in template, f"Missing docstring section: {section}"
+    # "Invariants" was removed as a standalone section; constraints now belong
+    # inside parameter/return descriptions.  Verify no table row advertises it.
+    table_rows = [l for l in template.splitlines() if l.strip().startswith("|")]
+    for row in table_rows:
+        assert "Invariants" not in row, (
+            "Invariants should not appear as a standalone section row in the table"
+        )
 
 
 def test_substrate_template_has_reading_paths():
