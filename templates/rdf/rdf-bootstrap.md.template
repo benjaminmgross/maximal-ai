@@ -16,7 +16,7 @@
 
 **When working in a specific directory:**
 - Check for `.context.md` in that directory — it describes purpose, invariants, and file listings.
-- Human-authored sections (Purpose, Invariants) are authoritative; do not modify them.
+- Human-authored sections (Purpose, Constraints) are authoritative; do not modify them.
 - Auto-generated sections (Files, Dependencies) are refreshed by tooling.
 
 **When you need anti-patterns or testing guidance:**
