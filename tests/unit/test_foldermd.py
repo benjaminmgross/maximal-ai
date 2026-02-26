@@ -18,7 +18,7 @@ class TestFolderMdGenerator:
         assert "Would write to" in result
         assert "# Folder:" in result
         assert "Purpose" in result
-        assert "Invariants" in result
+        assert "Constraints" in result
 
     def test_generate_new_file_creates_file(self, temp_dir: Path) -> None:
         """Test that generate creates the file when not in dry-run mode."""
