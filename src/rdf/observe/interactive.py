@@ -172,9 +172,9 @@ class InteractiveSession:
 
         console.print(table)
 
-        # Invariants
+        # Parameter constraints (inferred from observations)
         if invariants:
-            console.print("\n[bold]Invariants:[/bold]")
+            console.print("\n[bold]Parameter Constraints:[/bold]")
             for inv in invariants:
                 confidence_pct = int(inv.confidence * 100)
                 console.print(
