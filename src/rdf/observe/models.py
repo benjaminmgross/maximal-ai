@@ -322,6 +322,7 @@ class GeneratedDocstring:
                 # Append parameter-specific invariants
                 inv_list = param_invariants.get(param, [])
                 if inv_list:
+                    desc = desc.rstrip(". ")
                     desc += ". " + ". ".join(inv_list)
                 lines.append(f"    {desc}")
             lines.append("")
@@ -334,6 +335,7 @@ class GeneratedDocstring:
             return_desc = self.human_input.return_description or "TODO: Add description"
             return_invs = param_invariants.get("__return__", [])
             if return_invs:
+                return_desc = return_desc.rstrip(". ")
                 return_desc += ". " + ". ".join(return_invs)
             lines.append(f"    {return_desc}")
 
