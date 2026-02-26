@@ -344,7 +344,8 @@ class TestGeneratedDocstring:
         assert "Calculate the result." in rendered
         assert "Position" in rendered
         assert "Leaf function" in rendered
-        assert "Invariants" in rendered
+        # Invariants are folded into parameter descriptions, not a standalone section
+        assert "Invariants" not in rendered
         assert "`x` is never None" in rendered
         assert "Parameters" in rendered
         assert "Returns" in rendered

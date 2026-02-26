@@ -1,17 +1,11 @@
 """
 Observation decorator with call graph integration.
 
-Position
---------
 Provides the @observe decorator for instrumenting functions.
 Integrates with CallGraphTracker for relationship tracking.
-
-Invariants
-----------
-- Decorated functions behave identically to undecorated ones
-- Observations are stored globally (thread-safe)
-- Decorator preserves function metadata via functools.wraps
-- Records caller/callee relationships
+Decorated functions behave identically to undecorated ones,
+observations are stored globally (thread-safe), and function
+metadata is preserved via functools.wraps.
 """
 
 from __future__ import annotations

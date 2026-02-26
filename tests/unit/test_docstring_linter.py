@@ -185,14 +185,10 @@ def risky_operation(*, data: dict) -> str:
     --------
     Utility function.
 
-    Invariants
-    ----------
-    - data must not be empty
-
     Parameters
     ----------
     data : dict
-        Input data.
+        Input data. Must not be empty.
 
     Returns
     -------
@@ -223,10 +219,6 @@ def safe_fetch(*, url: str) -> str | None:
     --------
     Utility function for resilient HTTP calls.
 
-    Invariants
-    ----------
-    - Returns None on any HTTP error
-
     Raises
     ------
     ValueError
@@ -245,7 +237,7 @@ def safe_fetch(*, url: str) -> str | None:
     Returns
     -------
     str | None
-        Response body or None on failure.
+        Response body, or None on any HTTP error.
     """
     if not url:
         raise ValueError("empty url")
@@ -270,15 +262,11 @@ def safe_fetch(*, url: str) -> str | None:
         file_path.write_text('''"""Module docstring."""
 
 def quiet_fetch(*, url: str) -> str | None:
-    """Fetch URL quietly.
+    """Fetch URL quietly. Never raises exceptions.
 
     Position
     --------
     Utility function.
-
-    Invariants
-    ----------
-    - Never raises
 
     Parameters
     ----------

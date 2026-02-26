@@ -5,13 +5,9 @@ Position
 --------
 Generates REPOMAP.yaml from Python source code. Parses AST, extracts symbols
 and docstrings, builds import graph, and outputs YAML with semantic sections.
-
-Invariants
-----------
-- Output must validate against REPOMAP JSON schema
-- Must extract Position, Invariants from docstrings where present
-- Must respect token_budget configuration
-- Must include dependency information
+Output must validate against the REPOMAP JSON schema, extracts Position and
+constraint information from docstrings where present, and respects the
+token_budget configuration.
 """
 
 from __future__ import annotations
@@ -93,19 +89,16 @@ class RepomapGenerator:
     Position
     --------
     Main generator class. Coordinates AST parsing, ranking, and YAML output.
-
-    Invariants
-    ----------
-    - Output validates against schema before writing
-    - Respects token_budget from configuration
-    - Preserves semantic sections from docstrings
+    Output validates against schema before writing and preserves semantic
+    sections from docstrings.
 
     Parameters
     ----------
     source_dir : Path
         Root directory for source files.
     config : dict
-        Configuration from .repomap.yaml.
+        Configuration from .repomap.yaml. Must include token_budget to
+        constrain output size.
 
     Examples
     --------

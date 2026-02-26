@@ -1,16 +1,9 @@
 """
 Interactive docstring generation prompts.
 
-Position
---------
 Handles user interaction for human-provided docstring content.
-Uses rich library for terminal UI.
-
-Invariants
-----------
-- Graceful handling of Ctrl+C
-- Session save/resume support
-- Non-interactive mode available
+Uses rich library for terminal UI. Supports graceful Ctrl+C handling,
+session save/resume, and non-interactive mode.
 """
 
 from __future__ import annotations
@@ -39,15 +32,9 @@ class InteractiveSession:
     """
     Interactive session for docstring generation.
 
-    Position
-    --------
     Orchestrates the user interaction flow for each function.
-
-    Invariants
-    ----------
-    - One function at a time
-    - Always shows auto-inferred before prompting
-    - Supports skip, edit, apply actions
+    Processes one function at a time, always shows auto-inferred
+    content before prompting, and supports skip, edit, apply actions.
     """
 
     profiles: dict[str, FunctionProfile]
@@ -185,9 +172,9 @@ class InteractiveSession:
 
         console.print(table)
 
-        # Invariants
+        # Parameter constraints (inferred from observations)
         if invariants:
-            console.print("\n[bold]Invariants:[/bold]")
+            console.print("\n[bold]Parameter Constraints:[/bold]")
             for inv in invariants:
                 confidence_pct = int(inv.confidence * 100)
                 console.print(
@@ -217,9 +204,9 @@ class InteractiveSession:
             default="",
         )
 
-        # Additional invariants (optional)
+        # Additional constraints (optional)
         additional = Prompt.ask(
-            "? [bold]Additional invariants[/bold] "
+            "? [bold]Additional constraints[/bold] "
             "the code SHOULD enforce? [dim][Enter to skip][/dim]",
             default="",
         )

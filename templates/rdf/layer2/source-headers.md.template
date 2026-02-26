@@ -77,17 +77,13 @@ def process_payment(*, invoice_id: str, amount: int) -> Receipt:
     Service-layer function called by API route handlers.
     I/O: DATABASE_READ, DATABASE_WRITE, NETWORK_CALL
 
-    Invariants
-    ----------
-    - amount must be positive
-    - invoice must exist and be unpaid
-
     Parameters
     ----------
     invoice_id : str
-        The unique identifier for the invoice.
+        The unique identifier for the invoice. Must correspond to
+        an existing, unpaid invoice.
     amount : int
-        Payment amount in cents.
+        Payment amount in cents. Must be positive.
 
     Returns
     -------
@@ -109,10 +105,13 @@ def process_payment(*, invoice_id: str, amount: int) -> Receipt:
     """
 ```
 
+> **Note:** Invariants (constraints not enforced by the type system) belong
+> inside parameter and return descriptions, not as a standalone section.
+> For example, "Must be positive" in the `amount` description above.
+
 | Section | Purpose | When Required |
 |---------|---------|---------------|
 | Position | Structural role, call graph, I/O patterns | STRICT mode |
-| Invariants | Constraints that must always hold | STRICT mode |
 | Raises | Exceptions the function can raise | Recommended |
 | Silences | Exceptions caught and suppressed | Recommended |
 

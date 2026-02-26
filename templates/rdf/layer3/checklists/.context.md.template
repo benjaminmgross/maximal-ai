@@ -9,7 +9,7 @@
 Contains verification checklists for AI agents to ensure completeness.
 Each checklist provides a structured way to verify work is complete.
 
-## Invariants
+## Constraints
 
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 - Checklists must be actionable (checkable items)

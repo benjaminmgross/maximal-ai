@@ -9,7 +9,7 @@
 Contains step-by-step protocols for AI agents handling complex workflows.
 Protocols document decision trees, edge cases, and recovery procedures.
 
-## Invariants
+## Constraints
 
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 - Each protocol must include: trigger conditions, steps, success criteria

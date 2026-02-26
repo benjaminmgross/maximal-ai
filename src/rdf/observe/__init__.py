@@ -1,17 +1,10 @@
 """
 Interactive Docstring Generator - Observation Module.
 
-Position
---------
 Entry point for runtime observation. Provides decorators, collectors,
-and utilities for capturing function behavior at runtime.
-
-Invariants
-----------
-- Observation is opt-in via decorator or sys.setprofile
-- Does not modify observed functions' behavior
-- Thread-safe data collection
-- Tracks call graph relationships
+and utilities for capturing function behavior at runtime. Observation
+is opt-in via decorator or sys.setprofile, does not modify observed
+functions' behavior, and uses thread-safe data collection.
 """
 
 from rdf.observe.call_graph import (

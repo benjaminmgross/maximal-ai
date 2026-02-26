@@ -5,13 +5,9 @@ Position
 --------
 Creates and updates .folder.md files with human-preserved sections and
 auto-generated file listings. Implements the hybrid documentation pattern.
-
-Invariants
-----------
-- Must preserve content between HUMAN-AUTHORED markers
-- Must replace content after AUTO-GENERATED marker
-- Must create backup before any modification
-- Dry-run mode available for previewing changes
+Content between HUMAN-AUTHORED markers is always preserved, content after
+AUTO-GENERATED marker is always replaced, and backups are created before
+any modification. Dry-run mode is available for previewing changes.
 """
 
 from __future__ import annotations
@@ -55,16 +51,12 @@ class FolderMdGenerator:
     Handles hybrid documentation files. Preserves human-authored content
     while regenerating auto-generated sections.
 
-    Invariants
-    ----------
-    - Human sections are NEVER overwritten
-    - Backup created before any write
-    - Dry-run mode shows preview without changes
-
     Parameters
     ----------
     target_dir : Path
-        Directory to generate .folder.md for.
+        Directory to generate .folder.md for. Human sections within this
+        directory's .folder.md are never overwritten. A backup is created
+        before any write, and dry-run mode shows preview without changes.
 
     Examples
     --------
@@ -173,7 +165,7 @@ class FolderMdGenerator:
             # Create new template
             full_content = f"""# Folder: {self.target_dir.name}/
 
-> **Update Trigger:** Regenerate when files added/removed. Update Purpose/Invariants
+> **Update Trigger:** Regenerate when files added/removed. Update Purpose/Constraints
 > when folder responsibilities change.
 
 ## Purpose
@@ -181,7 +173,7 @@ class FolderMdGenerator:
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 TODO: Describe what this folder does.
 
-## Invariants
+## Constraints
 
 <!-- HUMAN-AUTHORED - DO NOT AUTO-GENERATE -->
 TODO: List rules that must always be true.
