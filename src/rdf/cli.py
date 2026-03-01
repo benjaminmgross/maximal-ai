@@ -19,6 +19,7 @@ from rich.table import Table
 from rdf import __version__
 from rdf.generators.context_file import ContextFileGenerator
 from rdf.generators.repomap import RepomapGenerator
+from rdf.introspect import detect_project_info, render_template
 from rdf.linters.docstring import DocstringLinter, Severity, Strictness
 from rdf.validators.context import ContextValidator
 
@@ -52,10 +53,16 @@ _CONTEXT_DIR_MAP: dict[str, list[tuple[str, str]]] = {
 }
 
 
-def _load_template(template_path: str) -> str:
-    """Load a template file from the templates directory."""
+def _load_template(
+    template_path: str,
+    substitutions: dict[str, str] | None = None,
+) -> str:
+    """Load a template file and apply placeholder substitutions."""
     full_path = _TEMPLATE_BASE / template_path
-    return full_path.read_text()
+    content = full_path.read_text()
+    if substitutions:
+        content = render_template(content, substitutions)
+    return content
 
 
 def _scaffold_context_dir(
@@ -63,6 +70,7 @@ def _scaffold_context_dir(
     context_dir: Path,
     force: bool = False,
     quiet: bool = False,
+    substitutions: dict[str, str] | None = None,
 ) -> None:
     """Scaffold the full .context/ directory from templates."""
     context_dir.mkdir(exist_ok=True)
@@ -71,7 +79,7 @@ def _scaffold_context_dir(
     for _type, (template_path, filename) in _CONTEXT_FILE_MAP.items():
         filepath = context_dir / filename
         if not filepath.exists() or force:
-            filepath.write_text(_load_template(template_path))
+            filepath.write_text(_load_template(template_path, substitutions))
             if not quiet:
                 console.print(f"  Created .context/{filename}")
         elif not quiet:
@@ -84,7 +92,7 @@ def _scaffold_context_dir(
         for template_path, filename in file_list:
             filepath = subdir / filename
             if not filepath.exists() or force:
-                filepath.write_text(_load_template(template_path))
+                filepath.write_text(_load_template(template_path, substitutions))
                 if not quiet:
                     console.print(f"  Created .context/{dirname}/{filename}")
             elif not quiet:
@@ -115,6 +123,10 @@ def init(*, dry_run: bool) -> None:
     """
     console.print("[bold green]Initializing RDF...[/bold green]")
 
+    # Introspect project to populate templates
+    project_info = detect_project_info(Path("."))
+    subs = project_info.as_substitutions()
+
     dirs_to_create = [
         "docs",
         "docs/ai/protocols",
@@ -126,7 +138,7 @@ def init(*, dry_run: bool) -> None:
     ]
 
     files_to_create = {
-        "docs/AGENTS.md": _agents_template(),
+        "docs/AGENTS.md": _load_template("layer1/AGENTS.md.template", subs),
         ".repomap.yaml": _repomap_config_template(),
     }
 
@@ -161,7 +173,7 @@ def init(*, dry_run: bool) -> None:
 
     # Scaffold .context/ directory
     console.print("\n[bold]Scaffolding .context/ directory...[/bold]")
-    _scaffold_context_dir(context_dir=Path(".context"))
+    _scaffold_context_dir(context_dir=Path(".context"), substitutions=subs)
 
     console.print("\n[bold green]RDF initialized![/bold green]")
 
@@ -180,8 +192,12 @@ def scaffold_context(file_type: str, *, force: bool) -> None:
     context_dir = Path(".context")
     context_dir.mkdir(exist_ok=True)
 
+    # Introspect project for template substitution
+    project_info = detect_project_info(Path("."))
+    subs = project_info.as_substitutions()
+
     if file_type == "all":
-        _scaffold_context_dir(context_dir=context_dir, force=force)
+        _scaffold_context_dir(context_dir=context_dir, force=force, substitutions=subs)
         console.print("\n[bold green]All .context/ files scaffolded![/bold green]")
         return
 
@@ -190,7 +206,7 @@ def scaffold_context(file_type: str, *, force: bool) -> None:
         template_path, filename = _CONTEXT_FILE_MAP[file_type]
         filepath = context_dir / filename
         if not filepath.exists() or force:
-            filepath.write_text(_load_template(template_path))
+            filepath.write_text(_load_template(template_path, subs))
             console.print(f"  Created .context/{filename}")
         else:
             console.print(f"  Skipped .context/{filename} (already exists, use --force)")
@@ -203,7 +219,7 @@ def scaffold_context(file_type: str, *, force: bool) -> None:
         for template_path, filename in _CONTEXT_DIR_MAP[file_type]:
             filepath = subdir / filename
             if not filepath.exists() or force:
-                filepath.write_text(_load_template(template_path))
+                filepath.write_text(_load_template(template_path, subs))
                 console.print(f"  Created .context/{file_type}/{filename}")
             else:
                 console.print(

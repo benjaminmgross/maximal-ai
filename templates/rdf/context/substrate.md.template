@@ -5,15 +5,13 @@
 
 ## Project Overview
 
-[PROJECT_NAME] — [ONE_LINE_DESCRIPTION]
+{{PROJECT_NAME}} — {{PROJECT_DESCRIPTION}}
 
 ## Directory Map
 
 | Directory | Purpose | Context File |
 |-----------|---------|--------------|
-| `src/` | Application source code | `.context.md` |
-| `tests/` | Test suite | `.context.md` |
-| `docs/` | Documentation | `.context.md` |
+{{DIRECTORY_MAP}}
 
 ## Reading Paths
 
