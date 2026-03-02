@@ -5,40 +5,36 @@
 
 ## Language & Runtime
 
-- **Language:** [Python 3.12+ / TypeScript 5.x / etc.]
-- **Package Manager:** [uv / npm / pnpm / etc.]
-- **Runtime:** [CPython / Node.js / Deno / etc.]
+- **Language:** {{LANGUAGE}}
+- **Package Manager:** {{PACKAGE_MANAGER}}
+- **Runtime:** {{RUNTIME}}
 
 ## Code Organization
 
-- [All new modules must have a module-level docstring]
-- [Functions use keyword-only arguments after `*` separator]
-- [No single-method service classes — use plain functions]
+TODO: Add code organization rules for this project.
 
 ## Function Signatures
 
-- [All public functions must have type annotations]
-- [Use `*` separator for keyword-only arguments]
-- [Return types are always explicit]
+TODO: Add function signature conventions (type annotations, keyword-only args, etc.).
 
 ## Formatting & Linting
 
-- **Formatter:** [ruff format / prettier / etc.]
-- **Linter:** [ruff / eslint / etc.]
-- **Line length:** [100 / 80 / etc.]
-- **Run before commit:** `[linting command]`
+- **Formatter:** {{FORMATTER}}
+- **Linter:** {{LINTER}}
+- **Line length:** {{LINE_LENGTH}}
+- **Run before commit:** `{{LINT_COMMAND}}`
 
 ## Type Checking
 
-- **Tool:** [mypy / pyright / tsc / etc.]
-- **Strictness:** [strict / basic / etc.]
-- **Run:** `[type check command]`
+- **Tool:** {{TYPE_CHECKER}}
+- **Strictness:** {{TYPE_STRICTNESS}}
+- **Run:** `{{TYPE_CHECK_COMMAND}}`
 
 ## Testing
 
-- **Framework:** [pytest / vitest / jest / etc.]
-- **Run:** `[test command]`
-- **Coverage minimum:** [80% / 90% / etc.]
+- **Framework:** {{TEST_FRAMEWORK}}
+- **Run:** `{{TEST_COMMAND}}`
+- **Coverage minimum:** TODO: Set coverage target
 
 ## Docstrings
 

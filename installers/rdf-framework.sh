@@ -174,6 +174,106 @@ EOFCLAUDEMD
 }
 
 # ============================================
+# Project Introspection
+# ============================================
+
+detect_project_name() {
+    # Try pyproject.toml first
+    if [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
+        local name
+        name=$(grep -m1 '^name\s*=' "$PROJECT_ROOT/pyproject.toml" | sed 's/^name\s*=\s*"\([^"]*\)".*/\1/')
+        if [ -n "$name" ]; then
+            echo "$name"
+            return
+        fi
+    fi
+    # Try package.json
+    if [ -f "$PROJECT_ROOT/package.json" ]; then
+        local name
+        name=$(grep -m1 '"name"' "$PROJECT_ROOT/package.json" | sed 's/.*"name"\s*:\s*"\([^"]*\)".*/\1/')
+        if [ -n "$name" ]; then
+            echo "$name"
+            return
+        fi
+    fi
+    # Fallback to directory name
+    basename "$PROJECT_ROOT"
+}
+
+detect_project_description() {
+    if [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
+        local desc
+        desc=$(grep -m1 '^description\s*=' "$PROJECT_ROOT/pyproject.toml" | sed 's/^description\s*=\s*"\([^"]*\)".*/\1/')
+        if [ -n "$desc" ]; then
+            echo "$desc"
+            return
+        fi
+    fi
+    if [ -f "$PROJECT_ROOT/package.json" ]; then
+        local desc
+        desc=$(grep -m1 '"description"' "$PROJECT_ROOT/package.json" | sed 's/.*"description"\s*:\s*"\([^"]*\)".*/\1/')
+        if [ -n "$desc" ]; then
+            echo "$desc"
+            return
+        fi
+    fi
+    echo "TODO: Add project description"
+}
+
+detect_language() {
+    if [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
+        local ver
+        ver=$(grep -m1 'requires-python' "$PROJECT_ROOT/pyproject.toml" | sed 's/.*"\([^"]*\)".*/\1/')
+        if [ -n "$ver" ]; then
+            echo "Python ${ver#>=}"
+            return
+        fi
+        echo "Python"
+        return
+    fi
+    if [ -f "$PROJECT_ROOT/package.json" ]; then
+        if grep -q '"typescript"' "$PROJECT_ROOT/package.json" 2>/dev/null; then
+            echo "TypeScript"
+        else
+            echo "JavaScript"
+        fi
+        return
+    fi
+    if [ -f "$PROJECT_ROOT/Cargo.toml" ]; then echo "Rust"; return; fi
+    if [ -f "$PROJECT_ROOT/go.mod" ]; then echo "Go"; return; fi
+    echo "TODO: detect language"
+}
+
+detect_package_manager() {
+    if [ -f "$PROJECT_ROOT/uv.lock" ]; then echo "uv"; return; fi
+    if [ -f "$PROJECT_ROOT/poetry.lock" ]; then echo "poetry"; return; fi
+    if [ -f "$PROJECT_ROOT/pyproject.toml" ]; then echo "pip"; return; fi
+    if [ -f "$PROJECT_ROOT/pnpm-lock.yaml" ]; then echo "pnpm"; return; fi
+    if [ -f "$PROJECT_ROOT/yarn.lock" ]; then echo "yarn"; return; fi
+    if [ -f "$PROJECT_ROOT/bun.lockb" ]; then echo "bun"; return; fi
+    if [ -f "$PROJECT_ROOT/package.json" ]; then echo "npm"; return; fi
+    if [ -f "$PROJECT_ROOT/Cargo.toml" ]; then echo "cargo"; return; fi
+    if [ -f "$PROJECT_ROOT/go.mod" ]; then echo "go modules"; return; fi
+    echo "TODO: detect package manager"
+}
+
+# Apply {{PLACEHOLDER}} substitutions to a template file, write to target
+render_template_file() {
+    local template_file="$1"
+    local target_file="$2"
+    local proj_name="$3"
+    local proj_desc="$4"
+    local proj_lang="$5"
+    local proj_pm="$6"
+
+    sed -e "s|{{PROJECT_NAME}}|${proj_name}|g" \
+        -e "s|{{PROJECT_DESCRIPTION}}|${proj_desc}|g" \
+        -e "s|{{LANGUAGE}}|${proj_lang}|g" \
+        -e "s|{{PACKAGE_MANAGER}}|${proj_pm}|g" \
+        "$template_file" > "$target_file"
+}
+
+# ============================================
 # .context/ Directory Scaffolding
 # ============================================
 
@@ -188,13 +288,20 @@ scaffold_context_dir() {
 
     echo "  Scaffolding .context/ directory..."
 
+    # Introspect project
+    local PROJ_NAME PROJ_DESC PROJ_LANG PROJ_PM
+    PROJ_NAME=$(detect_project_name)
+    PROJ_DESC=$(detect_project_description)
+    PROJ_LANG=$(detect_language)
+    PROJ_PM=$(detect_package_manager)
+
     # Create directory structure
     mkdir -p "$context_dir"
     mkdir -p "$context_dir/architecture"
     mkdir -p "$context_dir/decisions"
     mkdir -p "$context_dir/prompts"
 
-    # Copy top-level context files
+    # Copy top-level context files with substitution
     local CREATED=0
     local SKIPPED=0
 
@@ -205,7 +312,7 @@ scaffold_context_dir() {
         local target_file="$context_dir/$filename"
 
         if [ ! -f "$target_file" ]; then
-            cp "$template_file" "$target_file"
+            render_template_file "$template_file" "$target_file" "$PROJ_NAME" "$PROJ_DESC" "$PROJ_LANG" "$PROJ_PM"
             echo "    Created .context/$filename"
             CREATED=$((CREATED + 1))
         else
@@ -213,7 +320,7 @@ scaffold_context_dir() {
         fi
     done
 
-    # Copy subdirectory files
+    # Copy subdirectory files with substitution
     for subdir in architecture decisions prompts; do
         if [ -d "$template_dir/$subdir" ]; then
             for template_file in "$template_dir/$subdir"/*.template; do
@@ -223,7 +330,7 @@ scaffold_context_dir() {
                 local target_file="$context_dir/$subdir/$filename"
 
                 if [ ! -f "$target_file" ]; then
-                    cp "$template_file" "$target_file"
+                    render_template_file "$template_file" "$target_file" "$PROJ_NAME" "$PROJ_DESC" "$PROJ_LANG" "$PROJ_PM"
                     echo "    Created .context/$subdir/$filename"
                     CREATED=$((CREATED + 1))
                 else
@@ -245,10 +352,18 @@ install_layer1() {
 
     mkdir -p "$PROJECT_ROOT/docs"
 
-    # Create AGENTS.md from template
+    # Introspect project for template substitution
+    local PROJ_NAME PROJ_DESC PROJ_LANG PROJ_PM
+    PROJ_NAME=$(detect_project_name)
+    PROJ_DESC=$(detect_project_description)
+    PROJ_LANG=$(detect_language)
+    PROJ_PM=$(detect_package_manager)
+
+    # Create AGENTS.md from template with substitution
     if [ ! -f "$PROJECT_ROOT/docs/AGENTS.md" ]; then
         if [ -f "$INSTALL_DIR/templates/rdf/layer1/AGENTS.md.template" ]; then
-            cp "$INSTALL_DIR/templates/rdf/layer1/AGENTS.md.template" "$PROJECT_ROOT/docs/AGENTS.md"
+            render_template_file "$INSTALL_DIR/templates/rdf/layer1/AGENTS.md.template" \
+                "$PROJECT_ROOT/docs/AGENTS.md" "$PROJ_NAME" "$PROJ_DESC" "$PROJ_LANG" "$PROJ_PM"
             echo "  Created docs/AGENTS.md"
         else
             warn "  Template not found: templates/rdf/layer1/AGENTS.md.template"
