@@ -42,7 +42,7 @@ bash "$SCRIPT_DIR/setup.sh"
 echo "✓ Checking installation..."
 
 # Check commands
-for cmd in research plan implement epic-oneshot standup blocked create_handoff resume_handoff; do
+for cmd in research plan implement epic-oneshot standup blocked create_handoff resume_handoff map-to-standards; do
     if [ -f ".claude/commands/$cmd.md" ]; then
         echo "  ✅ Command: $cmd"
     else

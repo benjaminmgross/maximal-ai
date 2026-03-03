@@ -88,6 +88,7 @@ cp "$INSTALL_DIR/.claude/commands/review-fix-pr-loop.md" "$PROJECT_ROOT/.claude/
 
 # Automation commands
 cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
+cp "$INSTALL_DIR/.claude/commands/map-to-standards.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Knowledge compounding command
 cp "$INSTALL_DIR/.claude/commands/compound.md" "$PROJECT_ROOT/.claude/commands/"
@@ -182,8 +183,8 @@ echo ""
 echo "   🧠 Knowledge Compounding (1):"
 echo "      compound"
 echo ""
-echo "   🤖 Automation Commands (1):"
-echo "      observe-docstrings"
+echo "   🤖 Automation Commands (2):"
+echo "      observe-docstrings, map-to-standards"
 echo ""
 echo "   🧠 Sub-Agents (8) - Spawned automatically by Claude:"
 echo "      locator, analyzer, pattern-finder, researcher,"

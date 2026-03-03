@@ -308,7 +308,8 @@ your-project/
 │   │   ├── standup.md
 │   │   ├── blocked.md
 │   │   ├── create_handoff.md
-│   │   └── resume_handoff.md
+│   │   ├── resume_handoff.md
+│   │   └── map-to-standards.md
 │   └── agents/                   # RPI specialized agents
 │       ├── codebase-locator.md
 │       ├── codebase-analyzer.md

@@ -191,6 +191,10 @@ These commands enable adversarial code review across separate Claude sessions:
 - `/address-review [plan-file] [review-file]` - Address review feedback systematically (Session 1)
 - `/review-fix-pr-loop [PR#] [--max-rounds N]` - Automated adversarial review-fix loop using sub-agents (single session)
 
+### Automation Commands
+- `/map-to-standards [commit-range, PR#, or branch]` - Map code changes to all 9 Minty Living coding standards
+- `/observe-docstrings [path]` - Generate and check docstrings for a directory
+
 ### Usage Examples
 ```bash
 # Research how authentication works
@@ -238,6 +242,15 @@ These commands enable adversarial code review across separate Claude sessions:
 /review-fix-pr-loop 123                # Default 3 rounds
 /review-fix-pr-loop 123 --max-rounds 5 # Custom max rounds
 
+# Map a PR to all coding standards
+/map-to-standards 123
+
+# Map a specific commit range to standards
+/map-to-standards abc123..def456
+
+# Map the most recent pull on current branch
+/map-to-standards
+
 # Document what you learned after solving a problem
 /compound Fixed the race condition in async job processing
 
@@ -262,6 +275,7 @@ When performing these workflows, use the corresponding command to leverage pre-c
 | Architecture review | `/architecture-review` | spawns pattern-detector, scalability-assessor agents |
 | System design | `/design-system` | loads patterns, decision trees, NFR guides |
 | Technical tradeoffs | `/tradeoff-analysis` | spawns tradeoff-researcher agent, loads decision trees |
+| Map to standards | `/map-to-standards` | commit diff, changed files, coding standards |
 | Compound learnings | `/compound` | recent session context, prior learnings |
 
 **Why use these commands?** They use inline bash (`!` backtick syntax) to pre-compute context before Claude sees the prompt. This eliminates multiple tool call round-trips:
@@ -456,6 +470,7 @@ project-root/
 │   │   ├── test-and-fix.md
 │   │   ├── verify.md
 │   │   ├── observe-docstrings.md
+│   │   ├── map-to-standards.md          # Coding standards evaluation
 │   │   ├── architecture-review.md    # System design command
 │   │   ├── design-system.md          # System design command
 │   │   ├── tradeoff-analysis.md      # System design command

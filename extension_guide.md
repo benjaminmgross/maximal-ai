@@ -22,7 +22,7 @@ Commands live in `.claude/commands/` and fall into these categories:
 | PR Review | `review-pr`, `address-review`, `review-fix-pr-loop` | 3 |
 | Session Management | `standup`, `blocked`, `create_handoff`, `resume_handoff` | 4 |
 | System Design | `architecture-review`, `design-system`, `tradeoff-analysis` | 3 |
-| Automation | `observe-docstrings` | 1 |
+| Automation | `observe-docstrings`, `map-to-standards` | 2 |
 
 When adding a command, decide which category it belongs to. This determines where it appears in documentation and the installer.
 
