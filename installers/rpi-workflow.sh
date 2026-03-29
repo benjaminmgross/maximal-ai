@@ -77,14 +77,15 @@ cp "$INSTALL_DIR/.claude/commands/resume_handoff.md" "$PROJECT_ROOT/.claude/comm
 
 # Inner-loop commands (pre-computed context)
 cp "$INSTALL_DIR/.claude/commands/commit-push-pr.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/review.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/test-and-fix.md" "$PROJECT_ROOT/.claude/commands/"
 cp "$INSTALL_DIR/.claude/commands/verify.md" "$PROJECT_ROOT/.claude/commands/"
 
-# Multi-session PR review commands
-cp "$INSTALL_DIR/.claude/commands/review-pr.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/address-review.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/review-fix-pr-loop.md" "$PROJECT_ROOT/.claude/commands/"
+# Multi-session PR review commands (symlinked — single source of truth)
+echo "Symlinking review commands..."
+symlink_command "review.md"
+symlink_command "review-pr.md"
+symlink_command "address-review.md"
+symlink_command "review-fix-pr-loop.md"
 
 # Automation commands
 cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
