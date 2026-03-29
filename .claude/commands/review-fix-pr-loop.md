@@ -122,7 +122,7 @@ Run these commands to get the PR information:
    `gh pr view [PR_NUMBER] --json number,title,body,author,headRefName,baseRefName,additions,deletions,changedFiles,state,url`
 
 2. Get the LOCAL diff against the PR base branch (this includes all local commits, even unpushed fixer commits):
-   `git diff $(gh pr view [PR_NUMBER] --json baseRefName --jq '.baseRefName')...HEAD | head -600`
+   `git diff $(gh pr view [PR_NUMBER] --json baseRefName --jq '.baseRefName')...HEAD | head -2000`
    If the diff is truncated, use file-specific diffs for files you need to review in full:
    `git diff $(gh pr view [PR_NUMBER] --json baseRefName --jq '.baseRefName')...HEAD -- path/to/specific/file`
    Note: Do NOT use `gh pr diff` as the primary diff source — it fetches the remote state and will miss local fixer commits from prior rounds.
@@ -146,7 +146,35 @@ For each file in the diff, analyze:
 **Performance** - N+1 queries, unnecessary loops, memory leaks
 **Operational Resilience** - HTTP timeouts, retry logic, error boundaries around external calls, graceful degradation, `exc_info=True` in exception handlers
 
+**Runtime Context** (for shell scripts and multi-process code):
+  - Trace the working directory (cwd) through every `cd`, subshell `(cd ...)`,
+    and worktree boundary. Check whether relative paths resolve correctly in
+    each execution context.
+  - For every subprocess invocation, verify: does the subprocess inherit the
+    correct cwd? Are relative paths valid from the subprocess's perspective?
+  - Check whether `mkdir -p` for output paths runs in the same directory where
+    files will actually be written.
+
+**Staleness / Configuration Drift:**
+  - Hardcoded version strings, model IDs, SDK versions, or API endpoint versions
+    that may become outdated
+  - Magic numbers or date-based identifiers that should be configurable or
+    sourced from a central config
+
 **Cross-File Pattern Tracing:** When you find an issue in one file, search the ENTIRE diff for the same pattern in other files. Common patterns: `requests.*` without `timeout=`, `datetime.now()` without timezone, exception handlers without `exc_info=True`, hardcoded URLs/IDs/ARNs, `os.environ.get()` with defaults that make subsequent None-checks dead code. Report ALL instances, not just the first.
+
+**Data-Value Flow Tracing:** For variables assembled from external data (jq output,
+API responses, user input), ask: "What if this value contains a space, a newline,
+a quote, or special characters?" Trace the value from production (where it's created)
+through every consumption point (where it's used). Check that delimiters used in
+production are not ambiguous with possible field values.
+
+**Shell Argument Safety:** For every variable that participates in word-splitting,
+array construction, or string concatenation, ask:
+  - What if the value is empty?
+  - What if the value contains spaces?
+  - What if the value contains shell metacharacters?
+Trace from the data source (jq, API, user input) to every consumption point.
 
 Be genuinely adversarial. Your job is to find real issues, not rubber-stamp.
 
@@ -197,6 +225,9 @@ Issues that MUST be addressed before merging. Use these classification rules:
 - Missing error handling that would crash the service in production
 - Missing timeouts on external HTTP/API calls (can hang indefinitely)
 - Data loss or corruption risks
+- Missing verification that critical side-effects occurred (e.g., subprocess pushed
+  commits, file was written, API call succeeded) — especially when the action is
+  wrapped in `|| true` or run in a subshell whose exit code is discarded
 
 **Always Suggestion:**
 - Code style, naming, readability improvements
@@ -276,8 +307,10 @@ The response file (documenting how each issue was addressed) is at: [previous_re
 Read the response file to understand which issues were fixed, which were declined (WONT_FIX), and why.
 Do not re-raise WONT_FIX items unless you have new evidence they should be reconsidered.
 You may read the review file for context on what was previously found, but form your own independent assessment.
-Focus especially on whether previously-identified critical issues have been properly fixed,
-and whether the fixes introduced any new issues.
+Conduct a fully independent review as if this is a new PR you are seeing for the first time.
+Give equal or greater weight to discovering NEW issues versus verifying old fixes.
+After your independent review, also verify that previously-identified critical issues have
+been properly fixed — but do not let verification anchor your attention away from new discovery.
 ```
 
 #### 3b. Parse Reviewer Verdict

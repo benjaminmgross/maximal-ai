@@ -78,7 +78,17 @@ Based on the diff context above, analyze the changes:
 - [ ] Exception handlers include `exc_info=True` (or use `logger.exception()`)
 - [ ] Graceful degradation when external dependencies are unavailable
 
-### 8. Cross-File Pattern Tracing
+### 8. Runtime Context (shell scripts and multi-process code)
+- [ ] Working directory (cwd) traced through every `cd`, subshell `(cd ...)`, and worktree boundary
+- [ ] Relative paths resolve correctly in each execution context
+- [ ] Subprocess invocations inherit the correct cwd
+- [ ] `mkdir -p` for output paths runs in the same directory where files will actually be written
+
+### 9. Staleness / Configuration Drift
+- [ ] No hardcoded version strings, model IDs, SDK versions, or API endpoint versions that may become outdated
+- [ ] No magic numbers or date-based identifiers that should be configurable or sourced from a central config
+
+### 10. Cross-File Pattern Tracing
 - [ ] When an issue is found in one file, search the entire diff for the same pattern
 - [ ] All `requests.*` calls without `timeout=` identified
 - [ ] All `datetime.now()` without timezone identified
@@ -86,6 +96,8 @@ Based on the diff context above, analyze the changes:
 - [ ] All exception handlers without `exc_info=True` identified
 - [ ] All `os.environ.get()` with defaults that make subsequent None-checks dead code identified
 - [ ] Report ALL instances, not just the first one found
+- [ ] **Data-Value Flow:** For variables from external data (jq, API, user input) — what if the value contains a space, newline, quote, or special characters? Trace from production through every consumption point
+- [ ] **Shell Argument Safety:** For every variable in word-splitting, array construction, or string concatenation — what if empty, contains spaces, or shell metacharacters?
 
 ## Review Output Format
 
@@ -111,6 +123,9 @@ Provide feedback in this structure:
 - Missing error handling that would crash the service in production
 - Missing timeouts on external HTTP/API calls (can hang indefinitely)
 - Data loss or corruption risks
+- Missing verification that critical side-effects occurred (e.g., subprocess pushed
+  commits, file was written, API call succeeded) — especially when the action is
+  wrapped in `|| true` or run in a subshell whose exit code is discarded
 
 1. **[Issue]** - `file.ts:42`
    - Problem: [description]
