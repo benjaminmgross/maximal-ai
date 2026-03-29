@@ -28,13 +28,13 @@ If `--round` is not specified, the round number will be auto-detected based on e
 ### Diff Statistics
 !`gh pr diff $ARGUMENTS --stat 2>/dev/null | tail -20 || echo "No stats"`
 
-### Full Diff (first 600 lines)
-!`gh pr diff $ARGUMENTS 2>/dev/null | head -600 || echo "No diff"`
+### Full Diff (first 2000 lines)
+!`gh pr diff $ARGUMENTS 2>/dev/null | head -2000 || echo "No diff"`
 
 ### Total Diff Lines
 !`gh pr diff $ARGUMENTS 2>/dev/null | wc -l | tr -d ' '`
 
-**Note:** If total lines > 600, the diff above is truncated. Use `gh pr diff [PR] -- path/to/file` for full file diffs.
+**Note:** If total lines > 2000, the diff above is truncated. Use `gh pr diff [PR] -- path/to/file` for full file diffs.
 
 ### Linked Plan File (from PR body)
 !`gh pr view $ARGUMENTS --json body --jq '.body' 2>/dev/null | grep -oE 'thoughts/plans/[^)>\s]+\.md' | head -1 || echo "No plan file linked"`
@@ -101,6 +101,21 @@ For each file in the diff, analyze:
 - Do exception handlers include `exc_info=True` (or use `logger.exception()`) for debugging?
 - What is the failure mode when each external dependency is unavailable?
 
+**Runtime Context** (for shell scripts and multi-process code):
+  - Trace the working directory (cwd) through every `cd`, subshell `(cd ...)`,
+    and worktree boundary. Check whether relative paths resolve correctly in
+    each execution context.
+  - For every subprocess invocation, verify: does the subprocess inherit the
+    correct cwd? Are relative paths valid from the subprocess's perspective?
+  - Check whether `mkdir -p` for output paths runs in the same directory where
+    files will actually be written.
+
+**Staleness / Configuration Drift:**
+  - Hardcoded version strings, model IDs, SDK versions, or API endpoint versions
+    that may become outdated
+  - Magic numbers or date-based identifiers that should be configurable or
+    sourced from a central config
+
 **Cross-File Pattern Tracing**
 
 When you find an issue in one file, search the ENTIRE diff for the same pattern in other files before moving on. Common cross-cutting patterns:
@@ -111,6 +126,19 @@ When you find an issue in one file, search the ENTIRE diff for the same pattern 
 - `os.environ.get()` with defaults that make subsequent None-checks dead code
 
 Report ALL instances, not just the first one found.
+
+**Data-Value Flow Tracing:** For variables assembled from external data (jq output,
+API responses, user input), ask: "What if this value contains a space, a newline,
+a quote, or special characters?" Trace the value from production (where it's created)
+through every consumption point (where it's used). Check that delimiters used in
+production are not ambiguous with possible field values.
+
+**Shell Argument Safety:** For every variable that participates in word-splitting,
+array construction, or string concatenation, ask:
+  - What if the value is empty?
+  - What if the value contains spaces?
+  - What if the value contains shell metacharacters?
+Trace from the data source (jq, API, user input) to every consumption point.
 
 ### Step 3: Create Structured Review Output
 
@@ -162,6 +190,9 @@ Issues that MUST be addressed before merging. Use these classification rules:
 - Missing error handling that would crash the service in production
 - Missing timeouts on external HTTP/API calls (can hang indefinitely)
 - Data loss or corruption risks
+- Missing verification that critical side-effects occurred (e.g., subprocess pushed
+  commits, file was written, API call succeeded) — especially when the action is
+  wrapped in `|| true` or run in a subshell whose exit code is discarded
 
 **Always Suggestion:**
 - Code style, naming, readability improvements

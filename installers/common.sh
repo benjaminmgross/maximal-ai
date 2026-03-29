@@ -87,6 +87,37 @@ EOC
     info "Created .claude/config.yaml with username: $username"
 }
 
+# Symlink a command file from maximal-ai to the target project.
+# Provides single-source-of-truth: edits to maximal-ai propagate instantly.
+symlink_command() {
+    local filename="$1"
+    local source="$INSTALL_DIR/.claude/commands/$filename"
+    local target="$PROJECT_ROOT/.claude/commands/$filename"
+
+    if [ ! -f "$source" ]; then
+        warn "  Source not found: $source"
+        return 1
+    fi
+
+    # Remove existing file/symlink before creating new symlink
+    rm -f "$target"
+
+    # Use relative symlinks so they survive moves and aren't machine-specific
+    local rel_path
+    rel_path="$(python3 -c "import os.path,sys; print(os.path.relpath(sys.argv[1], os.path.dirname(sys.argv[2])))" "$source" "$target" 2>/dev/null)" || {
+        warn "  python3 not available, falling back to absolute symlink"
+        rel_path="$source"
+    }
+    ln -sf "$rel_path" "$target"
+
+    # Verify the symlink actually resolves (catches broken relpath computation)
+    if [ ! -e "$target" ]; then
+        warn "  Symlink created but does not resolve: $target -> $rel_path"
+        return 1
+    fi
+    echo "  ✓ Linked $filename → maximal-ai (relative)"
+}
+
 # Add entry to .gitignore if not present
 add_to_gitignore() {
     local entry="$1"
