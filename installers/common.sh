@@ -101,8 +101,12 @@ symlink_command() {
 
     # Remove existing file/symlink before creating new symlink
     rm -f "$target"
-    ln -sf "$source" "$target"
-    echo "  ✓ Linked $filename → maximal-ai"
+
+    # Use relative symlinks so they survive moves and aren't machine-specific
+    local rel_path
+    rel_path="$(python3 -c "import os.path; print(os.path.relpath('$source', os.path.dirname('$target')))")"
+    ln -sf "$rel_path" "$target"
+    echo "  ✓ Linked $filename → maximal-ai (relative)"
 }
 
 # Add entry to .gitignore if not present
