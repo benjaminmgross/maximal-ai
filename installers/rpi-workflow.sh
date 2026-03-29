@@ -168,6 +168,12 @@ fi
 add_to_gitignore "thoughts/" "# AI Context Engineering artifacts"
 add_to_gitignore ".claude/config.yaml" "# AI Context Engineering"
 
+# Symlinked review commands are machine-local and must not be committed
+add_to_gitignore ".claude/commands/review.md" "# Symlinked review commands (machine-local)"
+add_to_gitignore ".claude/commands/review-pr.md"
+add_to_gitignore ".claude/commands/address-review.md"
+add_to_gitignore ".claude/commands/review-fix-pr-loop.md"
+
 echo ""
 info "RPI Workflow installation complete!"
 echo ""
