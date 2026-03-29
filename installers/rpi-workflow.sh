@@ -82,10 +82,14 @@ cp "$INSTALL_DIR/.claude/commands/verify.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Multi-session PR review commands (symlinked — single source of truth)
 echo "Symlinking review commands..."
-symlink_command "review.md"
-symlink_command "review-pr.md"
-symlink_command "address-review.md"
-symlink_command "review-fix-pr-loop.md"
+symlink_failures=0
+symlink_command "review.md" || { error "Failed to symlink review.md"; symlink_failures=$((symlink_failures + 1)); }
+symlink_command "review-pr.md" || { error "Failed to symlink review-pr.md"; symlink_failures=$((symlink_failures + 1)); }
+symlink_command "address-review.md" || { error "Failed to symlink address-review.md"; symlink_failures=$((symlink_failures + 1)); }
+symlink_command "review-fix-pr-loop.md" || { error "Failed to symlink review-fix-pr-loop.md"; symlink_failures=$((symlink_failures + 1)); }
+if [ "$symlink_failures" -gt 0 ]; then
+    warn "Warning: $symlink_failures symlink(s) failed — review commands may be incomplete"
+fi
 
 # Automation commands
 cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
