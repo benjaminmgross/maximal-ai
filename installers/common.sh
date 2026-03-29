@@ -104,8 +104,17 @@ symlink_command() {
 
     # Use relative symlinks so they survive moves and aren't machine-specific
     local rel_path
-    rel_path="$(python3 -c "import os.path; print(os.path.relpath('$source', os.path.dirname('$target')))")"
+    rel_path="$(python3 -c "import os.path,sys; print(os.path.relpath(sys.argv[1], os.path.dirname(sys.argv[2])))" "$source" "$target" 2>/dev/null)" || {
+        warn "  python3 not available, falling back to absolute symlink"
+        rel_path="$source"
+    }
     ln -sf "$rel_path" "$target"
+
+    # Verify the symlink actually resolves (catches broken relpath computation)
+    if [ ! -e "$target" ]; then
+        warn "  Symlink created but does not resolve: $target -> $rel_path"
+        return 1
+    fi
     echo "  ✓ Linked $filename → maximal-ai (relative)"
 }
 
