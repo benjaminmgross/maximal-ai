@@ -136,10 +136,10 @@ If you encounter a mismatch:
 1. Read the entire plan to understand the full scope
 2. Note any phases already marked complete
 3. Read all files mentioned in the plan FULLY
-4. Create a TodoWrite list with:
-   - One item for each phase
-   - Sub-items for major changes within each phase
-   - Items for verification steps
+4. Note the scope in your project's persistent task tracker (if any):
+   - Capture the phases and major changes as discrete items
+   - Track verification steps alongside implementation steps
+   - **Do NOT use Claude Code's TodoWrite unless your project explicitly opts in.** Ephemeral in-session state does not survive context resets. Prefer your project's persistent tracker (e.g. `bd` in Minty Living repos, Linear, GitHub Issues, or the plan's checkbox list).
 
 ### Step 2: Phase-by-Phase Implementation
 For each phase:
@@ -179,8 +179,9 @@ For each phase:
 
 4. **Update Progress**
    - Check off completed items in the plan using Edit
-   - Update your TodoWrite list
-   - Note any deviations from the plan
+   - Update your project's persistent task tracker (not TodoWrite — see Step 1)
+   - If your project has a machine-readable feature registry (e.g. `features.json`), flip completed features to the "done" state and commit the update alongside the code
+   - Note any deviations in the plan's "Deviations" section
 
 ### Step 3: Verification Approach
 
@@ -440,10 +441,11 @@ Use sub-agents sparingly for:
 ## Progress Tracking
 
 Maintain clear progress indicators:
-- Use TodoWrite to track implementation tasks
+- Use your project's persistent task tracker. Do NOT use Claude Code's TodoWrite unless your project explicitly opts in — it doesn't survive context resets.
 - Update plan checkboxes as you complete sections
+- If the work is tracked in a machine-readable progress file (e.g. `features.json`), flip each feature's status as it's verified and commit alongside the code
 - Provide periodic status updates for long implementations
-- Note any blockers or concerns immediately
+- Note any blockers or concerns immediately in the project's tracker
 
 ## If You Get Stuck
 
@@ -483,9 +485,9 @@ If the plan has existing checkmarks:
    - Fix breaks immediately
 
 4. **Communicate Progress**
-   - Update todos regularly
+   - Update your project's task tracker regularly
    - Check off plan items as completed
-   - Report blockers immediately
+   - Report blockers immediately (via the tracker, or via project-specific escalation mechanisms)
    - Note any concerns or uncertainties
 
 ## Success Indicators
@@ -518,5 +520,52 @@ Before declaring implementation complete:
 - [ ] No commented-out code or TODOs left
 - [ ] All tests passing
 - [ ] **Documentation considered** (new feature? → update docs/ or $EXTERNAL_DOCS_PATH)
+- [ ] **Evaluator pass run** (see below — required before declaring done)
 
 Remember: You're implementing a solution, not just checking boxes. Keep the end goal in mind and maintain forward momentum.
+
+---
+
+## Final Step: Evaluator Pass (Inferential Feedback)
+
+**This step is NOT optional.** Agents that evaluate their own work rationalize their way to passing grades — Anthropic's research on this is unambiguous. A separate skeptical reader catches what self-evaluation misses.
+
+### Process
+
+1. **Capture the diff** of all changes since branch creation:
+   ```bash
+   git diff $(git merge-base HEAD main)...HEAD > /tmp/implementation.diff
+   ```
+
+2. **Collect success criteria** the evaluator should check against:
+   - The plan's acceptance criteria (primary)
+   - The initiative / feature brief's exit criteria, if the project has one
+   - Any project-specific machine-readable progress tracker (e.g. `features.json` `verification[]` items)
+
+3. **Spawn a fresh reviewer sub-agent** — use `pr-review-toolkit:code-reviewer` or equivalent — with ONLY:
+   - The plan doc
+   - The diff
+   - The success criteria
+
+   Task prompt:
+   > You are a skeptical reviewer. You have not seen the implementation journey.
+   >
+   > For EACH acceptance criterion in the plan, output one of:
+   > - **MET** — cite the specific diff hunk (file:line) that satisfies it
+   > - **UNMET** — state what's missing in one sentence
+   > - **PARTIAL** — cite what's there and what's missing
+   >
+   > Do not summarize. Do not rationalize UNMET as acceptable. Do not praise.
+   > If an acceptance criterion is ambiguous, flag it — don't guess.
+
+4. **Disposition every finding**:
+   - `MET` items: nothing to do
+   - `UNMET` / `PARTIAL` items: either fix the code OR document the gap in the plan's "Deviations" section with explicit rationale. Do not silently proceed.
+
+5. **For frontend features**: also run `/eval-fe <route>` for browser-driven verification (complements the diff-level review above).
+
+6. Only after every finding has a disposition should you commit and close the work.
+
+### Why This Matters
+
+Self-evaluation is a known failure mode — agents give themselves straight A's. A separate evaluator, tuned to be skeptical, catches what a self-assessing agent won't. This is the computational-vs-inferential feedback distinction in modern harness engineering: linters catch syntax; evaluators catch semantic gaps.

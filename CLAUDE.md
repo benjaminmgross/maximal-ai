@@ -6,6 +6,24 @@ This file configures Claude to use the advanced three-phase development workflow
 
 This repository implements the advanced context engineering workflow for AI-driven development, based on the principles from the "Advanced Context Engineering for Coding Agents" methodology.
 
+## Command Layering — Generic vs. Project-Specific
+
+**All commands in this repo (`.claude/commands/`) are project-agnostic.** They describe universal RPI / review / implementation flows that work anywhere.
+
+Project-specific primitives (task trackers like `bd` / Linear / GitHub Issues, feature registries, internal repo paths, custom close-out protocols) do NOT belong in these files. Those concerns live in consuming projects under one of:
+
+- **The project's own `CLAUDE.md`** — conventions, SoT declarations, project-specific rules
+- **Project-local context injection** — e.g. `SessionStart` hooks, `bd prime`, etc.
+- **Project-local commands with their own names** — force-tracked in the consuming project under a name that doesn't collide with a generic command. Example: `tackle-next.md` is a Minty Living-specific orchestrator that wraps `/research` + `/epic-oneshot` with bead lifecycle; it lives in `minty-docs/.claude/commands/tackle-next.md`, never upstreamed here.
+
+**When editing a command here, ask:**
+
+1. Is this genuinely useful to any project, or does it assume a Minty Living (or other specific) primitive?
+2. If generic: edit here; it ships downstream via `maximal-ai`'s installer
+3. If project-specific: keep it out of this repo. Create / edit a sibling command in the consuming project, force-tracked under a distinct name
+
+This is the layering pattern for harness engineering at scale: generic scaffolding in one place, project-specific wiring next to the project.
+
 ## Username Configuration
 
 RPI commands automatically detect your username for file naming. Priority order:
