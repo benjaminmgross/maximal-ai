@@ -17,25 +17,56 @@ echo ""
 
 # Create necessary directories
 echo "Creating directory structure..."
-mkdir -p "$PROJECT_ROOT/.claude/commands"
-mkdir -p "$PROJECT_ROOT/.claude/agents"
-mkdir -p "$PROJECT_ROOT/thoughts/research"
-mkdir -p "$PROJECT_ROOT/thoughts/plans"
-mkdir -p "$PROJECT_ROOT/thoughts/handoffs"
-mkdir -p "$PROJECT_ROOT/thoughts/reviews"
-mkdir -p "$PROJECT_ROOT/thoughts/learnings"
 
-# Optional: Create docs directory
-if [ ! -d "$PROJECT_ROOT/docs" ]; then
-    echo ""
-    echo "Would you like to create a docs/ directory for repo-specific documentation?"
-    echo "This enables the RPI workflow to suggest documentation updates after implementation."
-    read -p "(y/N): " create_docs
-    if [ "$create_docs" = "y" ] || [ "$create_docs" = "Y" ]; then
-        mkdir -p "$PROJECT_ROOT/docs"
-        echo "Created docs/ directory"
+# Helper: mkdir -p that survives broken symlinks by creating the symlink's target.
+# Motivation: thoughts/{handoffs,plans,research,...} are commonly symlinks into
+# a sibling minty-thoughts/repos/<repo>/ hub. If the hub subdir was never
+# created, plain `mkdir -p <path-through-broken-symlink>` fails with
+# "No such file or directory" because mkdir resolves the symlink first.
+safe_mkdir() {
+    local path="$1"
+    if [ -L "$path" ] && [ ! -e "$path" ]; then
+        local target
+        target=$(readlink "$path")
+        # Relative symlink → resolve against the symlink's containing directory
+        if [[ "$target" != /* ]]; then
+            target="$(cd "$(dirname "$path")" && pwd -P)/$target"
+        fi
+        mkdir -p "$target"
     else
-        echo "Skipping docs/ directory (can be created later)"
+        mkdir -p "$path"
+    fi
+}
+
+safe_mkdir "$PROJECT_ROOT/.claude/commands"
+safe_mkdir "$PROJECT_ROOT/.claude/agents"
+safe_mkdir "$PROJECT_ROOT/thoughts/research"
+safe_mkdir "$PROJECT_ROOT/thoughts/plans"
+safe_mkdir "$PROJECT_ROOT/thoughts/handoffs"
+safe_mkdir "$PROJECT_ROOT/thoughts/reviews"
+safe_mkdir "$PROJECT_ROOT/thoughts/learnings"
+
+# Optional: Create docs directory.
+# Only prompt when stdin is a TTY — non-interactive runs (e.g. deploy-all.sh)
+# used to inherit the loop's stdin and silently consume the next repo name
+# as the y/N answer. Set RPI_CREATE_DOCS=1 to auto-create in CI / batch mode.
+if [ ! -d "$PROJECT_ROOT/docs" ]; then
+    if [ -t 0 ]; then
+        echo ""
+        echo "Would you like to create a docs/ directory for repo-specific documentation?"
+        echo "This enables the RPI workflow to suggest documentation updates after implementation."
+        read -p "(y/N): " create_docs
+        if [ "$create_docs" = "y" ] || [ "$create_docs" = "Y" ]; then
+            mkdir -p "$PROJECT_ROOT/docs"
+            echo "Created docs/ directory"
+        else
+            echo "Skipping docs/ directory (can be created later)"
+        fi
+    elif [ "${RPI_CREATE_DOCS:-}" = "1" ]; then
+        mkdir -p "$PROJECT_ROOT/docs"
+        echo "Created docs/ directory (RPI_CREATE_DOCS=1)"
+    else
+        echo "Skipping docs/ directory (non-interactive; set RPI_CREATE_DOCS=1 to auto-create)"
     fi
 fi
 
@@ -63,40 +94,39 @@ echo ""
 # Copy command files
 echo "Installing commands..."
 
-# Core RPI workflow commands
-cp "$INSTALL_DIR/.claude/commands/research.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/plan.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/implement.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/epic-oneshot.md" "$PROJECT_ROOT/.claude/commands/"
+# Multi-session PR review commands are SYMLINKED (single source of truth across
+# consumer repos — edits in maximal-ai propagate instantly). Everything else
+# is COPIED so consuming projects can optionally force-track project-specific
+# overrides (cf. tackle-next.md pattern in minty-docs).
+SYMLINKED_CMDS=(review.md review-pr.md address-review.md review-fix-pr-loop.md)
 
-# Session management commands
-cp "$INSTALL_DIR/.claude/commands/standup.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/blocked.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/create_handoff.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/resume_handoff.md" "$PROJECT_ROOT/.claude/commands/"
+is_symlinked_cmd() {
+    local name="$1"
+    for s in "${SYMLINKED_CMDS[@]}"; do
+        [ "$name" = "$s" ] && return 0
+    done
+    return 1
+}
 
-# Inner-loop commands (pre-computed context)
-cp "$INSTALL_DIR/.claude/commands/commit-push-pr.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/test-and-fix.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/verify.md" "$PROJECT_ROOT/.claude/commands/"
+# Copy every *.md in .claude/commands/ that isn't part of the symlink set.
+# Globbed rather than enumerated so new commands added upstream auto-propagate.
+for cmd_file in "$INSTALL_DIR"/.claude/commands/*.md; do
+    cmd_name=$(basename "$cmd_file")
+    if is_symlinked_cmd "$cmd_name"; then
+        continue
+    fi
+    cp "$cmd_file" "$PROJECT_ROOT/.claude/commands/"
+done
 
-# Multi-session PR review commands (symlinked — single source of truth)
+# Symlink the review family (single source of truth — edits propagate instantly)
 echo "Symlinking review commands..."
 symlink_failures=0
-symlink_command "review.md" || { error "Failed to symlink review.md"; symlink_failures=$((symlink_failures + 1)); }
-symlink_command "review-pr.md" || { error "Failed to symlink review-pr.md"; symlink_failures=$((symlink_failures + 1)); }
-symlink_command "address-review.md" || { error "Failed to symlink address-review.md"; symlink_failures=$((symlink_failures + 1)); }
-symlink_command "review-fix-pr-loop.md" || { error "Failed to symlink review-fix-pr-loop.md"; symlink_failures=$((symlink_failures + 1)); }
+for sc in "${SYMLINKED_CMDS[@]}"; do
+    symlink_command "$sc" || { error "Failed to symlink $sc"; symlink_failures=$((symlink_failures + 1)); }
+done
 if [ "$symlink_failures" -gt 0 ]; then
     warn "Warning: $symlink_failures symlink(s) failed — review commands may be incomplete"
 fi
-
-# Automation commands
-cp "$INSTALL_DIR/.claude/commands/observe-docstrings.md" "$PROJECT_ROOT/.claude/commands/"
-cp "$INSTALL_DIR/.claude/commands/map-to-standards.md" "$PROJECT_ROOT/.claude/commands/"
-
-# Knowledge compounding command
-cp "$INSTALL_DIR/.claude/commands/compound.md" "$PROJECT_ROOT/.claude/commands/"
 
 # Copy agent files
 echo "Installing agents..."

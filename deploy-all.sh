@@ -142,7 +142,12 @@ while IFS= read -r repo; do
 
     echo -n "  Deploying to $repo... "
 
-    if (cd "$repo_path" && maximal-ai "$COMMAND") > /dev/null 2>&1; then
+    # Redirect stdin from /dev/null so any interactive `read` prompts in the
+    # installer see EOF instead of consuming the outer `while read` loop's
+    # stdin (which is $REPOS). Before this guard, installer prompts silently
+    # ate the next repo name as a y/N answer, causing repos to vanish from
+    # the deploy output.
+    if (cd "$repo_path" && maximal-ai "$COMMAND" < /dev/null) > /dev/null 2>&1; then
         info "✓"
         SUCCEEDED=$((SUCCEEDED + 1))
     else

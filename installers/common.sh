@@ -63,7 +63,12 @@ get_username() {
 
     echo ""
     echo "Detected username: $detected"
-    read -p "Press Enter to use this username, or type a different one: " user_input
+    # Only prompt interactively — non-interactive runs (e.g. deploy-all.sh's
+    # `while read` loop) would otherwise steal the next line of stdin.
+    local user_input=""
+    if [ -t 0 ]; then
+        read -p "Press Enter to use this username, or type a different one: " user_input
+    fi
 
     if [ -n "$user_input" ]; then
         echo "$user_input" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
