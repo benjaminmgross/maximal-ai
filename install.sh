@@ -27,12 +27,12 @@ cat > "$INSTALL_PATH/maximal-ai" << 'EOF'
 #!/bin/bash
 
 # Maximal-AI: Modular AI Development Toolkit
-# Version 2.0.0
+# Version 3.0.0
 
 set -e
 
 INSTALL_DIR="${MAXIMAL_AI_HOME:-$HOME/dev/maximal-ai}"
-VERSION="2.0.0"
+VERSION="3.0.0"
 
 show_help() {
     echo "maximal-ai - Modular AI Development Toolkit"
@@ -66,6 +66,7 @@ show_help() {
     echo "  /create_handoff  - Create handoff documentation"
     echo "  /resume_handoff  - Resume work from handoff document"
     echo "  /compound        - Document solved problems for future sessions"
+    echo "  /spec-task       - Author or audit implementation specs before RPI"
     echo "  /map-to-standards - Map commits to all coding standards"
     echo ""
     echo "RDF CLI (if Layer 5 installed):"

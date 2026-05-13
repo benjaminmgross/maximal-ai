@@ -109,8 +109,8 @@ maximal-ai complete
 #### RPI Workflow Installation
 
 `maximal-ai rpi-workflow` installs:
-- ✅ 8 commands (research, plan, implement, epic-oneshot, standup, blocked, create_handoff, resume_handoff)
-- ✅ 7 specialized agents
+- ✅ RPI commands for research, planning, implementation, spec quality, review, verification, handoff, and compounding workflows
+- ✅ 9 specialized agents
 - ✅ Username configuration for RPI file naming
 - ✅ `.claude/config.yaml` with your username
 - ✅ `thoughts/` directory structure (research/, plans/, handoffs/)
@@ -309,6 +309,7 @@ your-project/
 │   │   ├── blocked.md
 │   │   ├── create_handoff.md
 │   │   ├── resume_handoff.md
+│   │   ├── spec-task.md
 │   │   └── map-to-standards.md
 │   └── agents/                   # RPI specialized agents
 │       ├── codebase-locator.md
@@ -317,7 +318,9 @@ your-project/
 │       ├── web-search-researcher.md
 │       ├── file-analyzer.md
 │       ├── bug-hunter.md
-│       └── test-runner.md
+│       ├── test-runner.md
+│       ├── code-simplifier.md
+│       └── spec-reviewer.md
 ├── .context/                     # [RDF L1] Project-level context
 │   ├── substrate.md              # Navigation hub for AI and developers
 │   ├── ai-rules.md               # Hard constraints for code generation
@@ -356,9 +359,11 @@ your-project/
 - **file-analyzer**: Reduces large files by 80-90% while preserving critical information
 - **bug-hunter**: Elite bug detection with security and performance analysis
 - **test-runner**: Execute tests without polluting context
+- **spec-reviewer**: Adversarially reviews implementation specs before RPI planning
 
 ### Project Management Commands
 
+- **spec-task**: Author or audit implementation specs before RPI planning
 - **epic-oneshot**: Complete RPI workflow in a single session
 - **standup**: Generate progress reports from git and RPI artifacts
 - **blocked**: Identify and resolve implementation blockers
@@ -947,7 +952,7 @@ This workflow is continuously evolving. Contributions welcome:
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes to this project.
 
-This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Release preparation uses the checklist in [docs/release-process.md](docs/release-process.md).
 
 ## 📖 References
 

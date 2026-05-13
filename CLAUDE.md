@@ -190,6 +190,7 @@ TDD is **strongly recommended** but can be bypassed if explicitly stated in the 
 - `/create_handoff` - Create handoff documentation for session transfer
 - `/resume_handoff [handoff-file]` - Resume work from handoff document
 - `/compound [context]` - Document solved problems to compound team knowledge
+- `/spec-task [spec, source, or prompt]` - Author or audit an implementation spec before RPI planning
 
 ### System Design Commands
 - `/architecture-review [scope]` - Comprehensive architecture analysis with pattern/anti-pattern detection
@@ -487,6 +488,7 @@ project-root/
 │   │   ├── review-fix-pr-loop.md
 │   │   ├── test-and-fix.md
 │   │   ├── verify.md
+│   │   ├── spec-task.md
 │   │   ├── observe-docstrings.md
 │   │   ├── map-to-standards.md          # Coding standards evaluation
 │   │   ├── architecture-review.md    # System design command
@@ -503,6 +505,7 @@ project-root/
 │   │   ├── test-runner.md
 │   │   ├── thoughts-locator.md              # Searches prior research/plans/handoffs/learnings
 │   │   ├── code-simplifier.md
+│   │   ├── spec-reviewer.md                 # Adversarial implementation spec reviewer
 │   │   ├── architecture-pattern-detector.md  # System design agent
 │   │   ├── scalability-assessor.md           # System design agent
 │   │   └── tradeoff-researcher.md            # System design agent
@@ -601,7 +604,11 @@ The test-runner agent executes tests in an isolated context, preventing test out
 ### Code Simplification
 The code-simplifier agent cleans up code after implementation, reducing complexity and nesting without changing functionality. Invoke with: "Use the code-simplifier agent to clean up the files I just modified."
 
+### Spec Review
+The spec-reviewer agent audits implementation specs before they enter RPI, checking problem honesty, approach fit, acceptance criteria, risks, dependencies, source fidelity, and implementation readiness. Invoke through `/spec-task`.
+
 ### Project Management
+- **Spec Task**: Author or audit implementation specs before RPI planning
 - **Epic Oneshot**: Chain all three phases for quick feature implementation
 - **Standup**: Generate daily progress reports automatically
 - **Blocked**: Identify and resolve implementation impediments

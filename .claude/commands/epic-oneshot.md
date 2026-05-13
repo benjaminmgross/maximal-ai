@@ -137,6 +137,11 @@ If user approves:
      - Check if docs/ or $EXTERNAL_DOCS_PATH exist
      - If new feature/pattern added, suggest documentation update
      - If neither destination exists, continue silently
+   - **Consider release closeout**:
+     - Update the project release log/changelog when the change is user-visible, operationally significant, or fixes a notable bug
+     - If preparing an actual release, bump all project version sources consistently before tagging
+     - Review README, command help, examples, and docs for behavior changes
+     - Treat Git tags as release markers, not as the version bump itself; create tags only when the user explicitly wants release publication
 
 3. **Run final verification**:
    ```bash
@@ -172,6 +177,7 @@ If user approves:
    **Standards & Documentation:**
    - Coding standards: [Followed | N/A - no standards present]
    - Documentation updated: [Yes - location | No - not needed | Skipped - no docs destination]
+   - Release closeout: [Changelog updated | Version bumped | Tag prepared | Not a release]
 
    **Next Steps:**
    1. Review the changes
