@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `/map-to-standards` command — map any commit range or PR to all 9 Minty Living coding standards with structured scorecards
+- Release closeout guidance for RPI workflows, including changelog entries, version synchronization, README/docs review, and Git tag preparation
+- `docs/release-process.md` with the Maximal AI release checklist
+- `/spec-task` command and `spec-reviewer` agent for authoring or auditing implementation specs before RPI planning
+
+### Fixed
+- Synchronized the generated `maximal-ai` installer command version with the repo's `3.0.0` package/runtime version
 
 ## [2.0.1] - 2026-01-05
 
@@ -95,7 +101,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RPI artifacts directory structure (`thoughts/research/`, `thoughts/plans/`, `thoughts/handoffs/`)
 - Comprehensive documentation in README.md and CLAUDE.md
 
-[Unreleased]: https://github.com/benjaminmgross/maximal-ai/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/benjaminmgross/maximal-ai/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/benjaminmgross/maximal-ai/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/benjaminmgross/maximal-ai/compare/v0.1.0...v2.0.0
 [0.1.0]: https://github.com/benjaminmgross/maximal-ai/releases/tag/v0.1.0
 [0.0.1]: https://github.com/benjaminmgross/maximal-ai/releases/tag/v0.0.1

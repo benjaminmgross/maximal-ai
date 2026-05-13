@@ -65,6 +65,12 @@ else
     log_fail "Missing .claude/commands/research.md"
 fi
 
+if [ -f ".claude/commands/spec-task.md" ]; then
+    log_pass "Spec task command installed"
+else
+    log_fail "Missing .claude/commands/spec-task.md"
+fi
+
 if [ -d "thoughts/research" ] && [ -d "thoughts/plans" ] && [ -d "thoughts/handoffs" ]; then
     log_pass "thoughts/ directories created"
 else
@@ -75,6 +81,12 @@ if [ -f ".claude/agents/codebase-analyzer.md" ]; then
     log_pass "Agents installed"
 else
     log_fail "Missing .claude/agents/codebase-analyzer.md"
+fi
+
+if [ -f ".claude/agents/spec-reviewer.md" ]; then
+    log_pass "Spec reviewer agent installed"
+else
+    log_fail "Missing .claude/agents/spec-reviewer.md"
 fi
 
 if [ -f "CLAUDE.md" ]; then

@@ -258,6 +258,31 @@ After all implementation phases complete and verification passes, consider wheth
 
 ## Git Commit Best Practices
 
+### Release Closeout
+
+Before committing final implementation work, decide whether this change is part of a release. Most feature PRs only need an unreleased changelog entry; actual version bumps and tags should happen only when the user explicitly asks to prepare or publish a release.
+
+When release closeout is in scope:
+
+1. **Update the release log**:
+   - Add a concise entry to the project's changelog or release notes.
+   - Group changes by the project's existing categories such as Added, Changed, Fixed, Removed, Security, or Breaking Changes.
+   - Reference important PRs, issues, migrations, compatibility notes, and documentation changes when known.
+
+2. **Bump versions consistently**:
+   - Identify every project version source before editing: package manifests, language metadata, runtime `__version__` constants, installer scripts, lockfiles, generated docs, and tests that assert version output.
+   - Apply the same SemVer value everywhere.
+   - Do not call Git tags "version bumps": the version bump changes files; the Git tag marks the release commit.
+
+3. **Update public documentation**:
+   - Review README, docs, examples, command help, generated templates, and migration notes touched by the behavior change.
+   - If users need to learn about the change to install, configure, upgrade, or operate the project, update docs in the same implementation.
+
+4. **Prepare tags only for an actual release**:
+   - Create tags after verification passes and after the release commit exists.
+   - Prefer annotated tags, for example `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+   - Do not create or push tags unless the user requested release publication.
+
 During implementation, maintain clean git history with atomic commits:
 
 ### Setup Before Implementation
