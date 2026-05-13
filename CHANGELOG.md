@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+- **Renamed `/review-fix-pr-loop` → `/review-fix-loop`** (T0.HARN-013). Input contract changes from PR identifier (`gh pr view`) to local diff (`git diff <base>...HEAD`). The command now runs BEFORE `gh pr create` rather than after, so PRs carry one coherent post-review diff rather than a multi-commit review-fix audit trail. A thin deprecation wrapper at `.claude/commands/review-fix-pr-loop.md` redirects muscle-memory invocations; retired at the next quarterly harness review.
+
 ### Added
+- `/review-fix-loop` is now **auto-chained** into the three flow commands as a mandatory gate before any commit:
+  - `/epic-oneshot`: new "Step 3.5: Adversarial Review" between Implementation and the commit step.
+  - `/commit-push-pr`: new "Step 0: Adversarial Review Gate" before staging.
+  - `/implement`: new "Final Step 2: Adversarial Review Gate" after the existing Evaluator Pass.
+  Each insertion documents the APPROVED / APPROVED_WITH_SUGGESTIONS / REQUEST_CHANGES handling and the bypass mechanism. Empirically motivated by PR #43 (T0.HARN-012 merge driver in minty-docs), which shipped from `/epic-oneshot` with 2 CRITICAL bugs that no upstream gate caught.
 - `/map-to-standards` command — map any commit range or PR to all 9 Minty Living coding standards with structured scorecards
 - Release closeout guidance for RPI workflows, including changelog entries, version synchronization, README/docs review, and Git tag preparation
 - `docs/release-process.md` with the Maximal AI release checklist

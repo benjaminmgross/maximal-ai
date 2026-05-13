@@ -594,3 +594,25 @@ Remember: You're implementing a solution, not just checking boxes. Keep the end 
 ### Why This Matters
 
 Self-evaluation is a known failure mode — agents give themselves straight A's. A separate evaluator, tuned to be skeptical, catches what a self-assessing agent won't. This is the computational-vs-inferential feedback distinction in modern harness engineering: linters catch syntax; evaluators catch semantic gaps.
+
+## Final Step 2: Adversarial Review Gate (MANDATORY before any commit)
+
+**The evaluator pass above checks AC satisfaction** ("does the diff do what the plan said?"). It does NOT catch bugs the plan didn't anticipate — operational resilience gaps, source-fidelity drift, side-effect surprises, severity-miscalibrated findings the agent rationalized as nits. Those need a different gate: the adversarial review-fix loop.
+
+Per T0.HARN-013, this step is also NOT optional. After the evaluator pass disposes all findings and BEFORE any `git commit`, run:
+
+```
+/review-fix-loop --num-rounds 2
+```
+
+The loop reviewer reads `git diff <base>...HEAD` with fresh, skeptical eyes (no plan, no AC list — just the diff). Fixer subagent applies findings locally during the round.
+
+**Why two gates, not one:** the evaluator pass and the adversarial review have different objectives. The evaluator asks "did you do what you said?" The adversarial review asks "did what you did contain bugs?" Both questions matter; neither subsumes the other.
+
+**Result handling:**
+
+- **`APPROVED`** → commit + push.
+- **`APPROVED_WITH_SUGGESTIONS`** → commit + push; file follow-ups for non-trivial suggestions.
+- **`REQUEST_CHANGES`** → fixer already applied fixes; run round 2 to verify. If round 2 still returns `REQUEST_CHANGES`, halt and surface to user — don't auto-loop indefinitely.
+
+**Bypass** requires explicit user authorization recorded in session state (or bead metadata under `/tackle-next`). Bypasses surface in the harness quarterly review.
