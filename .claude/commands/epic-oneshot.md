@@ -161,6 +161,30 @@ If user approves:
    # For mixed projects, run both sets as appropriate
    ```
 
+### Step 3.5: Adversarial Review (MANDATORY before any commit / push / PR)
+
+**This step is NOT optional.** After tests + lint pass but BEFORE any `git commit` / `git push` / `gh pr create`, run the adversarial review-fix loop on the local diff:
+
+```
+/review-fix-loop --num-rounds 2
+```
+
+The reviewer subagent reads the implementation diff with fresh, skeptical eyes — catching bugs the brief didn't anticipate (operational resilience, source-fidelity vs spec, side-effect surprises) that the AC-evaluator and `pytest` cannot catch by construction. This is the gate that empirically caught the 2 CRITICAL bugs in T0.HARN-012 (PR #43) that all upstream gates missed.
+
+**Loop result handling:**
+
+- **`APPROVED`** → proceed to Step 4 (commit + push + PR creation).
+- **`APPROVED_WITH_SUGGESTIONS`** → proceed to Step 4. If suggestions warrant follow-up work, file follow-up beads/issues with explicit rationale and link them in the PR description.
+- **`REQUEST_CHANGES`** → the fixer subagent has already applied its fixes during the round. Run round 2 to verify. If round 2 still returns `REQUEST_CHANGES`, halt with a diagnostic and hand back to the user — do not auto-loop indefinitely.
+
+**Pre-PR placement is load-bearing.** Running the review BEFORE the PR exists means:
+- PR history is one coherent diff (no review-fix churn commits cluttering the PR)
+- No GitHub round-trip — the loop operates on `git diff <base>...HEAD` directly
+- Reviewers see the polished final state, not the audit trail of getting there
+- Closes the "PR opened, review never ran" failure mode by design
+
+**Bypass:** requires explicit user authorization recorded in session state (or bead metadata `review_gate_bypassed=true` with `review_gate_bypass_reason` if running under `/tackle-next`). Bypasses surface in the harness quarterly review.
+
 4. **Present completion summary**:
    ```
    ## Epic Oneshot Complete!

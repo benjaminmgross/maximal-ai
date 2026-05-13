@@ -46,6 +46,26 @@ description: Commit changes, push to remote, and create PR with pre-computed con
 
 Based on the git information above:
 
+### 0. Adversarial Review Gate (MANDATORY before commit/push/PR)
+
+**This step is NOT optional.** Before staging anything, run the adversarial review-fix loop on the local diff:
+
+```
+/review-fix-loop --num-rounds 2
+```
+
+The reviewer subagent reads `git diff <base>...HEAD` with fresh, skeptical eyes — catching bugs the AC-evaluator and `pytest` cannot catch by construction (operational resilience, source-fidelity vs spec, side-effect surprises). This is the gate that empirically caught the 2 CRITICAL bugs in T0.HARN-012 (PR #43) that all other gates missed.
+
+**Loop result handling:**
+
+- **`APPROVED`** → proceed to step 1 (stage + commit).
+- **`APPROVED_WITH_SUGGESTIONS`** → proceed to step 1. File follow-ups for non-trivial suggestions; link them in the PR description.
+- **`REQUEST_CHANGES`** → the fixer subagent has already applied its fixes during the round. Run round 2 to verify. If round 2 still returns `REQUEST_CHANGES`, halt and hand back to the user.
+
+**Pre-PR placement is load-bearing.** Running the review BEFORE the commit + push + PR creation means the PR carries one coherent diff (no review-fix churn commits), no GitHub round-trip, and reviewers see the polished final state.
+
+**Bypass** requires explicit user authorization recorded in session state. Bypasses surface in the harness quarterly review.
+
 ### 1. Stage Relevant Changes
 - Review the unstaged and untracked files shown above
 - Stage files that should be committed (avoid secrets, build artifacts, node_modules)
