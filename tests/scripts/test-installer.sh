@@ -143,7 +143,57 @@ fi
 echo ""
 
 # ============================================
-# Test 4: Command files have valid frontmatter
+# Test 4: Codex skills installer
+# ============================================
+log_info "Codex skills installer"
+
+CODEX_TEST_HOME="$TEST_DIR/codex-home"
+mkdir -p "$CODEX_TEST_HOME/skills/research"
+cat > "$CODEX_TEST_HOME/skills/research/SKILL.md" <<'EOF'
+---
+name: research
+description: Preserve me
+---
+
+# Existing Research Skill
+EOF
+
+CODEX_HOME="$CODEX_TEST_HOME" bash "$REPO_ROOT/installers/codex-skills.sh" > /dev/null 2>&1
+
+if [ -f "$CODEX_TEST_HOME/skills/research/SKILL.md" ]; then
+    log_pass "Codex research skill exists"
+else
+    log_fail "Missing Codex research skill"
+fi
+
+if grep -q "Preserve me" "$CODEX_TEST_HOME/skills/research/SKILL.md"; then
+    log_pass "Existing Codex SKILL.md preserved"
+else
+    log_fail "Codex installer overwrote existing SKILL.md"
+fi
+
+if [ -f "$CODEX_TEST_HOME/skills/research/references/source-claude-command.md" ]; then
+    log_pass "Codex research command reference installed"
+else
+    log_fail "Missing Codex research command reference"
+fi
+
+if [ -f "$CODEX_TEST_HOME/skills/create-handoff/SKILL.md" ]; then
+    log_pass "Codex command names normalize underscores to hyphens"
+else
+    log_fail "Missing normalized Codex create-handoff skill"
+fi
+
+if [ -f "$CODEX_TEST_HOME/skills/review-fix-loop/SKILL.md" ]; then
+    log_pass "New review-fix-loop Codex skill installed"
+else
+    log_fail "Missing review-fix-loop Codex skill"
+fi
+
+echo ""
+
+# ============================================
+# Test 5: Command files have valid frontmatter
 # ============================================
 log_info "Command files have valid YAML frontmatter"
 
@@ -164,7 +214,7 @@ fi
 echo ""
 
 # ============================================
-# Test 5: Empty project (no src/ or app/)
+# Test 6: Empty project (no src/ or app/)
 # ============================================
 log_info "Empty project (no src/ or app/)"
 

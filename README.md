@@ -102,7 +102,10 @@ maximal-ai rpi-workflow
 # Install RDF framework only (documentation layers)
 maximal-ai rdf-framework -l 1,2,3
 
-# Install both frameworks
+# Install Codex skill wrappers for Maximal-AI commands
+maximal-ai codex-skills
+
+# Install both frameworks plus Codex skills
 maximal-ai complete
 ```
 
@@ -116,6 +119,16 @@ maximal-ai complete
 - ✅ `thoughts/` directory structure (research/, plans/, handoffs/)
 - ✅ CLAUDE.md configuration
 - ✅ Auto-detect coding standards from `docs/coding-standards/`
+
+#### Codex Skills Installation
+
+`maximal-ai codex-skills` installs Codex-compatible skill wrappers under `${CODEX_HOME:-$HOME/.codex}/skills`.
+
+- ✅ Uses `.claude/commands/*.md` as the canonical command source
+- ✅ Creates one Codex skill per command (`create_handoff.md` → `create-handoff`)
+- ✅ Refreshes `references/source-claude-command.md` on every install
+- ✅ Preserves existing hand-authored `SKILL.md` adaptations
+- ✅ Generates default Codex wrappers for new commands
 
 #### RDF Framework Installation
 
@@ -192,13 +205,17 @@ repos:
 
 # Skip self-update, just deploy to repos
 ./deploy-all.sh --skip-update
+
+# Skip user-level Codex skill refresh
+./deploy-all.sh --skip-codex
 ```
 
 **What it does:**
 1. Pulls the latest maximal-ai `dev` branch
-2. Runs `source install.sh` to update the `maximal-ai` command
-3. Runs `maximal-ai <command>` in each repo listed in `deploy.yaml`
-4. Prints a summary with success/fail/skip counts
+2. Runs `install.sh` to update the `maximal-ai` command
+3. Refreshes global Codex skills from the canonical `.claude/commands/*.md` source
+4. Runs `maximal-ai <command>` in each repo listed in `deploy.yaml`
+5. Prints a summary with success/fail/skip counts
 
 ```
   Deploying to my-project-1... ✓
@@ -208,6 +225,7 @@ repos:
   ==============================
   Deploy Complete
 
+    Codex skills: refreshed
     Succeeded: 3
 ```
 

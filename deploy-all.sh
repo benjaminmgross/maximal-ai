@@ -5,6 +5,7 @@
 # Usage:
 #   ./deploy-all.sh               # Full workflow: pull + install + deploy
 #   ./deploy-all.sh --skip-update # Skip git pull + install.sh, just deploy
+#   ./deploy-all.sh --skip-codex  # Skip Codex skill refresh
 
 # Prevent running via 'source' — set -e and exit will kill the terminal
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
@@ -19,6 +20,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FILE="$SCRIPT_DIR/deploy.yaml"
 SKIP_UPDATE=false
+SKIP_CODEX=false
 
 # Parse flags
 for arg in "$@"; do
@@ -26,13 +28,17 @@ for arg in "$@"; do
         --skip-update)
             SKIP_UPDATE=true
             ;;
+        --skip-codex)
+            SKIP_CODEX=true
+            ;;
         --help|-h)
-            echo "Usage: ./deploy-all.sh [--skip-update]"
+            echo "Usage: ./deploy-all.sh [--skip-update] [--skip-codex]"
             echo ""
             echo "Deploy maximal-ai to all repositories listed in deploy.yaml."
             echo ""
             echo "Options:"
             echo "  --skip-update  Skip git pull and install.sh (just deploy to repos)"
+            echo "  --skip-codex   Skip user-level Codex skill refresh"
             echo "  --help, -h     Show this help message"
             exit 0
             ;;
@@ -120,8 +126,19 @@ else
     echo ""
 fi
 
-# Step 2: Deploy to repos
-info "Step 2: Deploying to $REPO_COUNT repositories..."
+# Step 2: Refresh user-level Codex skills
+if [ "$SKIP_CODEX" = false ]; then
+    info "Step 2: Refreshing Codex skills..."
+    echo ""
+    bash "$SCRIPT_DIR/installers/codex-skills.sh"
+    echo ""
+else
+    info "Step 2: Skipped Codex skills (--skip-codex)"
+    echo ""
+fi
+
+# Step 3: Deploy to repos
+info "Step 3: Deploying Claude Code commands to $REPO_COUNT repositories..."
 echo ""
 
 SUCCEEDED=0
@@ -162,6 +179,11 @@ echo ""
 echo "=============================="
 info "Deploy Complete"
 echo ""
+if [ "$SKIP_CODEX" = false ]; then
+    echo "  Codex skills: refreshed"
+else
+    warn "  Codex skills: skipped"
+fi
 echo "  Succeeded: $SUCCEEDED"
 
 if [ "$FAILED" -gt 0 ]; then

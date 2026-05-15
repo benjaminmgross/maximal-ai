@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Renamed `/review-fix-pr-loop` → `/review-fix-loop`** (T0.HARN-013). Input contract changes from PR identifier (`gh pr view`) to local diff (`git diff <base>...HEAD`). The command now runs BEFORE `gh pr create` rather than after, so PRs carry one coherent post-review diff rather than a multi-commit review-fix audit trail. A thin deprecation wrapper at `.claude/commands/review-fix-pr-loop.md` redirects muscle-memory invocations; retired at the next quarterly harness review.
 
 ### Added
+- Provider-aware deployment for Codex:
+  - New `installers/codex-skills.sh` installer generates Codex skill wrappers from canonical `.claude/commands/*.md` files.
+  - New `maximal-ai codex-skills` subcommand refreshes `${CODEX_HOME:-$HOME/.codex}/skills`.
+  - `deploy-all.sh` now refreshes Codex skills once before deploying Claude Code commands to target repos, with `--skip-codex` for opt-out.
 - `/review-fix-loop` is now **auto-chained** into the three flow commands as a mandatory gate before any commit:
   - `/epic-oneshot`: new "Step 3.5: Adversarial Review" between Implementation and the commit step.
   - `/commit-push-pr`: new "Step 0: Adversarial Review Gate" before staging.
