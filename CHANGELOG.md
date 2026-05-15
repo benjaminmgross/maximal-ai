@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Renamed `/review-fix-pr-loop` → `/review-fix-loop`** (T0.HARN-013). Input contract changes from PR identifier (`gh pr view`) to local diff (`git diff <base>...HEAD`). The command now runs BEFORE `gh pr create` rather than after, so PRs carry one coherent post-review diff rather than a multi-commit review-fix audit trail. A thin deprecation wrapper at `.claude/commands/review-fix-pr-loop.md` redirects muscle-memory invocations; retired at the next quarterly harness review.
 
 ### Added
+- `/spec-task` now treats `thoughts/spec/` as the default implementation spec workspace, keeping `thoughts/plans/` reserved for `/plan` outputs.
 - Provider-aware deployment for Codex:
   - New `installers/codex-skills.sh` installer generates Codex skill wrappers from canonical `.claude/commands/*.md` files.
   - New `maximal-ai codex-skills` subcommand refreshes `${CODEX_HOME:-$HOME/.codex}/skills`.

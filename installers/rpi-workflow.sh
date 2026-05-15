@@ -41,6 +41,7 @@ safe_mkdir() {
 safe_mkdir "$PROJECT_ROOT/.claude/commands"
 safe_mkdir "$PROJECT_ROOT/.claude/agents"
 safe_mkdir "$PROJECT_ROOT/thoughts/research"
+safe_mkdir "$PROJECT_ROOT/thoughts/spec"
 safe_mkdir "$PROJECT_ROOT/thoughts/plans"
 safe_mkdir "$PROJECT_ROOT/thoughts/handoffs"
 safe_mkdir "$PROJECT_ROOT/thoughts/reviews"

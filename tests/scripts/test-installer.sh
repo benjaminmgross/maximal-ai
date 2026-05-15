@@ -71,7 +71,7 @@ else
     log_fail "Missing .claude/commands/spec-task.md"
 fi
 
-if [ -d "thoughts/research" ] && [ -d "thoughts/plans" ] && [ -d "thoughts/handoffs" ]; then
+if [ -d "thoughts/research" ] && [ -d "thoughts/spec" ] && [ -d "thoughts/plans" ] && [ -d "thoughts/handoffs" ]; then
     log_pass "thoughts/ directories created"
 else
     log_fail "Missing thoughts/ directories"
