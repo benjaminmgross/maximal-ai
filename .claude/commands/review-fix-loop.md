@@ -27,7 +27,7 @@ $ARGUMENTS
 !`git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || (git show-ref --verify --quiet refs/remotes/origin/dev && echo "origin/dev") || (git show-ref --verify --quiet refs/remotes/origin/main && echo "origin/main") || (git show-ref --verify --quiet refs/remotes/origin/master && echo "origin/master") || echo ""`
 
 ### Local Diff Stat (vs detected base — same fallback chain as Detected Base Branch)
-!`BASE=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || (git show-ref --verify --quiet refs/remotes/origin/dev && echo "origin/dev") || (git show-ref --verify --quiet refs/remotes/origin/main && echo "origin/main") || (git show-ref --verify --quiet refs/remotes/origin/master && echo "origin/master") || echo ""); if [ -z "$BASE" ]; then echo "(no base branch detected — supply --base <ref>)"; else git diff --stat $BASE...HEAD 2>/dev/null | tail -20 || echo "(no diff against $BASE — branch may have no commits, or base is wrong)"; fi`
+!`git diff --stat @{upstream}...HEAD 2>/dev/null | tail -20 || git diff --stat origin/dev...HEAD 2>/dev/null | tail -20 || git diff --stat origin/main...HEAD 2>/dev/null | tail -20 || git diff --stat origin/master...HEAD 2>/dev/null | tail -20 || echo "(no base branch detected — supply --base <ref>)"`
 
 ### Username for Review File
 !`grep "^username:" .claude/config.yaml 2>/dev/null | cut -d: -f2 | tr -d ' ' || echo "${RPI_USERNAME:-user}"`
@@ -42,7 +42,7 @@ $ARGUMENTS
 !`ls -t thoughts/reviews/*-review-*.md 2>/dev/null | head -10 || echo "No existing reviews"`
 
 ### Linked Plan File (most recent plan that mentions current branch)
-!`BRANCH=$(git branch --show-current 2>/dev/null); grep -rl "$BRANCH" thoughts/plans/*.md 2>/dev/null | head -1 || echo "No plan file found referencing current branch"`
+!`git branch --show-current 2>/dev/null | head -1 | xargs -I BRANCH grep -rl BRANCH thoughts/plans/*.md 2>/dev/null | head -1 || echo "No plan file found referencing current branch"`
 
 ## Coordinator Instructions
 

@@ -42,7 +42,8 @@ show_help() {
     echo "Commands:"
     echo "  rpi-workflow     Install the three-phase Research/Plan/Implement workflow"
     echo "  rdf-framework    Install the Repo Documentation Framework"
-    echo "  complete         Install both RPI workflow and RDF framework"
+    echo "  codex-skills     Install Codex skill wrappers for Maximal-AI commands"
+    echo "  complete         Install RPI workflow, RDF framework, and Codex skills"
     echo "  (no command)     Interactive mode - choose what to install"
     echo ""
     echo "Options:"
@@ -54,9 +55,10 @@ show_help() {
     echo "  maximal-ai rpi-workflow       # Install RPI workflow"
     echo "  maximal-ai rdf-framework      # Install RDF framework"
     echo "  maximal-ai rdf-framework -l 1 # Install RDF Layer 1 only"
-    echo "  maximal-ai complete           # Install both frameworks"
+    echo "  maximal-ai codex-skills       # Install Codex skills"
+    echo "  maximal-ai complete           # Install both frameworks and Codex skills"
     echo ""
-    echo "After installation, use these commands in Claude:"
+    echo "After installation, use these workflows in Claude Code or Codex:"
     echo "  /research        - Conduct comprehensive research"
     echo "  /plan            - Create implementation plan"
     echo "  /implement       - Execute the plan"
@@ -100,6 +102,10 @@ case "${1:-interactive}" in
         shift
         source "$INSTALL_DIR/installers/rdf-framework.sh" "$@"
         ;;
+    codex-skills)
+        shift
+        bash "$INSTALL_DIR/installers/codex-skills.sh" "$@"
+        ;;
     complete)
         shift
         echo ""
@@ -110,6 +116,10 @@ case "${1:-interactive}" in
         echo "---"
         echo ""
         source "$INSTALL_DIR/installers/rdf-framework.sh" "$@"
+        echo ""
+        echo "---"
+        echo ""
+        bash "$INSTALL_DIR/installers/codex-skills.sh"
         ;;
     interactive|"")
         echo ""
@@ -120,10 +130,11 @@ case "${1:-interactive}" in
         echo ""
         echo "1) RPI Workflow - Research -> Plan -> Implement workflow"
         echo "2) RDF Framework - Repo Documentation Framework"
-        echo "3) Both - Full AI development toolkit"
-        echo "4) Cancel"
+        echo "3) Codex Skills - Codex wrappers for Maximal-AI commands"
+        echo "4) Both - Full AI development toolkit"
+        echo "5) Cancel"
         echo ""
-        read -p "Enter choice [1-4]: " choice
+        read -p "Enter choice [1-5]: " choice
 
         case $choice in
             1)
@@ -133,13 +144,20 @@ case "${1:-interactive}" in
                 source "$INSTALL_DIR/installers/rdf-framework.sh"
                 ;;
             3)
+                bash "$INSTALL_DIR/installers/codex-skills.sh"
+                ;;
+            4)
                 source "$INSTALL_DIR/installers/rpi-workflow.sh"
                 echo ""
                 echo "---"
                 echo ""
                 source "$INSTALL_DIR/installers/rdf-framework.sh"
+                echo ""
+                echo "---"
+                echo ""
+                bash "$INSTALL_DIR/installers/codex-skills.sh"
                 ;;
-            4)
+            5)
                 echo "Cancelled."
                 exit 0
                 ;;
