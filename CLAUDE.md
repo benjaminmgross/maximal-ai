@@ -526,6 +526,8 @@ project-root/
 ├── thoughts/           # RPI artifacts (symlinked to minty-thoughts)
 │   ├── research/       # Research documents (OUTPUT from phase 1)
 │   │   └── YYYY.MM.DD-username-description.md
+│   ├── spec/           # Implementation specs (OUTPUT from /spec-task)
+│   │   └── YYYY.MM.DD-username-description.md
 │   ├── plans/          # Implementation plans (OUTPUT from phase 2)
 │   │   └── YYYY.MM.DD-username-description.md
 │   ├── handoffs/       # Session handoff documents
@@ -575,6 +577,13 @@ This intentional context reset prevents overflow and ensures each phase starts w
 - Named: `YYYY.MM.DD-username-description.md`
 - Include phases, specific changes, and success criteria
 - Separate automated and manual verification
+
+### Implementation Specs
+- Located in `thoughts/spec/` directory
+- Symlinked to `~/dev/minty-thoughts/repos/[repo-name]/spec/`
+- Named: `YYYY.MM.DD-username-description.md`
+- Created or audited by `/spec-task` before `/plan`
+- Capture problem, goals, approach, acceptance criteria, risks, dependencies, and open questions
 
 ### Handoff Documents
 - Located in `thoughts/handoffs/` directory

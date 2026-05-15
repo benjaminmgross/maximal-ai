@@ -116,7 +116,7 @@ maximal-ai complete
 - ✅ 9 specialized agents
 - ✅ Username configuration for RPI file naming
 - ✅ `.claude/config.yaml` with your username
-- ✅ `thoughts/` directory structure (research/, plans/, handoffs/)
+- ✅ `thoughts/` directory structure (research/, spec/, plans/, handoffs/)
 - ✅ CLAUDE.md configuration
 - ✅ Auto-detect coding standards from `docs/coding-standards/`
 
@@ -364,6 +364,7 @@ your-project/
 │   └── .context.md               # [RDF L2] Per-directory documentation
 ├── thoughts/                     # RPI artifacts
 │   ├── research/
+│   ├── spec/
 │   ├── plans/
 │   ├── handoffs/
 │   └── learnings/

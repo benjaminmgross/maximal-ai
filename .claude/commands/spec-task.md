@@ -13,10 +13,10 @@ $ARGUMENTS
 ## Pre-computed Context
 
 ### Existing Spec-Like Files
-!`find . -path './.git' -prune -o -type f \( -path './specs/*.md' -o -path './docs/specs/*.md' -o -path './roadmap/initiatives/*.md' -o -path './plans/*.md' -o -path './thoughts/plans/*.md' \) -print 2>/dev/null | head -40`
+!`find . -path './.git' -prune -o -type f \( -path './thoughts/spec/*.md' -o -path './specs/*.md' -o -path './docs/specs/*.md' -o -path './roadmap/initiatives/*.md' -o -path './plans/*.md' \) -print 2>/dev/null | head -40`
 
 ### Local Spec Templates
-!`find . -path './.git' -prune -o -type f \( -iname '*spec*template*.md' -o -iname '*initiative*template*.md' -o -path './roadmap/templates/*.md' -o -path './docs/templates/*.md' \) -print 2>/dev/null | head -40`
+!`find . -path './.git' -prune -o -type f \( -path './thoughts/spec/template.md' -o -path './thoughts/spec/*template*.md' -o -iname '*spec*template*.md' -o -iname '*initiative*template*.md' -o -path './roadmap/templates/*.md' -o -path './docs/templates/*.md' \) -print 2>/dev/null | head -40`
 
 ### Decision Records
 !`find . -path './.git' -prune -o -type f \( -path './docs/adr/*.md' -o -path './docs/adrs/*.md' -o -path './docs/architecture/decisions/*.md' -o -path './roadmap/decisions/*.md' -o -path './.context/decisions/*.md' \) -print 2>/dev/null | head -60`
@@ -44,7 +44,7 @@ Parse `<task_args>` into one of these modes:
 
 | Input shape | Mode | Examples |
 | --- | --- | --- |
-| Existing Markdown file under a likely spec directory | **audit-in-place** | `specs/search-index.md`, `roadmap/initiatives/T1.CORE-004-foo.md` |
+| Existing Markdown file under a likely spec directory | **audit-in-place** | `thoughts/spec/search-index.md`, `specs/search-index.md`, `roadmap/initiatives/T1.CORE-004-foo.md` |
 | Existing Markdown file outside a likely spec directory | **source-mode** | `thoughts/research/2026.05.13-rough-notes.md` |
 | Existing ticket/task ID and local project docs explain tracker commands | **tracker-mode** | `PROJ-123`, `repo-abc` |
 | Freeform text or no matching file | **greenfield** | `"Add OAuth refresh token rotation"` |
@@ -65,6 +65,7 @@ Read project instructions and local spec materials before drafting or reviewing:
 1. `AGENTS.md` and `CLAUDE.md` when present.
 2. The first applicable spec template in this priority order:
    - project-local path named by `CLAUDE.md` or `AGENTS.md`,
+   - `thoughts/spec/template.md`,
    - `specs/template.md`,
    - `docs/specs/template.md`,
    - `roadmap/templates/initiative-brief.md`,
@@ -97,14 +98,16 @@ If none of these exist, continue with the generic schema in Step 4.
 #### source-mode
 
 - Read the source file fully.
-- Choose a target path using local conventions. If none exist, use `specs/<slug>.md`.
+- Choose a target path using local conventions. If none exist, use `thoughts/spec/<slug>.md`.
+- Create `thoughts/spec/` first if it does not exist.
 - Draft a new spec from the source, preserving concrete claims, numbers, file paths, and constraints.
 - Add the source path in a `Source` or `source_artifact` field if the local template supports it.
 
 #### greenfield
 
 - Treat the prompt as the source.
-- Choose a target path using local conventions. If none exist, use `specs/<slug>.md`.
+- Choose a target path using local conventions. If none exist, use `thoughts/spec/<slug>.md`.
+- Create `thoughts/spec/` first if it does not exist.
 - Draft a new spec, marking unknowns explicitly instead of inventing facts.
 
 #### tracker-mode
