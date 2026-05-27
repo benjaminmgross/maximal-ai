@@ -62,6 +62,28 @@ Tip: You can also invoke this command with a research file directly: `/plan thou
    - Read them FULLY into the main context
    - This ensures you have complete understanding before proceeding
 
+3.25. **Retrieve Relevant Learnings (If Present)**:
+
+Before finalizing planning assumptions, search `thoughts/learnings` and the searchable `*-learnings-*` index for prior lessons related to the task, referenced files, technologies, and failure modes.
+
+Use the **thoughts-locator** agent when `$THOUGHTS_PATH` is available:
+```
+Search for relevant prior learnings related to: [task, research file, likely files, technologies, and risks]
+
+Focus on:
+1. Repo-specific files in thoughts/learnings/
+2. Files matching *-learnings-* in the searchable index
+3. Learnings whose tags, related_files, prevention guidance, or key takeaways overlap with this plan
+
+Return:
+- Applicable learnings with file references and key takeaways
+- Possibly applicable learnings with why they may matter
+- Prevention guidance that should become plan constraints, acceptance criteria, implementation checks, or review prompts
+- A clear "No relevant learnings found" result if the search is empty
+```
+
+Read the top relevant learning documents fully before writing the final plan. Classify each as `applies`, `possibly applies`, or `not applicable`; do not blindly apply stale or cross-repo-specific lessons.
+
 3.5. **Load Coding Standards (If Present)**:
 
 After reading files identified by research tasks and before analyzing understanding:
@@ -261,6 +283,23 @@ Before creating the plan document, detect the username to use in the filename:
 - [Important finding with file:line reference]
 - [Pattern to follow]
 - [Constraint to work within]
+
+## Relevant Learnings Applied
+
+[Summarize learnings retrieved from `thoughts/learnings` or the searchable `*-learnings-*` index.]
+
+### Applies
+- **[Learning title]** (`thoughts/learnings/...`): [How this changes the plan]
+
+### Possibly Applies
+- **[Learning title]** (`thoughts/learnings/...`): [What to monitor or verify]
+
+### Not Applicable / No Results
+- [State when no relevant learnings were found, or why inspected learnings did not apply]
+
+## Learnings Converted to Constraints
+
+- [Prevention guidance from a learning] -> [Concrete plan constraint, acceptance criterion, implementation check, or review prompt]
 
 ## What We're NOT Doing
 

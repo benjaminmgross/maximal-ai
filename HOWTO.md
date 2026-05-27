@@ -33,7 +33,7 @@ Use parallel sub-agents: `codebase-locator` finds WHERE, `codebase-analyzer` exp
 </important>
 
 <important if="you have a centralized thoughts repository">
-Use the `thoughts-locator` agent to search prior research, plans, and handoffs. Requires `$THOUGHTS_PATH` environment variable. Prevents re-researching solved problems.
+Use the `thoughts-locator` agent to search prior research, plans, handoffs, and learnings. Requires `$THOUGHTS_PATH` environment variable. Prevents re-researching solved problems and repeating mistakes already captured in `thoughts/learnings`.
 </important>
 
 <important if="research documents are too long">
@@ -99,7 +99,7 @@ Use `/commit-push-pr` command. It pre-computes git status, branch info, and exis
 - **Running tests**: `test-runner`
 - **Summarizing files**: `file-analyzer`
 - **Web research**: `web-search-researcher`
-- **Prior research**: `thoughts-locator` (requires $THOUGHTS_PATH)
+- **Prior research, plans, handoffs, and learnings**: `thoughts-locator` (requires $THOUGHTS_PATH)
 
 See extension_guide.md for creating new agents.
 </important>

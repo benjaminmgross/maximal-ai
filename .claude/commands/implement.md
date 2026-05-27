@@ -16,6 +16,12 @@ When given a plan path:
 - Read the plan completely and check for any existing checkmarks (- [x])
 - Read any original research documents mentioned in the plan
 - **Read files fully** - never use limit/offset parameters, you need complete context
+- **Retrieve relevant learnings before editing**:
+  - Search `thoughts/learnings` and the searchable `*-learnings-*` index for the plan topic, target files, technologies, and failure modes.
+  - Prefer repo-specific learnings; treat cross-repo lessons as advisory unless the same toolchain or workflow is present.
+  - Read applicable learning documents fully and classify each as `applies`, `possibly applies`, or `not applicable`.
+  - Convert applicable prevention guidance into a **Relevant Learnings Checklist** before implementation: concrete constraints, tests, manual checks, review prompts, or deterministic gates.
+  - If no relevant learnings are found, note that explicitly and continue.
 - **Verify branch before implementation**:
   - Check current branch:
     ```bash
@@ -136,7 +142,11 @@ If you encounter a mismatch:
 1. Read the entire plan to understand the full scope
 2. Note any phases already marked complete
 3. Read all files mentioned in the plan FULLY
-4. Note the scope in your project's persistent task tracker (if any):
+4. Create a **Relevant Learnings Checklist** from any applicable `thoughts/learnings` results:
+   - [Learning path]: [constraint or check to apply during implementation]
+   - [Learning path]: [test, review prompt, or manual verification to run]
+   - If no relevant learnings were found, record "No relevant learnings found" in your implementation notes.
+5. Note the scope in your project's persistent task tracker (if any):
    - Capture the phases and major changes as discrete items
    - Track verification steps alongside implementation steps
    - **Do NOT use Claude Code's TodoWrite unless your project explicitly opts in.** Ephemeral in-session state does not survive context resets. Prefer your project's persistent tracker (e.g. `bd` in Minty Living repos, Linear, GitHub Issues, or the plan's checkbox list).
@@ -164,6 +174,10 @@ For each phase:
         - Apply coding standards (if loaded)
         - Commit: `refactor: Phase N - clean up [feature]`
    - Follow the code examples from the plan closely
+   - Apply the **Relevant Learnings Checklist** created during preparation:
+     - Turn prevention guidance into tests or deterministic checks when practical
+     - Carry workflow learnings into PR, review, and closeout behavior
+     - Do not apply stale or unrelated learnings just because they were retrieved
    - **Apply coding standards** (if loaded) to all new/modified code:
      - Place files in correct locations per standards
      - Use documented import patterns

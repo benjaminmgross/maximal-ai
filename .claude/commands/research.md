@@ -192,7 +192,29 @@ Create multiple Task agents to research different aspects concurrently:
 - Use the **codebase-locator** agent to find WHERE files and components live
 - Use the **codebase-analyzer** agent to understand HOW specific code works
 - Use the **codebase-pattern-finder** agent if you need examples of similar implementations
-- Use the **thoughts-locator** agent to search prior research, plans, and handoffs (requires $THOUGHTS_PATH)
+- Use the **thoughts-locator** agent to search prior research, plans, handoffs, and `thoughts/learnings` when `$THOUGHTS_PATH` or local `thoughts/` is available
+
+**For learning retrieval:**
+```
+Search for relevant prior learnings related to: [research query, likely components, technologies, and failure modes]
+
+Focus on:
+1. Repo-specific files in thoughts/learnings/
+2. Files matching *-learnings-* in the searchable index
+3. Learnings whose tags or related_files overlap with the current task
+
+Return:
+- Applicable learnings with file references and key takeaways
+- Possibly applicable learnings with why they may matter
+- Any prevention guidance that should become research constraints, plan acceptance criteria, implementation checks, or review prompts
+- A clear "No relevant learnings found" result if the search is empty
+```
+
+If the **thoughts-locator** agent is unavailable but local `thoughts/learnings/` exists, search it directly before spawning implementation-oriented research:
+```bash
+rg -n -i "[query keywords|likely components|technologies|failure modes]" thoughts/learnings
+```
+Read the top matching learning documents fully, classify each as `applies`, `possibly applies`, or `not applicable`, and include the result in the research artifact.
 
 **For architecture-relevant research** (if `ARCHITECTURE_RESEARCH=true` from Step 1.75):
 - Use the **architecture-pattern-detector** agent to identify patterns and anti-patterns
@@ -356,6 +378,19 @@ last_updated_by: [Your name]
 
 ## Architecture Insights
 [Patterns, conventions, and design decisions discovered]
+
+## Relevant Learnings Applied
+
+[Summarize learnings retrieved from `thoughts/learnings` or the searchable `*-learnings-*` index.]
+
+### Applies
+- [Learning title and path]: [How it changes this research, constraints, or next steps]
+
+### Possibly Applies
+- [Learning title and path]: [What to watch for, and what evidence would make it applicable]
+
+### Not Applicable / No Results
+- [State when no relevant learnings were found, or why inspected learnings did not apply]
 
 ## Architecture Assessment
 [**Only include this section if architecture agents were spawned (ARCHITECTURE_RESEARCH=true)**]

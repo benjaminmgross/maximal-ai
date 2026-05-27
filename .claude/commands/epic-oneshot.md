@@ -46,13 +46,16 @@ After receiving the task:
    - Use codebase-locator to find relevant files
    - Use codebase-analyzer to understand implementation
    - Use codebase-pattern-finder for similar patterns
+   - Use thoughts-locator to search prior research, plans, handoffs, and `thoughts/learnings` for relevant learnings when `$THOUGHTS_PATH` or `thoughts/` is available
    - Use web-search-researcher if external info needed
    - Cross-reference findings with standards (if loaded)
+   - Classify retrieved learnings as `applies`, `possibly applies`, or `not applicable`; convert applicable prevention guidance into constraints for the plan and implementation
 
 3. **Save research document**:
    - Create `thoughts/research/YYYY.MM.DD-{username}-[topic].md`
    - Include comprehensive findings
    - **Include "Coding Standards Adherence" section** if standards were loaded
+   - **Include "Relevant Learnings Applied" section** with applicable `thoughts/learnings` findings, or explicitly state that no relevant learnings were found
    - Document all discoveries
 
 4. **Present summary**:
@@ -78,6 +81,7 @@ After receiving the task:
 2. **Read research document**:
    - Load the just-created research file
    - Extract key implementation points
+   - Carry forward the research document's **Relevant Learnings Applied** findings
    - **Load coding standards** (same process as /plan command):
      - Check for standards using priority order (EXTERNAL_DOCS_PATH → docs/coding-standards/)
      - Spawn codebase-analyzer to synthesize if standards found
@@ -87,7 +91,9 @@ After receiving the task:
    - Define phases with specific changes
    - Include exact code modifications
    - **Validate all decisions against coding standards** (if loaded)
+   - **Convert applicable learnings into plan constraints, acceptance criteria, implementation checks, or review prompts**
    - **Include "Coding Standards Compliance" section** in plan (if standards exist)
+   - **Include "Relevant Learnings Applied" and "Learnings Converted to Constraints" sections**
    - Add verification criteria
    - Document what we're NOT doing
 
@@ -120,6 +126,7 @@ If user approves:
    ```
 
 2. **Execute plan phases**:
+   - Re-read the plan's **Relevant Learnings Applied** and "Learnings Converted to Constraints" sections before editing
    - **Load coding standards** (same process as /implement command):
      - Check for standards using priority order (EXTERNAL_DOCS_PATH → docs/coding-standards/)
      - Spawn codebase-analyzer to synthesize if standards found
@@ -132,6 +139,7 @@ If user approves:
      3. **REFACTOR**: Clean up while tests stay green
    - **Follow coding standards** for all code changes (if loaded)
    - Run verification after each phase
+   - Verify every applicable learning-derived check before moving to closeout
    - Document any deviations (including from standards)
    - **Consider documentation updates** (after all code changes complete):
      - Check if docs/ or $EXTERNAL_DOCS_PATH exist

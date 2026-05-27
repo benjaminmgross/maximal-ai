@@ -157,6 +157,24 @@ description: Preserve me
 
 # Existing Research Skill
 EOF
+mkdir -p "$CODEX_TEST_HOME/skills/plan"
+cat > "$CODEX_TEST_HOME/skills/plan/SKILL.md" <<'EOF'
+---
+name: plan
+description: Preserve me
+---
+
+# Existing Plan Skill
+EOF
+mkdir -p "$CODEX_TEST_HOME/skills/implement"
+cat > "$CODEX_TEST_HOME/skills/implement/SKILL.md" <<'EOF'
+---
+name: implement
+description: Preserve me
+---
+
+# Existing Implement Skill
+EOF
 
 CODEX_HOME="$CODEX_TEST_HOME" bash "$REPO_ROOT/installers/codex-skills.sh" > /dev/null 2>&1
 
@@ -172,10 +190,34 @@ else
     log_fail "Codex installer overwrote existing SKILL.md"
 fi
 
+if grep -q "Existing Plan Skill" "$CODEX_TEST_HOME/skills/plan/SKILL.md" && grep -q "Existing Implement Skill" "$CODEX_TEST_HOME/skills/implement/SKILL.md"; then
+    log_pass "Existing Codex plan/implement wrappers preserved"
+else
+    log_fail "Codex installer overwrote existing plan/implement wrappers"
+fi
+
 if [ -f "$CODEX_TEST_HOME/skills/research/references/source-claude-command.md" ]; then
     log_pass "Codex research command reference installed"
 else
     log_fail "Missing Codex research command reference"
+fi
+
+if grep -Fq 'when `$THOUGHTS_PATH` or local `thoughts/` is available' "$CODEX_TEST_HOME/skills/research/references/source-claude-command.md"; then
+    log_pass "Existing Codex research install receives learning retrieval via refreshed reference"
+else
+    log_fail "Codex research reference missing learning retrieval protocol"
+fi
+
+if grep -Fq 'Learnings Converted to Constraints' "$CODEX_TEST_HOME/skills/plan/references/source-claude-command.md"; then
+    log_pass "Existing Codex plan install receives learning constraints via refreshed reference"
+else
+    log_fail "Codex plan reference missing learning constraint protocol"
+fi
+
+if grep -Fq 'Relevant Learnings Checklist' "$CODEX_TEST_HOME/skills/implement/references/source-claude-command.md"; then
+    log_pass "Existing Codex implement install receives learning checklist via refreshed reference"
+else
+    log_fail "Codex implement reference missing learning checklist protocol"
 fi
 
 if [ -f "$CODEX_TEST_HOME/skills/create-handoff/SKILL.md" ]; then
