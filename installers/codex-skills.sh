@@ -17,6 +17,7 @@ show_help() {
     echo "Usage: maximal-ai codex-skills [--dry-run]"
     echo ""
     echo "Install Codex skill wrappers for Maximal-AI commands."
+    echo "Existing SKILL.md wrappers are preserved; refreshed source references carry command protocol updates."
     echo ""
     echo "Options:"
     echo "  --dry-run   Show what would be installed without writing files"
@@ -101,7 +102,7 @@ Original command description: $description
 
 ## Workflow
 
-1. Read local project guidance first: \`AGENTS.md\`, \`CLAUDE.md\`, \`.context/\`, and relevant \`thoughts/\` artifacts when present.
+1. Read local project guidance first: \`AGENTS.md\`, \`CLAUDE.md\`, \`.context/\`, and relevant \`thoughts/\` artifacts when present, especially applicable \`thoughts/learnings\` entries.
 2. Use \`references/source-claude-command.md\` as the canonical workflow source for this command.
 3. Adapt Claude Code-specific instructions to Codex equivalents:
    - Inline bash pre-computation blocks are reference context, not syntax Codex executes automatically.
@@ -122,6 +123,7 @@ echo ""
 echo "Command source: $COMMANDS_DIR"
 echo "Codex home:     $CODEX_HOME"
 echo "Skills target:  $SKILLS_DIR"
+echo "Update model:   Preserve existing SKILL.md files; refresh canonical source references"
 if [ "$DRY_RUN" = true ]; then
     warn "Dry run: no files will be written"
 fi
@@ -145,7 +147,7 @@ for cmd_file in "$COMMANDS_DIR"/*.md; do
 
     if [ "$DRY_RUN" = true ]; then
         if [ -f "$skill_file" ]; then
-            echo "  Would refresh $skill_name reference and preserve SKILL.md"
+            echo "  Would refresh $skill_name source reference and preserve SKILL.md"
         else
             echo "  Would create $skill_name SKILL.md and reference"
         fi
@@ -157,7 +159,7 @@ for cmd_file in "$COMMANDS_DIR"/*.md; do
     cp "$cmd_file" "$reference_file"
 
     if [ -f "$skill_file" ]; then
-        echo "  ✓ Refreshed $skill_name reference (preserved SKILL.md)"
+        echo "  ✓ Refreshed $skill_name source reference (preserved SKILL.md)"
         preserved=$((preserved + 1))
     else
         write_skill_wrapper "$skill_file" "$skill_name" "$command_name" "$description"
